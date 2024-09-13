@@ -8,11 +8,11 @@ Campus Meals là ứng dụng di động giúp sinh viên theo dõi và đặt �
 
 ## Đội ngũ phát triển 💻
 
-| Tên thành viên         | Vai trò               | Mô tả ngắn gọn                                         |
-|------------------------|-----------------------|--------------------------------------------------------|
-| **Vũ Đăng Khoa**       | Backend Developer     | Chuyên thiết kế hệ thống API, đảm bảo hiệu suất và bảo mật dữ liệu. |
-| **Phan Vũ Hoài Nam**   | UI/UX Designer        | Thiết kế giao diện trực quan, tạo trải nghiệm người dùng dễ sử dụng. |
-| **Phan Viết Anh Tuấn** | Mobile App Developer  | Xây dựng ứng dụng trên nền tảng iOS/Android, phát triển các tính năng quan trọng. |
+| Tên thành viên         | Vai trò                          | Mô tả ngắn gọn                                         |
+|------------------------|----------------------------------|--------------------------------------------------------|
+| **Vũ Đăng Khoa**       |Backend Developer, UI/UX Designer | Chuyên thiết kế hệ thống API, đảm bảo hiệu suất và bảo mật dữ liệu. |
+| **Phan Vũ Hoài Nam**   |                                  | Thiết kế giao diện trực quan, tạo trải nghiệm người dùng dễ sử dụng. |
+| **Phan Viết Anh Tuấn** |                                  | Xây dựng ứng dụng trên nền tảng iOS/Android, phát triển các tính năng quan trọng. |
 
 ---
 

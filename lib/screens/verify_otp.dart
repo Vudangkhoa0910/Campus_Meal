@@ -13,7 +13,7 @@ class VerifyOtp extends StatefulWidget {
   _VerifyOtpState createState() => _VerifyOtpState();
 }
 
-class _VerifyOtpState extends State<VerifyOtp> {
+class _VerifyOtpState extends State<VerifyOtp> {  
   final FirebaseAuth auth = FirebaseAuth.instance;
   String code = ""; // luu OTP
 

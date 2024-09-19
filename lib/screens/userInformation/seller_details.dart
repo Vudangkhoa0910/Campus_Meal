@@ -1,35 +1,75 @@
+import 'package:campus_catalogue/add_item.dart';
 import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
-import 'package:campus_catalogue/models/buyer_model.dart';
-import 'package:campus_catalogue/screens/home_screen.dart';
-import 'package:campus_catalogue/screens/sign_in.dart';
+import 'package:campus_catalogue/models/shopModel.dart';
+import 'package:campus_catalogue/screens/seller_home_screen.dart';
+import 'package:campus_catalogue/screens/userInformation/buyer_details.dart';
 import 'package:campus_catalogue/services/database_service.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class BuyerDetails extends StatefulWidget {
-  const BuyerDetails({Key? key}) : super(key: key);
+class SellerDetails extends StatefulWidget {
+  SellerDetails({Key? key}) : super(key: key);
 
   @override
-  _BuyerDetailsState createState() => _BuyerDetailsState();
+  _SellerDetailsState createState() => _SellerDetailsState();
 }
 
-class _BuyerDetailsState extends State<BuyerDetails> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _userNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
+class _SellerDetailsState extends State<SellerDetails> {
+  final List<String> shopTypeitems = [
+    'Food and Beverages',
+    'Restaurant',
+    'Stationary',
+  ];
+  final List<String> locationItems = [
+    'Hostel Canteen',
+    'Hostel Juice Centre',
+    'Market Complex',
+    'Khokha Stalls',
+    'Food Court',
+    'Swimming Pool Area',
+  ];
+
+  final TextEditingController _shopNameController = TextEditingController();
+  final TextEditingController _openingTimeController = TextEditingController();
+  final TextEditingController _closingTimeController = TextEditingController();
+  String selectedShopType = "";
+  String selectedLocation = "";
   final _formKey = GlobalKey<FormState>();
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Color(0xFFFFFEF6),
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 140, 20, 36),
+        padding: const EdgeInsets.fromLTRB(20, 60, 20, 36),
         child: Column(children: [
+          Row(
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.keyboard_arrow_left,
+                      size: 32,
+                      color: Color(0xFFFC8019),
+                    )),
+              ),
+              Spacer(),
+              Text(
+                "1/2",
+                style: AppTypography.textMd.copyWith(color: Color(0xFFFC8019)),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 84,
+          ),
           Text(
-            "Create New Buyer Account",
+            "Create New Seller Account",
             style: AppTypography.textMd
                 .copyWith(fontSize: 20, fontWeight: FontWeight.w700),
           ),
@@ -37,50 +77,362 @@ class _BuyerDetailsState extends State<BuyerDetails> {
             height: 4,
           ),
           Text(
-            "Please fill up all inputs to create a new buyer account.",
+            "Please fill up all inputs to create a new seller account.",
             textAlign: TextAlign.center,
             style: AppTypography.textSm.copyWith(fontSize: 14),
           ),
           const SizedBox(
             height: 40,
           ),
-          Form(
-            key: _formKey,
-            child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(width: 0, color: Color(0xFFFEC490)),
-                    color: AppColors.signIn),
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+          Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(width: 0, color: Color(0xFFFEC490)),
+                  color: AppColors.signIn),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FieldsFormat(
+                      text: _shopNameController,
+                      title: "Shop Name",
+                      maxlines: 1,
+                    ),
+                    Text(
+                      "Shop Type",
+                      style: AppTypography.textSm.copyWith(fontSize: 14),
+                    ),
+                    const SizedBox(
+                      height: 4,
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: DropdownButtonFormField2(
+  decoration: InputDecoration(
+    isDense: true,
+    contentPadding: EdgeInsets.zero,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(6),
+      borderSide: BorderSide(width: 0),
+    ),
+    filled: true,
+    fillColor: AppColors.backgroundYellow,
+  ),
+  isExpanded: true,
+  hint: const Text(
+    'Select an option',
+    style: TextStyle(fontSize: 14),
+  ),
+  items: shopTypeitems.map((item) => DropdownMenuItem<String>(
+    value: item,
+    child: Text(
+      item,
+      style: const TextStyle(fontSize: 14),
+    ),
+  )).toList(),
+  validator: (value) {
+    if (value == null) {
+      return 'Please select an option.';
+    }
+    return null;
+  },
+  onChanged: (value) {
+    setState(() {
+      selectedShopType = value.toString();
+    });
+  },
+  onSaved: (value) {
+    selectedShopType = value.toString();
+  },
+)
+
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "Location",
+                      style: AppTypography.textSm.copyWith(fontSize: 14),
+                    ),
+                    const SizedBox(
+                      height: 4,
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: DropdownButtonFormField2<String>(
+  decoration: InputDecoration(
+    isDense: true,
+    contentPadding: EdgeInsets.zero,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(6),
+      borderSide: BorderSide.none,
+    ),
+    filled: true,
+    fillColor: AppColors.backgroundYellow,
+  ),
+  isExpanded: true,
+  hint: const Text(
+    'Select an option',
+    style: TextStyle(fontSize: 14),
+  ),
+  items: locationItems.map((item) => DropdownMenuItem<String>(
+    value: item,
+    child: Text(
+      item,
+      style: const TextStyle(fontSize: 14),
+    ),
+  )).toList(),
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return 'Please select Location.';
+    }
+    return null;
+  }
+),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              "Opening Time",
+                              style:
+                                  AppTypography.textSm.copyWith(fontSize: 14),
+                            ),
+                            const SizedBox(
+                              height: 4,
+                            ),
+                            SizedBox(
+                              height: 40,
+                              width: 85,
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter time';
+                                  }
+                                  return null;
+                                },
+                                controller: _openingTimeController,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.start,
+                                decoration: InputDecoration(
+                                    suffixIcon: Padding(
+                                        padding: const EdgeInsets.all(12),
+                                        child: Text(
+                                          "AM",
+                                          style: AppTypography.textSm
+                                              .copyWith(fontSize: 14),
+                                        )),
+                                    suffixIconConstraints: BoxConstraints(
+                                        minHeight: 0, minWidth: 0),
+                                    fillColor: AppColors.backgroundYellow,
+                                    filled: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                        borderSide: const BorderSide(
+                                            width: 0,
+                                            color: AppColors.backgroundYellow)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                        borderSide: const BorderSide(
+                                            width: 0,
+                                            color:
+                                                AppColors.backgroundYellow))),
+                                autofocus: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          width: 60,
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              "Closing Time",
+                              style:
+                                  AppTypography.textSm.copyWith(fontSize: 14),
+                            ),
+                            const SizedBox(
+                              height: 4,
+                            ),
+                            SizedBox(
+                              height: 40,
+                              width: 85,
+                              child: TextFormField(
+                                controller: _closingTimeController,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter time}';
+                                  }
+                                  return null;
+                                },
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.start,
+                                decoration: InputDecoration(
+                                    suffixIcon: Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: Text(
+                                          "PM",
+                                          style: AppTypography.textSm
+                                              .copyWith(fontSize: 14),
+                                        )),
+                                    suffixIconConstraints: BoxConstraints(
+                                        minHeight: 0, minWidth: 0),
+                                    fillColor: AppColors.backgroundYellow,
+                                    filled: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                        borderSide: const BorderSide(
+                                            width: 0,
+                                            color: AppColors.backgroundYellow)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                        borderSide: const BorderSide(
+                                            width: 0,
+                                            color:
+                                                AppColors.backgroundYellow))),
+                                autofocus: true,
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              )),
+          const Spacer(),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SellerAdditional(
+                        shopName: _shopNameController.text,
+                        closingTime: _closingTimeController.text,
+                        location: selectedLocation,
+                        openingTime: _openingTimeController.text,
+                        shopType: selectedShopType)),
+              );
+            },
+          )
+        ]),
+      ),
+    );
+  }
+}
+
+// ignore: must_be_immutable
+class SellerAdditional extends StatefulWidget {
+  final String shopName;
+  final String shopType;
+  String location;
+  String openingTime;
+  String closingTime;
+  SellerAdditional(
+      {Key? key,
+      required this.shopName,
+      required this.closingTime,
+      required this.location,
+      required this.openingTime,
+      required this.shopType})
+      : super(key: key);
+
+  @override
+  _SellerAdditionalState createState() => _SellerAdditionalState();
+}
+
+class _SellerAdditionalState extends State<SellerAdditional> {
+  List<dynamic> menu = [];
+  final TextEditingController _ownerNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _alternatePhoneController =
+      TextEditingController();
+  final TextEditingController _upiIdController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Color(0xFFFFFEF6),
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 60, 20, 36),
+        child: Column(children: [
+          Row(
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.keyboard_arrow_left,
+                      size: 32,
+                      color: Color(0xFFFC8019),
+                    )),
+              ),
+              Text(
+                "2/2",
+                style: AppTypography.textMd.copyWith(color: Color(0xFFFC8019)),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 84,
+          ),
+          Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(width: 0, color: Color(0xFFFEC490)),
+                  color: AppColors.signIn),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Form(
+                key: _formKey,
                 child: Column(
                   children: [
-                    Format(
-                      text: _nameController,
-                      title: "Name*",
+                    FieldsFormat(
+                      text: _ownerNameController,
+                      title: "Owner Name",
                       maxlines: 1,
                     ),
-                    Format(
-                      text: _userNameController,
-                      title: "Username*",
-                      maxlines: 1,
-                    ),
-                    Format(
-                      text: _emailController,
-                      title: "E-mail* (preferably outlook id)",
-                      maxlines: 1,
-                    ),
-                    Format(
+                    FieldsFormat(
                       text: _phoneController,
-                      title: "Phone Number*",
+                      title: "Phone Number",
                       maxlines: 1,
                     ),
-                    Format(
-                      text: _addressController,
-                      title: "Add Address*",
-                      maxlines: 2,
+                    FieldsFormat(
+                      text: _alternatePhoneController,
+                      title: "Alternate Phone Number",
+                      maxlines: 1,
+                    ),
+                    FieldsFormat(
+                      text: _upiIdController,
+                      title: "UPI ID",
+                      maxlines: 1,
                     ),
                   ],
-                )),
+                ),
+              )),
+          const SizedBox(
+            height: 32,
+          ),
+          GestureDetector(
+            onTap: () => {
+              // print('hello')
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => EditMenu(
+                          menu: menu,
+                        )),
+              )
+            }
           ),
           const Spacer(),
           GestureDetector(
@@ -89,47 +441,34 @@ class _BuyerDetailsState extends State<BuyerDetails> {
                 DatabaseService service = DatabaseService();
                 final FirebaseAuth _auth = FirebaseAuth.instance;
                 final User user = await _auth.currentUser!;
-                Buyer buyer = Buyer(
-                    user_id: user.uid,
-                    name: _nameController.text,
-                    userName: _userNameController.text,
-                    email: _emailController.text,
-                    phone: _phoneController.text,
-                    address: _addressController.text);
-                await service.addBuyer(buyer);
+                ShopModel shop = ShopModel(
+                    shopID: user.uid,
+                    alternatePhoneNumber: _alternatePhoneController.text,
+                    closingTime: widget.closingTime,
+                    location: widget.location,
+                    openingTime: widget.openingTime,
+                    ownerName: _ownerNameController.text,
+                    phoneNumber: _phoneController.text,
+                    shopName: widget.shopName,
+                    shopType: widget.shopType,
+                    upiId: _upiIdController.text,
+                    menu: menu,
+                    status: true,
+                    rating: {"rating": 0, "num_ratings": 2});
+
+                await service.addShop(shop);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => SellerHomeScreen(
+                            shop: shop,
+                          )),
                 );
               }
             },
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Container(
-                      height: 60,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: const Color(0xffF57C51),
-                      ),
-                      child: Center(
-                        child: Text("Continue",
-                            style: AppTypography.textMd.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700)),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           )
         ]),
       ),
     );
   }
 }
-

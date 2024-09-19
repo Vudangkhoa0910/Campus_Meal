@@ -54,27 +54,27 @@ class _BuyerDetailsState extends State<BuyerDetails> {
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                 child: Column(
                   children: [
-                    Format(
+                    FieldsFormat(
                       text: _nameController,
                       title: "Name*",
                       maxlines: 1,
                     ),
-                    Format(
+                    FieldsFormat(
                       text: _userNameController,
                       title: "Username*",
                       maxlines: 1,
                     ),
-                    Format(
+                    FieldsFormat(
                       text: _emailController,
                       title: "E-mail* (preferably outlook id)",
                       maxlines: 1,
                     ),
-                    Format(
+                    FieldsFormat(
                       text: _phoneController,
                       title: "Phone Number*",
                       maxlines: 1,
                     ),
-                    Format(
+                    FieldsFormat(
                       text: _addressController,
                       title: "Add Address*",
                       maxlines: 2,
@@ -133,3 +133,65 @@ class _BuyerDetailsState extends State<BuyerDetails> {
   }
 }
 
+// ignore: must_be_immutable
+class FieldsFormat extends StatefulWidget {
+  String title;
+  TextEditingController text;
+  int maxlines;
+  FieldsFormat(
+      {Key? key,
+      required this.title,
+      required this.text,
+      required this.maxlines})
+      : super(key: key);
+
+  @override
+  _FieldsFormatState createState() => _FieldsFormatState();
+}
+
+class _FieldsFormatState extends State<FieldsFormat> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(
+        widget.title,
+        style: AppTypography.textSm.copyWith(fontSize: 14),
+      ),
+      const SizedBox(
+        height: 4,
+      ),
+      SizedBox(
+        height: widget.title == "Add Address*" ? 76 : 40,
+        child: TextFormField(
+            enabled: widget.title == "Phone Number*" ? false : true,
+            textAlign: TextAlign.start,
+            maxLines: widget.maxlines,
+            decoration: InputDecoration(
+                fillColor: AppColors.backgroundYellow,
+                filled: true,
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: const BorderSide(
+                        width: 0, color: AppColors.backgroundYellow)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6),
+                    borderSide: const BorderSide(
+                        width: 0, color: AppColors.backgroundYellow))),
+            autofocus: true,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter ${widget.title}';
+              }
+              return null;
+            },
+            // controller: widget.title == "Phone Number*"
+            //     ? (widget.text..text = SignIn.phoneNumber)
+            //     : widget.text),
+      ),
+      ),
+      const SizedBox(
+        height: 10,
+      )
+    ]);
+  }
+}

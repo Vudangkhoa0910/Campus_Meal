@@ -113,13 +113,13 @@ class _CartState extends State<Cart> {
             Spacer(),
             GestureDetector(
               onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => UpiScreen(
-                            amount: totalPrice,
-                          )),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //       builder: (context) => UpiScreen(
+                //             amount: totalPrice,
+                //           )),
+                // );
               },
               child: Row(
                 mainAxisSize: MainAxisSize.max,

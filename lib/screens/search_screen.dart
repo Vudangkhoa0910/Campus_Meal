@@ -17,6 +17,7 @@ class _SearchInputState extends State<SearchInput> {
 
   @override
   void dispose() {
+    // Clean up the controller when the widget is disposed.
     searchController.dispose();
     super.dispose();
   }
@@ -216,6 +217,26 @@ class SearchScreen extends StatefulWidget {
   State<SearchScreen> createState() => _SearchScreenState();
 }
 
+class ShopHeader extends StatelessWidget {
+  final String name;
+  const ShopHeader({super.key, required this.name});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        child: Text(name,
+            style: AppTypography.textMd.copyWith(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.secondary)),
+      ),
+    );
+  }
+}
+
 class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
@@ -245,6 +266,7 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             children: [
               const SearchInput(),
+              const ShopHeader(name: "Currently open shops"),
               for (var shop in openShops)
                 GestureDetector(
                   onTap: () => Navigator.push(
@@ -268,6 +290,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     upiID: shop["upi_id"],
                   ),
                 ),
+              const ShopHeader(name: "Currently closed shops"),
               for (var shop in closedShops)
                 ShopCard(
                   name: shop["shop_name"],
@@ -280,6 +303,23 @@ class _SearchScreenState extends State<SearchScreen> {
                 )
             ],
           ),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          selectedItemColor: AppColors.backgroundOrange,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history_rounded),
+              label: 'Orders',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart),
+              label: 'Cart',
+            ),
+          ],
         ));
   }
 }

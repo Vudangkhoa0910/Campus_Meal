@@ -185,3 +185,150 @@ class _SellerDetailsState extends State<SellerDetails> {
     );
   }
 }
+
+class SellerAdditional extends StatefulWidget {
+  final String shopName;
+  final String shopType;
+  String location;
+  String openingTime;
+  String closingTime;
+  SellerAdditional(
+      {Key? key,
+      required this.shopName,
+      required this.closingTime,
+      required this.location,
+      required this.openingTime,
+      required this.shopType})
+      : super(key: key);
+
+  @override
+  _SellerAdditionalState createState() => _SellerAdditionalState();
+}
+
+class _SellerAdditionalState extends State<SellerAdditional> {
+  List<dynamic> menu = [];
+  final TextEditingController _ownerNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _alternatePhoneController =
+      TextEditingController();
+  final TextEditingController _upiIdController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Color(0xFFFFFEF6),
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 60, 20, 36),
+        child: Column(children: [
+          Row(
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.keyboard_arrow_left,
+                      size: 32,
+                      color: Color(0xFFFC8019),
+                    )),
+              ),
+              Spacer(),
+              Text(
+                "2/2",
+                style: AppTypography.textMd.copyWith(color: Color(0xFFFC8019)),
+              )
+            ],
+          ),
+          const SizedBox(
+            height: 84,
+          ),
+          Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(width: 0, color: Color(0xFFFEC490)),
+                  color: AppColors.signIn),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    FieldsFormat(
+                      text: _ownerNameController,
+                      title: "Owner Name",
+                      maxlines: 1,
+                    ),
+                    FieldsFormat(
+                      text: _phoneController,
+                      title: "Phone Number",
+                      maxlines: 1,
+                    ),
+                    FieldsFormat(
+                      text: _alternatePhoneController,
+                      title: "Alternate Phone Number",
+                      maxlines: 1,
+                    ),
+                    FieldsFormat(
+                      text: _upiIdController,
+                      title: "UPI ID",
+                      maxlines: 1,
+                    ),
+                  ],
+                ),
+              )),
+          const SizedBox(
+            height: 32,
+          ),
+          GestureDetector(
+            onTap: () => {
+              // print('hello')
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => EditMenu(
+                          menu: menu,
+                        )),
+              )
+            },
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(width: 2, color: Color(0xFFFC8019))),
+              child: Text(
+                "Add Food Items",
+                style: AppTypography.textMd.copyWith(
+                    fontWeight: FontWeight.w700, color: Color(0xFFFC8019)),
+              ),
+            ),
+          ),
+          const Spacer(),
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: const Color(0xffF57C51),
+                    ),
+                    child: Center(
+                      child: Text("Proceed",
+                          style: AppTypography.textMd.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ]),
+      ),
+    );
+  }
+}

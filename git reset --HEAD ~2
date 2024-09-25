@@ -1,0 +1,51 @@
+[33mcdeb5fc[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Merge branch 'main' of https://github.com/Vudangkhoa0910/Campus_Meal
+[33mc118c79[m Update userInfor/seller_details v4
+[33m26d5c63[m Update screens/seller_home v4.1
+[33m06b44f1[m Update userInfo/seller_details v3
+[33m1b6cb11[m Merge branch 'main' of https://github.com/Vudangkhoa0910/Campus_Meal
+[33me42d4af[m Update pubspec.yaml v4
+[33m582fd98[m Update screens/seller_home v4
+[33mcef8dc2[m Add database_ser v1
+[33m378ce0e[m Update search_screen v2.1
+[33m405abe9[m Add screen after_onb v1
+[33mb56d32c[m Add onboard/show v1
+[33m9c1efb8[m Add folder assets/image v1
+[33mac470cd[m Add add_shop v1
+[33m244987c[m Update home_screen v2
+[33m485e15c[m Add screens/search_screen.dart
+[33m1be7996[m Update screens/cart.dart v3
+[33m81b91a4[m Update screens/cart.dart v2
+[33m0991e70[m Add /screens/shop_info.dart
+[33m34d798b[m Update pubspec.lock after change yaml
+[33m255ce96[m Update pubspec.yaml v3
+[33m01b41f1[m Update pubspec.lock after change yaml
+[33m72308f8[m Update pubspec.yaml v2
+[33m04410ab[m Update pubspec.lock after change yaml
+[33m05ff990[m Update pubspec.yaml v1
+[33m8bda626[m Update seller_details v2
+[33me3f873c[m Update verify_otp 2v
+[33m7b2aee9[m Update buyer_details v2
+[33m3418aa1[m Add screens/home_screen v1
+[33ma6e7777[m Update /screens/seller_home v3
+[33m4efbdec[m Add user/buyer_details.dart v1
+[33m5619663[m Add user/seller_details.dart v1
+[33m910900a[m Update models/shopModel v2
+[33m3fad02b[m Add model/buyer_model.dart base
+[33m6d31111[m Add model/cart_model.dart base
+[33me3d5313[m Add model/item_model.dart base
+[33m5e58cae[m Update seller_home_screen.dart v2
+[33mcca03da[m Add /model/order_model.dart v1
+[33maf00899[m Add /lib/add_item.dart v1
+[33m89c69e1[m Add seller_home_screen v1
+[33m17a26ac[m Add models/shopModels v1
+[33mf2e4f74[m Add seller_de v1
+[33m34d11e9[m Add buyer_de v1
+[33m1eed58a[m Add user_type_screen v1
+[33mcdbd0cf[m Add verify_otp.dart v1
+[33mde60952[m Add sign_in.dart v1
+[33m7613e06[m Add typography.dart for constants
+[33m2a41e41[m Add colors.dart for constants
+[33m34c8c40[m Push project setup pubspec yaml&lock 1t
+[33m73eb4fa[m Push update README.md 2t
+[33m347ff2e[m Push update README.md 1t
+[33m9289801[m Push base project campus

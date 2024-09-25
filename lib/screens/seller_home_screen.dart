@@ -212,6 +212,19 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
               "Current Orders",
               style: AppTypography.textMd.copyWith(fontWeight: FontWeight.w700),
             ),
+            FutureBuilder<List<dynamic>>(
+                future: getOrders(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<dynamic>> snapshot) {
+                  if (snapshot.hasData) {
+                    final orders = snapshot.data!;
+                    return OrderWrapper(orders: orders);
+                  } else {
+                    return Text("No orders",
+                        style: AppTypography.textMd.copyWith(
+                            fontSize: 20, fontWeight: FontWeight.w700));
+                  }
+                }),
             // SizedBox(
             //   height: MediaQuery.of(context).size.height,
             //   child: ListView.builder(

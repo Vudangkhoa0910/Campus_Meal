@@ -159,8 +159,48 @@ class _SellerDetailsState extends State<SellerDetails> {
                     const SizedBox(
                       height: 4,
                     ),
-                    const SizedBox(
-                      height: 10,
+                    SizedBox(
+                      height: 40,
+                      child: DropdownButtonFormField2<String>(
+                        decoration: InputDecoration(
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: AppColors.backgroundYellow,
+                        ),
+                        isExpanded: true,
+                        hint: const Text(
+                          'Select an option',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        items: locationItems
+                            .map((item) => DropdownMenuItem<String>(
+                                  value: item,
+                                  child: Text(
+                                    item,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ))
+                            .toList(),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select Location.';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          setState(() {
+                            selectedLocation = value.toString();
+                          });
+                        },
+                        onSaved: (value) {
+                          selectedLocation = value.toString();
+                        },
+                      ),
                     ),
                   ],
                 ),

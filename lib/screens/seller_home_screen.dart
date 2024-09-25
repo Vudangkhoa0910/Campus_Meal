@@ -3,8 +3,8 @@ import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/order_model.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
-import 'package:campus_catalogue/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:campus_catalogue/services/database_service.dart';
 import 'package:flutter/material.dart';
 
 class OrderWrapper extends StatelessWidget {
@@ -212,19 +212,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
               "Current Orders",
               style: AppTypography.textMd.copyWith(fontWeight: FontWeight.w700),
             ),
-            FutureBuilder<List<dynamic>>(
-                future: getOrders(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<List<dynamic>> snapshot) {
-                  if (snapshot.hasData) {
-                    final orders = snapshot.data!;
-                    return OrderWrapper(orders: orders);
-                  } else {
-                    return Text("No orders",
-                        style: AppTypography.textMd.copyWith(
-                            fontSize: 20, fontWeight: FontWeight.w700));
-                  }
-                }),
             // SizedBox(
             //   height: MediaQuery.of(context).size.height,
             //   child: ListView.builder(
@@ -331,21 +318,6 @@ class _OrderTileState extends State<OrderTile> {
                             width: 1, color: AppColors.backgroundOrange),
                         borderRadius: BorderRadius.circular(5)),
                     child: Text(
-                      "REJECT",
-                      style: AppTypography.textMd.copyWith(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(5, 2, 5, 2),
-                    decoration: BoxDecoration(
-                        color: AppColors.backgroundYellow,
-                        border: Border.all(
-                            width: 1, color: AppColors.backgroundOrange),
-                        borderRadius: BorderRadius.circular(5)),
-                    child: Text(
                       "VIEW",
                       style: AppTypography.textMd.copyWith(
                           fontSize: 15,
@@ -356,12 +328,6 @@ class _OrderTileState extends State<OrderTile> {
                 ],
               ),
               //Spacer(),
-              Text(
-                "Rs." + widget.totalAmount.toString(),
-                textAlign: TextAlign.end,
-                style: AppTypography.textMd
-                    .copyWith(fontWeight: FontWeight.w700, fontSize: 10),
-              )
             ],
           )
         ],

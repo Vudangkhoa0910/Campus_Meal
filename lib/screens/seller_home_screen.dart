@@ -181,7 +181,7 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                   .copyWith(fontWeight: FontWeight.w700, fontSize: 20),
             ),
             const SizedBox(
-              height: 32,
+              height: 25,
             ),
             Center(
               child: GestureDetector(
@@ -206,7 +206,7 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
               ),
             ),
             const SizedBox(
-              height: 12,
+              height: 20,
             ),
             Text(
               "Current Orders",
@@ -225,25 +225,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                             fontSize: 20, fontWeight: FontWeight.w700));
                   }
                 }),
-            // SizedBox(
-            //   height: MediaQuery.of(context).size.height,
-            //   child: ListView.builder(
-            //     itemCount: orders.length,
-            //     itemBuilder: (context, index) {
-            //       final order = orders[index];
-            //       return Column(
-            //         children: [
-            //           OrderTile(
-            //             order: order,
-            //           ),
-            //           SizedBox(
-            //             height: 10,
-            //           )
-            //         ],
-            //       );
-            //     },
-            //   ),
-            // )
           ]),
         ),
       ),
@@ -355,7 +336,6 @@ class _OrderTileState extends State<OrderTile> {
                   ),
                 ],
               ),
-              //Spacer(),
               Text(
                 "Rs." + widget.totalAmount.toString(),
                 textAlign: TextAlign.end,

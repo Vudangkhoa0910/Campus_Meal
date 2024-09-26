@@ -242,7 +242,7 @@ class LocationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 110,
+      height: 130,
       width: MediaQuery.of(context).size.width * 0.285,
       child: Card(
           shape:

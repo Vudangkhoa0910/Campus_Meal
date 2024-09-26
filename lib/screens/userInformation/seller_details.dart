@@ -202,6 +202,118 @@ class _SellerDetailsState extends State<SellerDetails> {
                         },
                       ),
                     ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              "Opening Time",
+                              style:
+                                  AppTypography.textSm.copyWith(fontSize: 14),
+                            ),
+                            const SizedBox(
+                              height: 4,
+                            ),
+                            SizedBox(
+                              height: 40,
+                              width: 85,
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter time';
+                                  }
+                                  return null;
+                                },
+                                controller: _openingTimeController,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.start,
+                                decoration: InputDecoration(
+                                    suffixIcon: Padding(
+                                        padding: const EdgeInsets.all(12),
+                                        child: Text(
+                                          "AM",
+                                          style: AppTypography.textSm
+                                              .copyWith(fontSize: 14),
+                                        )),
+                                    suffixIconConstraints: BoxConstraints(
+                                        minHeight: 0, minWidth: 0),
+                                    fillColor: AppColors.backgroundYellow,
+                                    filled: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                        borderSide: const BorderSide(
+                                            width: 0,
+                                            color: AppColors.backgroundYellow)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                        borderSide: const BorderSide(
+                                            width: 0,
+                                            color:
+                                                AppColors.backgroundYellow))),
+                                autofocus: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          width: 60,
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              "Closing Time",
+                              style:
+                                  AppTypography.textSm.copyWith(fontSize: 14),
+                            ),
+                            const SizedBox(
+                              height: 4,
+                            ),
+                            SizedBox(
+                              height: 40,
+                              width: 85,
+                              child: TextFormField(
+                                controller: _closingTimeController,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter time}';
+                                  }
+                                  return null;
+                                },
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.start,
+                                decoration: InputDecoration(
+                                    suffixIcon: Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: Text(
+                                          "PM",
+                                          style: AppTypography.textSm
+                                              .copyWith(fontSize: 14),
+                                        )),
+                                    suffixIconConstraints: BoxConstraints(
+                                        minHeight: 0, minWidth: 0),
+                                    fillColor: AppColors.backgroundYellow,
+                                    filled: true,
+                                    enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                        borderSide: const BorderSide(
+                                            width: 0,
+                                            color: AppColors.backgroundYellow)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                        borderSide: const BorderSide(
+                                            width: 0,
+                                            color:
+                                                AppColors.backgroundYellow))),
+                                autofocus: true,
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    )
                   ],
                 ),
               )),

@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({Key? key}) : super(key: key);
+  // Không cần biến tĩnh nữa
+  // static String verify = "";
   static String phoneNumber = "";
 
   @override
@@ -82,6 +84,9 @@ class _SignInState extends State<SignIn> {
               String countryCode = _countryCode.text.trim();
               String fullPhoneNumber = countryCode + phone;
 
+              // Lưu số điện thoại vào biến tĩnh
+              SignIn.phoneNumber = fullPhoneNumber;
+
               print('Phone: $phone');
               print('Country Code: $countryCode');
               print('Full Phone Number: $fullPhoneNumber');
@@ -97,6 +102,7 @@ class _SignInState extends State<SignIn> {
                 },
                 verificationFailed: (FirebaseAuthException e) {
                   print("Verification failed: ${e.message}");
+                  // Bạn có thể hiển thị thông báo lỗi cho người dùng ở đây
                 },
                 codeSent: (String verificationId, int? resendToken) {
                   Navigator.push(
@@ -107,6 +113,7 @@ class _SignInState extends State<SignIn> {
                   );
                 },
                 codeAutoRetrievalTimeout: (String verificationId) {
+                  // Xử lý khi thời gian lấy mã tự động kết thúc
                 },
               );
             },

@@ -33,66 +33,56 @@ class ItemCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (vegetarian)
-                      Text(
-                        "VEG",
-                        style: AppTypography.textSm.copyWith(
-                            color: Color.fromARGB(255, 0, 196, 0),
-                            fontSize: 14),
-                      )
-                    else
-                      Text("NON VEG",
+                Expanded( // Sửa để tránh lỗi overflow
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (vegetarian)
+                        Text(
+                          "VEG",
                           style: AppTypography.textSm.copyWith(
-                              color: Color.fromARGB(255, 197, 0, 0),
-                              fontSize: 14)),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                      child: Text("PRICE: Rs. ${price}",
-                          style: AppTypography.textSm.copyWith(fontSize: 14)),
-                    ),
-                    Text(
-                      name,
-                      style: AppTypography.textMd
-                          .copyWith(fontSize: 20, fontWeight: FontWeight.w700),
-                    ),
-                    Text(
-                      description,
-                      style: AppTypography.textSm
-                          .copyWith(fontSize: 14, fontWeight: FontWeight.w400),
-                    )
-                  ],
-                ),
-                Spacer(),
-                // ElevatedButton(
-                //   onPressed: () async {
-                //     DatabaseService service = DatabaseService();
-                //     // ItemModel item = ItemModel(
-                //     //     category: "xbks",
-                //     //     description: "hey",
-                //     //     name: name,
-                //     //     price: price.toString(),
-                //     //     vegetarian: vegetarian);
-                //     // await service.addToCart(item);
-                //   },
-                //   child: Text("ADD TO CART"),
-                //   style: ElevatedButton.styleFrom(
-                //       backgroundColor: AppColors.backgroundOrange),
-                // )
-                Container(
-                  height: 50,
-                  width: 50,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: AppColors.backgroundOrange, width: 1.5),
-                      borderRadius: BorderRadius.circular(20)),
-                  child: Image.network(
-                    img,
-                    fit: BoxFit.cover,
+                              color: Color.fromARGB(255, 0, 196, 0),
+                              fontSize: 14),
+                        )
+                      else
+                        Text("NON VEG",
+                            style: AppTypography.textSm.copyWith(
+                                color: Color.fromARGB(255, 197, 0, 0),
+                                fontSize: 14)),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                        child: Text("PRICE: Rs. $price",
+                            style: AppTypography.textSm.copyWith(fontSize: 14)),
+                      ),
+                      Text(
+                        name,
+                        style: AppTypography.textMd.copyWith(
+                            fontSize: 20, fontWeight: FontWeight.w700),
+                      ),
+                      Text(
+                        description,
+                        style: AppTypography.textSm.copyWith(
+                            fontSize: 14, fontWeight: FontWeight.w400),
+                      )
+                    ],
                   ),
                 ),
+                Spacer(),
+                Container(
+                    height: 120, 
+                    width: 120,  
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            color: AppColors.backgroundOrange, width: 1.5),
+                        borderRadius: BorderRadius.circular(20)),
+                    child: ClipRRect(  
+                      borderRadius: BorderRadius.circular(20),  
+                      child: Image.network(
+                        img,
+                        fit: BoxFit.cover,  
+                      ),
+                    ),
+                  ),
               ],
             ),
           )),
@@ -200,7 +190,7 @@ class _ShopPageState extends State<ShopPage> {
                           child: Row(
                             children: [
                               Text(
-                                "0",
+                                widget.rating, // Thay giá trị cố định bằng rating từ widget
                                 style: AppTypography.textSm.copyWith(
                                     fontSize: 15, fontWeight: FontWeight.w700),
                               ),
@@ -225,11 +215,12 @@ class _ShopPageState extends State<ShopPage> {
             ),
             for (var item in widget.menu)
               ItemCard(
-                  name: item["name"],
-                  price: item["price"],
-                  description: item["description"],
-                  vegetarian: item["veg"],
-                  img: item["img"]),
+                name: item["name"] ?? 'Unknown',
+                price: item["price"] ?? 0.0,
+                description: item["description"] ?? 'No description',
+                vegetarian: item["veg"] ?? false,
+                img: item["img"], 
+              ),
           ],
         ),
       ),

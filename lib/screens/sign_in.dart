@@ -132,7 +132,7 @@ class _SignInState extends State<SignIn> {
                       child: Center(
                         child: Text("Sign In",
                             style: AppTypography.textMd.copyWith(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontWeight: FontWeight.w700)),
                       ),
                     ),

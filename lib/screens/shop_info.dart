@@ -67,13 +67,13 @@ class ItemCard extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () async {
                     DatabaseService service = DatabaseService();
-                    ItemModel item = ItemModel(
-                        category: "xbks",
-                        description: "hey",
-                        name: name,
-                        price: price.toString(),
-                        vegetarian: vegetarian);
-                    await service.addToCart(item);
+                    // ItemModel item = ItemModel(
+                    //     category: "xbks",
+                    //     description: "hey",
+                    //     name: name,
+                    //     price: price.toString(),
+                    //     vegetarian: vegetarian);
+                    // await service.addToCart(item);
                   },
                   child: Text("ADD TO CART"),
                   style: ElevatedButton.styleFrom(

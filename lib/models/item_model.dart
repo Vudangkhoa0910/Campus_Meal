@@ -6,13 +6,15 @@ class ItemModel {
   String category;
   bool vegetarian;
   String description;
+  String imgUrl;
 
   ItemModel(
       {required this.category,
       required this.description,
       required this.name,
       required this.price,
-      required this.vegetarian});
+      required this.vegetarian,
+      required this.imgUrl});
 
   Map<String, dynamic> toMap() {
     return {
@@ -20,7 +22,8 @@ class ItemModel {
       'description': description,
       'name': name,
       'price': price,
-      'vegetarian': vegetarian
+      'vegetarian': vegetarian,
+      'imgUrl': imgUrl
     };
   }
 
@@ -29,12 +32,14 @@ class ItemModel {
         description = sellerMap["description"],
         name = sellerMap["name"],
         price = sellerMap["price"],
-        vegetarian = sellerMap["vegetarian"];
+        vegetarian = sellerMap["vegetarian"],
+        imgUrl = sellerMap["imgUrl"];
 
   ItemModel.fromDocumentSnapshot(DocumentSnapshot<Map<String, dynamic>> doc)
       : name = doc.data()!["name"],
         description = doc.data()!["description"],
         category = doc.data()!["category"],
         price = doc.data()!["price"],
-        vegetarian = doc.data()!["vegetarian"];
+        vegetarian = doc.data()!["vegetarian"],
+        imgUrl = doc.data()!["imgUrl"];
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -91,19 +92,52 @@ class _ItemEditorState extends State<ItemEditor> {
   @override
   Widget build(BuildContext context) {
     // ignore: unused_local_variable
-    Widget x;
-    if (sampleImage == null) {
-      x = Image.network(
-          'https://firebasestorage.googleapis.com/v0/b/manas-kriti-appd.appspot.com/o/cloud-upload-a30f385a928e44e199a62210d578375a.jpg?alt=media&token=dbc10511-b70c-41ad-9db6-435c8247e0c0',
-          height: 100
-          // height: 400,
-          );
-    } else {
-      x = Image.file(
-        File(sampleImage!.path),
-        height: 100,
-      );
+    // Widget x;
+    // if (sampleImage == null) {
+    //   x = Image.network(
+    //       'https://firebasestorage.googleapis.com/v0/b/manas-kriti-appd.appspot.com/o/cloud-upload-a30f385a928e44e199a62210d578375a.jpg?alt=media&token=dbc10511-b70c-41ad-9db6-435c8247e0c0',
+    //       height: 100
+    //       // height: 400,
+    //       );
+    // } else {
+    //   x = Image.file(
+    //     File(sampleImage!.path),
+    //     height: 100,
+    //   );
+    // }
+    final ImagePicker _picker = ImagePicker();
+
+    Future<String> uploadImageToFirebase(File imageFile) async {
+      // Tạo một reference trong Firebase Storage
+      FirebaseStorage storage = FirebaseStorage.instance;
+      // String fileName = 'images/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      String fileName = 'images/1727367740145.jpg';
+      Reference ref = storage.ref().child(fileName);
+
+      // Tải lên file
+      UploadTask uploadTask = ref.putFile(imageFile);
+      TaskSnapshot snapshot = await uploadTask;
+
+      // Lấy URL sau khi tải lên thành công
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
     }
+
+    Future getImage() async {
+      var image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        sampleImage = image; // Update sampleImage instead of selectedImage
+        // Tải hình ảnh lên Firebase Storage
+        String downloadUrl =
+            await uploadImageToFirebase(File(sampleImage!.path));
+        widget.item["img"] = downloadUrl;
+
+        // Bạn có thể lưu URL vào Firestore hoặc hiển thị trong giao diện
+        print("Image uploaded! URL: $downloadUrl");
+        setState(() {}); // Ensure the UI updates after image selection
+      }
+    }
+
     if (!widget.item.containsKey('name')) {
       widget.item['name'] = '';
     }
@@ -247,6 +281,58 @@ class _ItemEditorState extends State<ItemEditor> {
           SizedBox(
             height: 10,
           ),
+
+          //add image
+          SizedBox(
+            height: 10,
+          ),
+          const Align(
+            child: Text('Image'),
+            alignment: Alignment.topLeft,
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          sampleImage == null
+              ? GestureDetector(
+                  onTap: () {
+                    getImage();
+                  },
+                  child: Center(
+                    child: Container(
+                      height: 150,
+                      width: 250,
+                      decoration: BoxDecoration(
+                          border: Border.all(
+                              color: AppColors.backgroundOrange, width: 1.5),
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Icon(
+                        Icons.add,
+                        color: AppColors.backgroundOrange,
+                      ),
+                    ),
+                  ),
+                )
+              : Center(
+                  child: Material(
+                    elevation: 4.0,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                        height: 100,
+                        width: 150,
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                                color: AppColors.backgroundOrange, width: 1.5),
+                            borderRadius: BorderRadius.circular(20)),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.file(
+                            File(sampleImage!.path),
+                            fit: BoxFit.cover,
+                          ),
+                        )),
+                  ),
+                ),
 
           const Text('Relevant Tags'),
           SizedBox(

@@ -10,12 +10,14 @@ class ItemCard extends StatelessWidget {
   final num price;
   final String description;
   final bool vegetarian;
+  final String img;
   const ItemCard(
       {super.key,
       required this.name,
       required this.price,
       required this.description,
-      required this.vegetarian});
+      required this.vegetarian,
+      required this.img});
 
   @override
   Widget build(BuildContext context) {
@@ -64,21 +66,33 @@ class ItemCard extends StatelessWidget {
                   ],
                 ),
                 Spacer(),
-                ElevatedButton(
-                  onPressed: () async {
-                    DatabaseService service = DatabaseService();
-                    // ItemModel item = ItemModel(
-                    //     category: "xbks",
-                    //     description: "hey",
-                    //     name: name,
-                    //     price: price.toString(),
-                    //     vegetarian: vegetarian);
-                    // await service.addToCart(item);
-                  },
-                  child: Text("ADD TO CART"),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.backgroundOrange),
-                )
+                // ElevatedButton(
+                //   onPressed: () async {
+                //     DatabaseService service = DatabaseService();
+                //     // ItemModel item = ItemModel(
+                //     //     category: "xbks",
+                //     //     description: "hey",
+                //     //     name: name,
+                //     //     price: price.toString(),
+                //     //     vegetarian: vegetarian);
+                //     // await service.addToCart(item);
+                //   },
+                //   child: Text("ADD TO CART"),
+                //   style: ElevatedButton.styleFrom(
+                //       backgroundColor: AppColors.backgroundOrange),
+                // )
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: AppColors.backgroundOrange, width: 1.5),
+                      borderRadius: BorderRadius.circular(20)),
+                  child: Image.network(
+                    img,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ],
             ),
           )),
@@ -214,7 +228,8 @@ class _ShopPageState extends State<ShopPage> {
                   name: item["name"],
                   price: item["price"],
                   description: item["description"],
-                  vegetarian: item["veg"]),
+                  vegetarian: item["veg"],
+                  img: item["img"]),
           ],
         ),
       ),

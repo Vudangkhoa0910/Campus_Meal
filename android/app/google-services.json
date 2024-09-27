@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "456761030249",
+    "project_id": "campusmeals-37097",
+    "storage_bucket": "campusmeals-37097.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456761030249:android:ad9f99abf49adf6aff94f8",
+        "android_client_info": {
+          "package_name": "campusMeal.app.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwSTyz1UhkSxLaFjNVvPGnEps4pi_WpOA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

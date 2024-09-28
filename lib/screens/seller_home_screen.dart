@@ -50,6 +50,10 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
   List<Map<String, dynamic>> menu = [];
   final DatabaseService service = DatabaseService();
 
+  double? screenWidth;
+  double? screenHeight;
+  bool _isEditable = false;
+
   Future<List<dynamic>> getOrders() async {
     final ordersSnapshot = await FirebaseFirestore.instance
         .collection("orders")
@@ -72,16 +76,31 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
   @override
   void initState() {
     super.initState();
+    // _isEditable = false;
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   final mediaQuery = MediaQuery.of(context);
+    //   setState(() {
+    //     screenWidth = mediaQuery.size.width;
+    //     screenHeight = mediaQuery.size.height;
+    //     // Thực hiện bất kỳ khởi tạo bổ sung nào tại đây
+    //   });
+    // });
     _widgetOptions = [
       homePage(),
-      Text("History"),
+      // Text("History"),
+
+      // Text("Profine")
+      historyPage("np", "4", "HN", "NP", "123"),
       Text("Notifications"),
-      Text("Profile")
+      infoPage()
     ];
   }
 
   @override
   Widget build(BuildContext context) {
+    // Truy cập MediaQuery trực tiếp trong build
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     menu = List<Map<String, dynamic>>.from(widget.shop.menu.map((item) => {
           "name": item["name"],
           "price": item["price"],
@@ -111,7 +130,8 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
               label: 'Profile',
             ),
           ],
-          currentIndex: 0, // _selectedIndex should be managed if needed
+          currentIndex:
+              _selectedIndex, // _selectedIndex should be managed if needed
           selectedItemColor: Colors.black,
           onTap: (index) {
             setState(() {
@@ -137,7 +157,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          _buildIncomeCard(),
           const SizedBox(height: 12),
           Text(
             "Shop Management",
@@ -175,6 +194,318 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
             },
           ),
         ]),
+      ),
+    );
+  }
+
+  Widget historyPage(
+      // final ShopModel? shop,
+      final String name,
+      final String rating,
+      final String location,
+      // final List menu,
+      final String ownerName,
+      final String upiID) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.backgroundYellow,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.backgroundOrange,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        elevation: 0,
+        centerTitle: true,
+        title: Text("Order History",
+            style: AppTypography.textMd.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.backgroundOrange)),
+      ),
+      backgroundColor: AppColors.backgroundYellow,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: EdgeInsets.all(20),
+              padding: EdgeInsets.all(20),
+              height: 120,
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                  borderRadius: const BorderRadius.all(Radius.circular(20))),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.pin_drop_rounded,
+                            size: 15,
+                          ),
+                          Text(location,
+                              style: AppTypography.textMd.copyWith(
+                                  fontSize: 12, fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.timelapse_rounded, size: 15),
+                          Text("9 AM TO 10 PM",
+                              style: AppTypography.textMd.copyWith(
+                                  fontSize: 12, fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.shopping_cart, size: 15),
+                          Text("4 ITEMS IN STOCK",
+                              style: AppTypography.textMd.copyWith(
+                                  fontSize: 12, fontWeight: FontWeight.w700)),
+                          // Text("${menu.length} ITEMS IN STOCK",
+                          //     style: AppTypography.textMd.copyWith(
+                          //         fontSize: 12, fontWeight: FontWeight.w700)),
+                        ],
+                      ),
+                      Container(
+                          width: 30,
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: AppColors.signIn),
+                          child: Row(
+                            children: [
+                              Text(
+                                "0",
+                                style: AppTypography.textSm.copyWith(
+                                    fontSize: 15, fontWeight: FontWeight.w700),
+                              ),
+                              const Icon(
+                                Icons.star,
+                                size: 15,
+                              )
+                            ],
+                          ))
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                "All Orders",
+                style: AppTypography.textMd
+                    .copyWith(fontSize: 20, fontWeight: FontWeight.w700),
+              ),
+            ),
+            // for (var item in menu)
+            // ItemCard(
+            //     name: item["name"],
+            //     price: item["price"],
+            //     description: item["description"],
+            //     vegetarian: item["veg"],
+            //     img: item["img"]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget infoPage() {
+    late TextEditingController ownerNameController;
+    late TextEditingController phoneNumberController;
+    late TextEditingController shopNameController;
+    late TextEditingController openingTimeController;
+    late TextEditingController closingTimeController;
+    late TextEditingController upiIdController;
+
+    ownerNameController = TextEditingController(text: widget.shop.ownerName);
+    phoneNumberController =
+        TextEditingController(text: widget.shop.phoneNumber);
+    shopNameController = TextEditingController(text: widget.shop.shopName);
+    openingTimeController =
+        TextEditingController(text: widget.shop.openingTime);
+    closingTimeController =
+        TextEditingController(text: widget.shop.closingTime);
+    upiIdController = TextEditingController(text: widget.shop.upiId);
+
+    Future<void> updateShop() async {
+      // Tìm kiếm document dựa trên điều kiện
+      final shopQuery = FirebaseFirestore.instance
+          .collection('shop')
+          .where('upi_id', isEqualTo: widget.shop.upiId);
+
+      // Lấy snapshot của document
+      final querySnapshot = await shopQuery.get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Giả sử bạn muốn cập nhật document đầu tiên tìm thấy
+        final shopRef = querySnapshot.docs.first.reference;
+
+        await shopRef.update({
+          'owner_name': ownerNameController.text,
+          'phone_number': phoneNumberController.text,
+          'shop_name': shopNameController.text,
+          'opening_time': openingTimeController.text,
+          'closing_time': closingTimeController.text,
+          'upi_id': upiIdController.text,
+        });
+      } else {
+        print("No shop found with the specified UPI ID.");
+      }
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.backgroundYellow,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.backgroundOrange,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        elevation: 0,
+        centerTitle: true,
+        title: Text("Profine",
+            style: AppTypography.textMd.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.backgroundOrange)),
+      ),
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Container(
+                  height: 150,
+                  width: 500,
+                  // height: screenHeight! * 1 / 5,
+                  // width: screenWidth,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20)),
+                      color: Colors.amber[900]),
+                ),
+                Container(
+                  // height: screenHeight! * 0.5,
+                  // width: screenWidth,
+                  height: 500,
+                  width: 500,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20)),
+                      color: Colors.white),
+                ),
+              ],
+            ),
+            Positioned(
+                top: 80,
+                left: 200,
+                child: Container(
+                  height: 130,
+                  width: 130,
+                  // height: screenHeight! * 0.2,
+                  // width: screenHeight! * 0.2,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Color.fromRGBO(122, 103, 238, 1), width: 3),
+                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: Image.asset(
+                      "assets/iconprofile.png",
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                )),
+            Positioned(
+                bottom: 80,
+                left: 140,
+                child: Column(
+                  children: [
+                    inputText(ownerNameController),
+                    inputText(phoneNumberController),
+                    inputText(shopNameController),
+                    inputText(openingTimeController),
+                    inputText(closingTimeController),
+                    inputText(upiIdController),
+                  ],
+                )),
+            Positioned(
+              bottom: 10,
+              left: 180,
+              child: GestureDetector(
+                onTap: () {
+                  updateShop();
+                },
+                child: Container(
+                  width: 200,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      color: Color.fromRGBO(238, 118, 0, 1),
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: Center(
+                    child: Text(
+                      "Lưu",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget inputText(TextEditingController text) {
+    return Padding(
+      padding: const EdgeInsets.all(5),
+      child: Container(
+        width: 250,
+        // width: screenWidth! * 2 / 3,
+        child: TextFormField(
+          decoration: InputDecoration(
+            enabledBorder: OutlineInputBorder(
+              borderSide:
+                  BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                Icons.edit,
+                color: _isEditable
+                    ? Colors.grey[400]
+                    : Color.fromRGBO(238, 118, 0, 1),
+              ),
+              onPressed: () {
+                setState(() {
+                  if (_isEditable) {
+                    _isEditable = false;
+                  } else {
+                    _isEditable = true;
+                  }
+                });
+              },
+            ),
+          ),
+          // readOnly: _isEditable,
+          controller: text,
+        ),
       ),
     );
   }

@@ -10,6 +10,7 @@ class SignIn extends StatefulWidget {
   // Không cần biến tĩnh nữa
   // static String verify = "";
   static String phoneNumber = "";
+  static String phoneBasic = "";
 
   @override
   _SignInState createState() => _SignInState();
@@ -18,7 +19,7 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _countryCode = TextEditingController();
-  
+
   @override
   void initState() {
     super.initState();
@@ -83,9 +84,8 @@ class _SignInState extends State<SignIn> {
               String phone = _phoneController.text.trim();
               String countryCode = _countryCode.text.trim();
               String fullPhoneNumber = countryCode + phone;
-
-              // Lưu số điện thoại vào biến tĩnh
               SignIn.phoneNumber = fullPhoneNumber;
+              SignIn.phoneBasic = phone;
 
               print('Phone: $phone');
               print('Country Code: $countryCode');
@@ -108,7 +108,8 @@ class _SignInState extends State<SignIn> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => VerifyOtp(verificationId: verificationId),
+                      builder: (context) =>
+                          VerifyOtp(verificationId: verificationId),
                     ),
                   );
                 },
@@ -132,7 +133,7 @@ class _SignInState extends State<SignIn> {
                       child: Center(
                         child: Text("Sign In",
                             style: AppTypography.textMd.copyWith(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontWeight: FontWeight.w700)),
                       ),
                     ),

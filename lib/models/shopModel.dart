@@ -11,22 +11,23 @@ class ShopModel {
   bool? status;
   String alternatePhoneNumber;
   List menu;
-  Map<String, int> rating;
+  // Map<String, int> rating;
 
-  ShopModel(
-      {required this.shopID,
-      required this.alternatePhoneNumber,
-      required this.closingTime,
-      required this.location,
-      required this.openingTime,
-      required this.ownerName,
-      required this.phoneNumber,
-      required this.shopName,
-      required this.shopType,
-      required this.upiId,
-      required this.menu,
-      this.status,
-      required this.rating});
+  ShopModel({
+    required this.shopID,
+    required this.alternatePhoneNumber,
+    required this.closingTime,
+    required this.location,
+    required this.openingTime,
+    required this.ownerName,
+    required this.phoneNumber,
+    required this.shopName,
+    required this.shopType,
+    required this.upiId,
+    required this.menu,
+    this.status,
+    // required this.rating
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -41,7 +42,7 @@ class ShopModel {
       'phone_number': phoneNumber,
       'alternate_phone_number': alternatePhoneNumber,
       'menu': menu,
-      "rating": rating,
+      // "rating": rating,
       "status": status
     };
   }
@@ -58,6 +59,6 @@ class ShopModel {
         phoneNumber = sellerMap["phone_number"],
         alternatePhoneNumber = sellerMap["alternate_phone_number"],
         menu = sellerMap["menu"],
-        rating = sellerMap["rating"],
+        // rating = sellerMap["rating"],
         status = sellerMap["status"];
 }

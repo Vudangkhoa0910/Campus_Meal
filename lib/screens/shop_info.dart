@@ -33,7 +33,8 @@ class ItemCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Expanded( // Sửa để tránh lỗi overflow
+                Expanded(
+                  // Sửa để tránh lỗi overflow
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -69,20 +70,20 @@ class ItemCard extends StatelessWidget {
                 ),
                 Spacer(),
                 Container(
-                    height: 120, 
-                    width: 120,  
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                            color: AppColors.backgroundOrange, width: 1.5),
-                        borderRadius: BorderRadius.circular(20)),
-                    child: ClipRRect(  
-                      borderRadius: BorderRadius.circular(20),  
-                      child: Image.network(
-                        img,
-                        fit: BoxFit.cover,  
-                      ),
+                  height: 120,
+                  width: 120,
+                  decoration: BoxDecoration(
+                      border: Border.all(
+                          color: AppColors.backgroundOrange, width: 1.5),
+                      borderRadius: BorderRadius.circular(20)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.network(
+                      img,
+                      fit: BoxFit.cover,
                     ),
                   ),
+                ),
               ],
             ),
           )),
@@ -190,7 +191,8 @@ class _ShopPageState extends State<ShopPage> {
                           child: Row(
                             children: [
                               Text(
-                                widget.rating, // Thay giá trị cố định bằng rating từ widget
+                                widget
+                                    .rating, // Thay giá trị cố định bằng rating từ widget
                                 style: AppTypography.textSm.copyWith(
                                     fontSize: 15, fontWeight: FontWeight.w700),
                               ),
@@ -219,7 +221,7 @@ class _ShopPageState extends State<ShopPage> {
                 price: item["price"] ?? 0.0,
                 description: item["description"] ?? 'No description',
                 vegetarian: item["veg"] ?? false,
-                img: item["img"], 
+                img: item["img"],
               ),
           ],
         ),

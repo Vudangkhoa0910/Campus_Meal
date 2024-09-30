@@ -1,6 +1,9 @@
 import 'package:campus_catalogue/screens/cart.dart';
 import 'package:campus_catalogue/screens/search_screen.dart';
+import 'package:campus_catalogue/screens/search_screen.dart';
+import 'package:campus_catalogue/screens/search_screen.dart';
 import 'package:campus_catalogue/screens/shop_info.dart';
+import 'package:campus_catalogue/screens/userType_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_catalogue/constants/colors.dart';
@@ -372,6 +375,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  final List<String> _titles = [
+    "Explore IITG",
+    "Cart",
+    "History",
+    "Notifications",
+    "Profile",
+  ];
+
   Future<List> getCampusFavouriteShops() async {
     List tmp = [];
     final shops = await FirebaseFirestore.instance
@@ -388,82 +399,113 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: AppColors.backgroundOrange,
-            ),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            // Navigate back to the UserTypeSelectionScreen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => UserType()),
+            );
+          },
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.backgroundOrange,
           ),
-          backgroundColor: AppColors.backgroundYellow,
-          elevation: 0,
-          centerTitle: true,
-          title: Text("Explore IITG",
-              style: AppTypography.textMd.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.backgroundOrange)),
         ),
         backgroundColor: AppColors.backgroundYellow,
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: [
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SearchInput(),
-                  const LocationCardWrapper(),
-                  const ShopHeader(name: "Campus Favourites"),
-                  FutureBuilder<List<dynamic>>(
-                      future: getCampusFavouriteShops(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<List<dynamic>> snapshot) {
-                        if (snapshot.hasData) {
-                          final campusFavs = snapshot.data!;
-                          return ShopCardWrapper(shops: campusFavs);
-                        } else {
-                          return const CircularProgressIndicator(
-                              color: AppColors.backgroundOrange);
-                        }
-                      }),
-                  const ShopHeader(name: "Recommended"),
-                  FutureBuilder<List<dynamic>>(
-                      future: getCampusFavouriteShops(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<List<dynamic>> snapshot) {
-                        if (snapshot.hasData) {
-                          final campusFavs = snapshot.data!;
-                          return ShopCardWrapper(shops: campusFavs);
-                        } else {
-                          return const CircularProgressIndicator(
-                              color: AppColors.backgroundOrange);
-                        }
-                      }),
-                  // ShopCardWrapper(shops: campusFavouriteShops),
-                ],
-              ),
+        elevation: 0,
+        centerTitle: true,
+        title: Text(_titles[_selectedIndex],
+            style: AppTypography.textMd.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.backgroundOrange)),
+      ),
+      backgroundColor: AppColors.backgroundYellow,
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                const SearchInput(),
+                const LocationCardWrapper(),
+                const ShopHeader(name: "Campus Favourites"),
+                FutureBuilder<List<dynamic>>(
+                  future: getCampusFavouriteShops(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<List<dynamic>> snapshot) {
+                    if (snapshot.hasData) {
+                      final campusFavs = snapshot.data!;
+                      return ShopCardWrapper(shops: campusFavs);
+                    } else {
+                      return const CircularProgressIndicator(
+                          color: AppColors.backgroundOrange);
+                    }
+                  },
+                ),
+                const ShopHeader(name: "Recommended"),
+                FutureBuilder<List<dynamic>>(
+                  future: getCampusFavouriteShops(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<List<dynamic>> snapshot) {
+                    if (snapshot.hasData) {
+                      final campusFavs = snapshot.data!;
+                      return ShopCardWrapper(shops: campusFavs);
+                    } else {
+                      return const CircularProgressIndicator(
+                          color: AppColors.backgroundOrange);
+                    }
+                  },
+                ),
+              ],
             ),
-            Cart(),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          selectedItemColor: AppColors.backgroundOrange,
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
-              label: 'Cart',
-            ),
-          ],
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        ));
+          ),
+          Cart(),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        // selectedItemColor: AppColors.backgroundOrange,
+        type: BottomNavigationBarType.fixed, // Đảm bảo loại là fixed
+        backgroundColor: Colors.white, // Tuỳ chọn: Đặt màu nền mong muốn
+        selectedItemColor: AppColors.backgroundOrange, // Màu của mục được chọn
+        unselectedItemColor: Colors.grey, // Màu của các mục không được chọn
+        // selectedLabelStyle: AppTypography.textMd.copyWith(
+        //   fontWeight: FontWeight.w700, // Tuỳ chọn: Kiểu chữ của nhãn được chọn
+        // ),
+        // unselectedLabelStyle: AppTypography.textMd.copyWith(
+        //   fontWeight: FontWeight.w400,
+        // ), // Tuỳ chọn: Kiểu chữ của nhãn không được chọn
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Cart',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'History',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle_outlined),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      ),
+    );
   }
 }

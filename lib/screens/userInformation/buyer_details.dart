@@ -99,7 +99,10 @@ class _BuyerDetailsState extends State<BuyerDetails> {
                 await service.addBuyer(buyer);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => HomeScreen(
+                            buyer: buyer,
+                          )),
                 );
               }
             },
@@ -163,31 +166,31 @@ class _FieldsFormatState extends State<FieldsFormat> {
       SizedBox(
         height: widget.title == "Add Address*" ? 76 : 40,
         child: TextFormField(
-            enabled: widget.title == "Phone Number*" ? false : true,
-            textAlign: TextAlign.start,
-            maxLines: widget.maxlines,
-            decoration: InputDecoration(
-                fillColor: AppColors.backgroundYellow,
-                filled: true,
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    borderSide: const BorderSide(
-                        width: 0, color: AppColors.backgroundYellow)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(6),
-                    borderSide: const BorderSide(
-                        width: 0, color: AppColors.backgroundYellow))),
-            autofocus: true,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter ${widget.title}';
-              }
-              return null;
-            },
-            // controller: widget.title == "Phone Number*"
-            //     ? (widget.text..text = SignIn.phoneNumber)
-            //     : widget.text),
-      ),
+          enabled: widget.title == "Phone Number*" ? false : true,
+          textAlign: TextAlign.start,
+          maxLines: widget.maxlines,
+          decoration: InputDecoration(
+              fillColor: AppColors.backgroundYellow,
+              filled: true,
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(
+                      width: 0, color: AppColors.backgroundYellow)),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: const BorderSide(
+                      width: 0, color: AppColors.backgroundYellow))),
+          autofocus: true,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter ${widget.title}';
+            }
+            return null;
+          },
+          // controller: widget.title == "Phone Number*"
+          //     ? (widget.text..text = SignIn.phoneNumber)
+          //     : widget.text),
+        ),
       ),
       const SizedBox(
         height: 10,

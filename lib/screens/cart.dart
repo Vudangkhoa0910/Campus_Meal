@@ -79,7 +79,7 @@ class _CartState extends State<Cart> {
                       totalPrice = 0;
 
                       for (var items in items) {
-                        totalPrice += double.parse(items.price);
+                        totalPrice += items.price;
                       }
                       return ListView.separated(
                           itemBuilder: (context, index) {
@@ -113,13 +113,10 @@ class _CartState extends State<Cart> {
             Spacer(),
             GestureDetector(
               onTap: () async {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //       builder: (context) => UpiScreen(
-                //             amount: totalPrice,
-                //           )),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PaymentInfo()),
+                );
               },
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -195,7 +192,7 @@ class _ItemCardState extends State<ItemCard> {
                     height: 2,
                   ),
                   Text(
-                    "PRICE:" + widget.item.price,
+                    "PRICE: ${widget.item.price}",
                     style: AppTypography.textSm.copyWith(
                       fontSize: 10,
                     ),

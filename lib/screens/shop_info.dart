@@ -100,6 +100,14 @@ class ItemCard extends StatelessWidget {
                     child: Image.network(
                       img,
                       fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'assets/iconshop.jpg', // Đường dẫn đến hình ảnh thay thế
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        );
+                      },
                     ),
                   ),
                 ),

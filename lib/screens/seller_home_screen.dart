@@ -466,8 +466,42 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                   ],
                 )),
             Positioned(
-              bottom: 10,
-              left: 180,
+                top: 60,
+                left: 130,
+                child: Container(
+                  height: 120,
+                  width: 120,
+                  // height: screenHeight! * 0.2,
+                  // width: screenHeight! * 0.2,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Color.fromRGBO(122, 103, 238, 1), width: 3),
+                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(100),
+                    child: Image.asset(
+                      "assets/iconprofile.png",
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                )),
+            Positioned(
+                bottom: 45,
+                left: 55,
+                child: Column(
+                  children: [
+                    inputText(ownerNameController, "Owner Name"),
+                    inputText(phoneNumberController, "Phone Number"),
+                    inputText(shopNameController, "Shop Name"),
+                    inputText(openingTimeController, "Opening Time"),
+                    inputText(closingTimeController, "Closing Time"),
+                    inputText(upiIdController, "Upi Id"),
+                  ],
+                )),
+            Positioned(
+              bottom: -5,
+              left: 90,
               child: GestureDetector(
                 onTap: () {
                   updateShop();
@@ -494,7 +528,7 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     );
   }
 
-  Widget inputText(TextEditingController text) {
+  Widget inputText(TextEditingController text, String hintText) {
     return Padding(
       padding: const EdgeInsets.all(5),
       child: Container(
@@ -507,6 +541,7 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                   BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
+            hintText: hintText,
             suffixIcon: IconButton(
               icon: Icon(
                 Icons.edit,

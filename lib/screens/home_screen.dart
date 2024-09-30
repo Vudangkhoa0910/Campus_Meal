@@ -399,7 +399,8 @@ class _SearchInputState extends State<SearchInput> {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  Buyer buyer;
+  HomeScreen({Key? key, required this.buyer}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -495,6 +496,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Cart(),
+          HistoryPageUser(),
+          NtfUserPage(),
+          ProfileUsePage(
+            buyer: widget.buyer,
+          )
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

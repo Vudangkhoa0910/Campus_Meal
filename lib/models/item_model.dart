@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ItemModel {
   String name;
-  String price;
+  num price;
   String category;
   bool vegetarian;
   String description;

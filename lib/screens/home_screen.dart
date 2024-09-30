@@ -105,6 +105,7 @@ class ShopCard extends StatelessWidget {
           children: [
             // Sử dụng CachedNetworkImage để hiển thị ảnh từ Firebase
             ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
               child: Image.network(
                 imageUrl,
                 fit: BoxFit.cover,

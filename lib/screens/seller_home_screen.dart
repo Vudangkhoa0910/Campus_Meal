@@ -362,7 +362,7 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
       // Tìm kiếm document dựa trên điều kiện
       final shopQuery = FirebaseFirestore.instance
           .collection('shop')
-          .where('upi_id', isEqualTo: widget.shop.upiId);
+          .where('shop_id', isEqualTo: widget.shop.shopID);
 
       // Lấy snapshot của document
       final querySnapshot = await shopQuery.get();

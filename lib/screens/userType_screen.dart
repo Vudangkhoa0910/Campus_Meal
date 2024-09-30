@@ -22,116 +22,114 @@ class _UserTypeState extends State<UserType> {
 
   // Function to check if user is a Buyer or Seller
   Future<void> checkUserType(String type) async {
-  final User? user = _auth.currentUser;
+    final User? user = _auth.currentUser;
 
-  if (user != null) {
-    final uid = user.uid;
-    print("User UID: $uid");
+    if (user != null) {
+      final uid = user.uid;
 
-    if (type == "Buyer") {
-      QuerySnapshot buyerQuery = await _firestore
-          .collection("Buyer")
-          .where("user_id", isEqualTo: uid)
-          .get();
+      if (type == "Buyer") {
+        QuerySnapshot buyerQuery = await _firestore
+            .collection("Buyer")
+            .where("user_id", isEqualTo: uid)
+            .get();
 
-      if (buyerQuery.docs.isNotEmpty) {
-        // If Buyer exists, print the user_id from the document
-        String buyerUserId = buyerQuery.docs[0]['user_id'];
-        print("Buyer User ID (from Firestore): $buyerUserId");
+        if (buyerQuery.docs.isNotEmpty) {
+          // Navigate to HomeScreen
+          final Buyer buyer =
+              Buyer.fromMap(buyerQuery.docs[0].data() as Map<String, dynamic>);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomeScreen(buyer: buyer)),
+          );
+        } else {
+          // Navigate to BuyerDetails
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const BuyerDetails()),
+          );
+        }
+      } else if (type == "Seller") {
+        QuerySnapshot sellerQuery = await _firestore
+            .collection("shop")
+            .where("shop_id", isEqualTo: uid)
+            .get();
 
-        // Navigate to HomeScreen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
-      } else {
-        print("No Buyer found with user_id: $uid");
-        // Navigate to BuyerDetails
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const BuyerDetails()),
-        );
+        if (sellerQuery.docs.isNotEmpty) {
+          final ShopModel shop = ShopModel.fromMap(
+              sellerQuery.docs[0].data() as Map<String, dynamic>);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => SellerHomeScreen(shop: shop)),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SellerDetails()),
+          );
+        }
       }
     }
-
-    if (type == "Seller") {
-      QuerySnapshot sellerQuery = await _firestore
-          .collection("shop")
-          .where("shop_id", isEqualTo: uid)
-          .get();
-
-      if (sellerQuery.docs.isNotEmpty) {
-        String shopId = sellerQuery.docs[0]['shop_id'];
-        print("Shop ID (from Firestore): $shopId");
-
-        ShopModel shop = ShopModel.fromMap(sellerQuery.docs[0].data() as Map<String, dynamic>);
-        
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => SellerHomeScreen(shop: shop)),
-        );
-      } else {
-        print("No Seller found with shop_id: $uid");
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SellerDetails()),
-        );
-      }
-    }
-  } else {
-    print("No user currently signed in.");
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFFEF6),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 140, 20, 36),
-        child: Column(
-          children: [
-            Text(
-              "Welcome Onboard!",
-              style: AppTypography.textMd
-                  .copyWith(fontSize: 20, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "Select your user type.",
-              textAlign: TextAlign.center,
-              style: AppTypography.textSm.copyWith(fontSize: 14),
-            ),
-            const SizedBox(height: 38),
-            GestureDetector(
-              onTap: () async {
-                await checkUserType("Buyer");
-              },
-              child: buildUserTypeContainer("Buyer",
-                  "Join as a buyer, if you \nwant to purchase any \nitem or avail any \nservice", "assets/images/buyer_type.png"),
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () async {
-                await checkUserType("Seller");
-              },
-              child: buildUserTypeContainer("Seller",
-                  "Join as a seller, if you \nwant to sell any item \nor provide any \nservice.", "assets/images/seller_type.png"),
-            ),
-            const Spacer(),
-            GestureDetector(
-              onTap: () async {},
-              child: buildContinueButton(),
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 140, 20, 36),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Welcome Onboard!",
+                style: AppTypography.textMd
+                    .copyWith(fontSize: 20, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "Select your user type.",
+                textAlign: TextAlign.center,
+                style: AppTypography.textSm.copyWith(fontSize: 14),
+              ),
+              const SizedBox(height: 38),
+              GestureDetector(
+                onTap: () async {
+                  await checkUserType("Buyer");
+                },
+                child: buildUserTypeContainer(
+                  "Buyer",
+                  "Join as a buyer, if you \nwant to purchase any \nitem or avail any \nservice",
+                  "assets/images/buyer_type.png",
+                ),
+              ),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () async {
+                  await checkUserType("Seller");
+                },
+                child: buildUserTypeContainer(
+                  "Seller",
+                  "Join as a seller, if you \nwant to sell any item \nor provide any \nservice.",
+                  "assets/images/seller_type.png",
+                ),
+              ),
+              const SizedBox(
+                  height: 20), // Thay Spacer() bằng SizedBox để tránh overflow
+              GestureDetector(
+                onTap: () async {},
+                child: buildContinueButton(),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget buildUserTypeContainer(String title, String description, String imagePath) {
+  Widget buildUserTypeContainer(
+      String title, String description, String imagePath) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 21, 10, 29),
       decoration: BoxDecoration(
@@ -147,7 +145,8 @@ class _UserTypeState extends State<UserType> {
             children: [
               Text(
                 title,
-                style: AppTypography.textMd.copyWith(fontWeight: FontWeight.w500),
+                style:
+                    AppTypography.textMd.copyWith(fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 4),
               Text(

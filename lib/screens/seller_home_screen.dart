@@ -3,6 +3,7 @@ import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/order_model.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
+import 'package:campus_catalogue/screens/userType_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:flutter/material.dart';
@@ -143,57 +144,78 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
   }
 
   Widget homePage() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 56, 20, 0),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Center(
-            child: Text(
-              "Explore IITG",
-              style: AppTypography.textMd.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.backgroundOrange,
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.backgroundYellow,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.backgroundOrange,
+          ),
+          onPressed: () => Navigator.push(
+              context, MaterialPageRoute(builder: (context) => UserType())),
+        ),
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          "Explore IITG",
+          style: AppTypography.textMd.copyWith(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: AppColors.backgroundOrange,
+          ),
+        ),
+      ),
+      backgroundColor: AppColors.backgroundYellow,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 56, 20, 0),
+          child: Column(
+            // Thêm Column để chứa các widget
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildIncomeCard(),
+              const SizedBox(height: 12),
+              Text(
+                "Shop Management",
+                style: AppTypography.textMd.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                ),
               ),
-            ),
+              const SizedBox(height: 32),
+              _buildUpdateMenuButton(context),
+              const SizedBox(height: 12),
+              Text(
+                "Current Orders",
+                style: AppTypography.textMd.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              FutureBuilder<List<dynamic>>(
+                future: getOrders(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<dynamic>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    final orders = snapshot.data!;
+                    return OrderWrapper(orders: orders);
+                  } else {
+                    return Text(
+                      "No orders",
+                      style: AppTypography.textMd.copyWith(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          const SizedBox(height: 12),
-          Text(
-            "Shop Management",
-            style: AppTypography.textMd.copyWith(
-              fontWeight: FontWeight.w700,
-              fontSize: 20,
-            ),
-          ),
-          const SizedBox(height: 32),
-          _buildUpdateMenuButton(context),
-          const SizedBox(height: 12),
-          Text(
-            "Current Orders",
-            style: AppTypography.textMd.copyWith(fontWeight: FontWeight.w700),
-          ),
-          FutureBuilder<List<dynamic>>(
-            future: getOrders(),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              }
-              if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                final orders = snapshot.data!;
-                return OrderWrapper(orders: orders);
-              } else {
-                return Text(
-                  "No orders",
-                  style: AppTypography.textMd.copyWith(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                );
-              }
-            },
-          ),
-        ]),
+        ),
       ),
     );
   }

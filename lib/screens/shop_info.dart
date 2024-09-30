@@ -38,21 +38,21 @@ class ItemCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (vegetarian)
-                        Text(
-                          "VEG",
-                          style: AppTypography.textSm.copyWith(
-                              color: Color.fromARGB(255, 0, 196, 0),
-                              fontSize: 14),
-                        )
-                      else
-                        Text("NON VEG",
-                            style: AppTypography.textSm.copyWith(
-                                color: Color.fromARGB(255, 197, 0, 0),
-                                fontSize: 14)),
+                      // if (vegetarian)
+                      //   Text(
+                      //     "VEG",
+                      //     style: AppTypography.textSm.copyWith(
+                      //         color: Color.fromARGB(255, 0, 196, 0),
+                      //         fontSize: 14),
+                      //   )
+                      // else
+                      // Text("NON VEG",
+                      //     style: AppTypography.textSm.copyWith(
+                      //         color: Color.fromARGB(255, 197, 0, 0),
+                      //         fontSize: 14)),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                        child: Text("PRICE: Rs. $price",
+                        child: Text("PRICE: $price",
                             style: AppTypography.textSm.copyWith(fontSize: 14)),
                       ),
                       Text(
@@ -64,7 +64,26 @@ class ItemCard extends StatelessWidget {
                         description,
                         style: AppTypography.textSm.copyWith(
                             fontSize: 14, fontWeight: FontWeight.w400),
-                      )
+                      ),
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          width: 200,
+                          height: 30,
+                          decoration: BoxDecoration(
+                              color: Color.fromRGBO(238, 118, 0, 1),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(20))),
+                          child: Center(
+                            child: Text(
+                              "ADD ",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

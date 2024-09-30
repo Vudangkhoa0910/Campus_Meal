@@ -44,29 +44,29 @@ class ShopCardWrapper extends StatelessWidget {
           shrinkWrap: true,
           itemBuilder: (BuildContext context, int index) {
             return Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-              child: GestureDetector(
-                onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => ShopPage(
-                              name: shops[index]["shop_name"],
-                              rating: "0",
-                              location: shops[index]["location"],
-                              menu: shops[index]["menu"],
-                              ownerName: shops[index]["owner_name"],
-                              upiID: shops[index]["upi_id"],
-                            ))),
-                child: ShopCard(
-                    name: shops[index]["shop_name"],
-                    rating: "0",
-                    location: shops[index]["location"],
-                    menu: shops[index]["menu"],
-                    ownerName: shops[index]["owner_name"],
-                    upiID: shops[index]["upi_id"],
-                    status: true),
-              ),
-            );
+                padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
+                child: GestureDetector(
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ShopPage(
+                                name: shops[index]["shop_name"],
+                                rating: "0",
+                                location: shops[index]["location"],
+                                menu: shops[index]["menu"],
+                                ownerName: shops[index]["owner_name"],
+                                upiID: shops[index]["upi_id"],
+                              ))),
+                  child: ShopCard(
+                      name: shops[index]["shop_name"],
+                      rating: "0",
+                      location: shops[index]["location"],
+                      menu: shops[index]["menu"],
+                      ownerName: shops[index]["owner_name"],
+                      upiID: shops[index]["upi_id"],
+                      status: true,
+                      imageUrl: shops[index]["img"]),
+                ));
           }),
     );
   }
@@ -80,6 +80,8 @@ class ShopCard extends StatelessWidget {
   final String ownerName;
   final String upiID;
   final bool status;
+  final String imageUrl; // Thêm trường imageUrl
+
   const ShopCard(
       {super.key,
       required this.name,
@@ -88,7 +90,8 @@ class ShopCard extends StatelessWidget {
       required this.menu,
       required this.ownerName,
       required this.upiID,
-      required this.status});
+      required this.status,
+      required this.imageUrl}); // Thêm imageUrl trong constructor
 
   @override
   Widget build(BuildContext context) {
@@ -96,34 +99,58 @@ class ShopCard extends StatelessWidget {
       height: 125,
       width: MediaQuery.of(context).size.width * 0.5,
       child: Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          color: const Color(0xFFFFF2E0),
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      name,
-                      style: AppTypography.textMd
-                          .copyWith(fontSize: 14, fontWeight: FontWeight.w700),
-                    ),
-                    Text(location,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        color: const Color(0xFFFFF2E0),
+        child: Stack(
+          children: [
+            // Sử dụng CachedNetworkImage để hiển thị ảnh từ Firebase
+            ClipRRect(
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                // placeholder: (context, url) =>
+                //     const CircularProgressIndicator(),
+                // errorWidget: (context, url, error) => const Icon(Icons.error),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5), // Đặt overlay mờ
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text(
+                        name,
+                        style: AppTypography.textMd.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white),
+                      ),
+                      Text(
+                        location,
                         style: AppTypography.textSm.copyWith(
-                            fontSize: 10, fontWeight: FontWeight.w400))
-                  ],
-                ),
-                Container(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white),
+                      ),
+                    ],
+                  ),
+                  Container(
                     padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(3),
-                        color: const Color(0xFFFFFEF6)),
+                      borderRadius: BorderRadius.circular(3),
+                      color: const Color(0xFFFFFEF6),
+                    ),
                     child: Row(
                       children: [
                         Text(
@@ -134,12 +161,16 @@ class ShopCard extends StatelessWidget {
                         const Icon(
                           Icons.star,
                           size: 10,
-                        )
+                        ),
                       ],
-                    ))
-              ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          )),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,4 +1,8 @@
+import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/screens/cart.dart';
+import 'package:campus_catalogue/screens/history_user_page.dart';
+import 'package:campus_catalogue/screens/ntf_user_page.dart';
+import 'package:campus_catalogue/screens/profile_use_page.dart';
 import 'package:campus_catalogue/screens/search_screen.dart';
 import 'package:campus_catalogue/screens/search_screen.dart';
 import 'package:campus_catalogue/screens/search_screen.dart';
@@ -111,9 +115,14 @@ class ShopCard extends StatelessWidget {
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
-                // placeholder: (context, url) =>
-                //     const CircularProgressIndicator(),
-                // errorWidget: (context, url, error) => const Icon(Icons.error),
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/iconshop.jpg', // Đường dẫn đến hình ảnh thay thế
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  );
+                },
               ),
             ),
             Container(
@@ -496,7 +505,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Cart(),
-          HistoryPageUser(),
+          HistoryPageUser(
+            buyer: widget.buyer,
+          ),
           NtfUserPage(),
           ProfileUsePage(
             buyer: widget.buyer,

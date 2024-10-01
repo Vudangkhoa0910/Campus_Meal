@@ -52,16 +52,16 @@ class ItemCard extends StatelessWidget {
                       //         fontSize: 14)),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                        child: Text("PRICE: $price",
+                        child: Text("Price: ${price}",
                             style: AppTypography.textSm.copyWith(fontSize: 14)),
                       ),
                       Text(
-                        name,
+                        "Name: ${name}",
                         style: AppTypography.textMd.copyWith(
-                            fontSize: 20, fontWeight: FontWeight.w700),
+                            fontSize: 14, fontWeight: FontWeight.w400),
                       ),
                       Text(
-                        description,
+                        "Description: ${description}",
                         style: AppTypography.textSm.copyWith(
                             fontSize: 14, fontWeight: FontWeight.w400),
                       ),

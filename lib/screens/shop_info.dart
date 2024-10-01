@@ -1,23 +1,59 @@
 import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
+import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/models/item_model.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ItemCard extends StatelessWidget {
+  final String shopName;
   final String name;
   final num price;
   final String description;
   final bool vegetarian;
   final String img;
+  final Buyer buyer;
   const ItemCard(
       {super.key,
+      required this.shopName,
       required this.name,
       required this.price,
       required this.description,
       required this.vegetarian,
-      required this.img});
+      required this.img,
+      required this.buyer});
+
+  Future<void> addOrder(String buyerPhone, String buyerName, String shopName,
+      num price, String date, String orderName, String img) async {
+    CollectionReference orders =
+        FirebaseFirestore.instance.collection('orders');
+
+    // num x = orders.
+
+    return orders.add({
+      'buyer_phone': buyerPhone,
+      'buyer_name': buyerName,
+      // 'txn_id': txnId,
+      'shop_name': shopName,
+      // 'status': status,
+      // 'total_amount': totalAmount,
+      'price': price,
+      'date': date,
+      'order_name': orderName,
+      'img': img,
+    }).then((value) {
+      print("Order Added");
+    }).catchError((error) {
+      print("Failed to add order: $error");
+    });
+  }
+
+  String formatDate(DateTime date) {
+    final DateFormat formatter = DateFormat('dd/MM/yyyy');
+    return formatter.format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +102,10 @@ class ItemCard extends StatelessWidget {
                             fontSize: 14, fontWeight: FontWeight.w400),
                       ),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          addOrder(buyer.phone, buyer.userName, shopName, price,
+                              formatDate(DateTime.now()), name, img);
+                        },
                         child: Container(
                           width: 200,
                           height: 30,
@@ -120,21 +159,25 @@ class ItemCard extends StatelessWidget {
 
 class ShopPage extends StatefulWidget {
   final ShopModel? shop;
+  // final String shopName;
   final String name;
   final String rating;
   final String location;
   final List menu;
   final String ownerName;
   final String upiID;
+  final Buyer buyer;
   const ShopPage({
     super.key,
     this.shop,
+    // required this.shopName,
     required this.name,
     required this.rating,
     required this.location,
     required this.menu,
     required this.ownerName,
     required this.upiID,
+    required this.buyer,
   });
 
   @override
@@ -244,11 +287,15 @@ class _ShopPageState extends State<ShopPage> {
             ),
             for (var item in widget.menu)
               ItemCard(
+                shopName: widget.name,
+                // shopName: widget.shop?.shopName ??
+                //     'Unknown Shop', // Provide a fallback
                 name: item["name"] ?? 'Unknown',
                 price: item["price"] ?? 0.0,
                 description: item["description"] ?? 'No description',
                 vegetarian: item["veg"] ?? false,
                 img: item["img"],
+                buyer: widget.buyer,
               ),
           ],
         ),

@@ -228,6 +228,15 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
       // final List menu,
       final String ownerName,
       final String upiID) {
+    List card = [
+      ["user1", "order1", "20", "2", "30-9-2024", ""],
+      ["user1", "order2", "25", "2", "30-9-2024", ""],
+      ["user1", "order3", "30", "2", "30-9-2024", ""],
+      ["user2", "order1", "20", "2", "30-9-2024", ""],
+      ["user2", "order2", "25", "2", "30-9-2024", ""],
+      ["user2", "order3", "40", "2", "30-9-2024", ""],
+      ["user3", "order1", "20", "2", "30-9-2024", ""]
+    ];
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.backgroundYellow,
@@ -236,7 +245,8 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
             Icons.arrow_back_ios_new_rounded,
             color: AppColors.backgroundOrange,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.push(
+              context, MaterialPageRoute(builder: (context) => UserType())),
         ),
         elevation: 0,
         centerTitle: true,
@@ -287,7 +297,7 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                       Row(
                         children: [
                           Icon(Icons.shopping_cart, size: 15),
-                          Text("4 ITEMS IN STOCK",
+                          Text("${card.length} ITEMS IN STOCK",
                               style: AppTypography.textMd.copyWith(
                                   fontSize: 12, fontWeight: FontWeight.w700)),
                           // Text("${menu.length} ITEMS IN STOCK",
@@ -334,6 +344,87 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
             //     description: item["description"],
             //     vegetarian: item["veg"],
             //     img: item["img"]),
+            for (var item in card)
+              Container(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 5),
+                child: Container(
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFFFF2E0),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            // Sửa để tránh lỗi overflow
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                                  child: Text("Shop : ${item[0]}",
+                                      style: AppTypography.textSm
+                                          .copyWith(fontSize: 14)),
+                                ),
+                                Text(
+                                  "Order : ${item[1]}",
+                                  style: AppTypography.textSm.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                                Text(
+                                  "Price : ${item[2]}",
+                                  style: AppTypography.textSm.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                                Text(
+                                  "Count : ${item[3]}",
+                                  style: AppTypography.textSm.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                                Text(
+                                  "Time : ${item[4]}",
+                                  style: AppTypography.textSm.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Spacer(),
+                          Container(
+                            height: 120,
+                            width: 120,
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: AppColors.backgroundOrange,
+                                    width: 1.5),
+                                borderRadius: BorderRadius.circular(20)),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.network(
+                                item[5],
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                    'assets/iconshop.jpg', // Đường dẫn đến hình ảnh thay thế
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )),
+              )
           ],
         ),
       ),
@@ -514,7 +605,7 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                       borderRadius: BorderRadius.all(Radius.circular(10))),
                   child: Center(
                     child: Text(
-                      "Lưu",
+                      "ADD",
                       style: TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold),
                     ),

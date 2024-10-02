@@ -38,70 +38,59 @@ class OrderWrapper extends StatelessWidget {
   }
 }
 
-class SellerHomeScreen extends StatefulWidget {
+class HomePage extends StatefulWidget {
   final ShopModel shop;
-
-  const SellerHomeScreen({Key? key, required this.shop}) : super(key: key);
+  const HomePage({super.key, required this.shop});
 
   @override
-  _SellerHomeScreenState createState() => _SellerHomeScreenState();
+  State<HomePage> createState() => HomePageState();
 }
 
-class _SellerHomeScreenState extends State<SellerHomeScreen> {
-  List<Map<String, dynamic>> menu = [];
-  final DatabaseService service = DatabaseService();
-
-  double? screenWidth;
-  double? screenHeight;
-  bool _isEditable = false;
-
-  Future<List<dynamic>> getOrders() async {
-    final ordersSnapshot = await FirebaseFirestore.instance
-        .collection("orders")
-        .where("shop_id", isEqualTo: widget.shop.shopID)
-        .limit(10)
-        .get();
-
-    return ordersSnapshot.docs.map((doc) => doc.data()).toList();
-  }
-
-  int _selectedIndex = 0;
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  List<Widget> _widgetOptions = [];
+class HomePageState extends State<HomePage> {
+  List card = [];
+  bool isLoading = true;
+  String errorMessage = '';
+  double totalIncome = 0.0;
 
   @override
   void initState() {
     super.initState();
-    // _isEditable = false;
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   final mediaQuery = MediaQuery.of(context);
-    //   setState(() {
-    //     screenWidth = mediaQuery.size.width;
-    //     screenHeight = mediaQuery.size.height;
-    //     // Thực hiện bất kỳ khởi tạo bổ sung nào tại đây
-    //   });
-    // });
-    _widgetOptions = [
-      homePage(),
-      // Text("History"),
-
-      // Text("Profine")
-      historyPage("np", "4", "HN", "NP", "123"),
-      Text("Notifications"),
-      infoPage()
-    ];
+    fetchOrders();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Truy cập MediaQuery trực tiếp trong build
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+  Future<void> fetchOrders() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('orders')
+          .where('shop_name', isEqualTo: widget.shop.shopName)
+          .get();
+
+      setState(() {
+        card = snapshot.docs.map((doc) {
+          var data = doc.data() as Map<String, dynamic>;
+
+          totalIncome += (data['price'] ?? 0) as double;
+          return [
+            data['buyer_name'] ?? 'Unknown',
+            data['order_name'] ?? 'Unknown',
+            data['price']?.toString() ?? '0',
+            data['date'] ?? 'Unknown',
+            data['img'] ?? 'Unknown', // Đảm bảo 'img' tồn tại trong Firestore
+          ];
+        }).toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error fetching orders: $e';
+        isLoading = false;
+      });
+      print('Error fetching orders: $e');
+    }
+  }
+
+  List<Map<String, dynamic>> menu = [];
+  void initializeMenu() {
     menu = List<Map<String, dynamic>>.from(widget.shop.menu.map((item) => {
           "name": item["name"],
           "price": item["price"],
@@ -109,41 +98,10 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
           "description": item["description"],
           "category": item["category"],
         }));
-
-    return Scaffold(
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined, color: Colors.black),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.history, color: Colors.black),
-              label: 'History',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications, color: Colors.black),
-              label: 'Notifications',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle_outlined, color: Colors.black),
-              label: 'Profile',
-            ),
-          ],
-          currentIndex:
-              _selectedIndex, // _selectedIndex should be managed if needed
-          selectedItemColor: Colors.black,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        ),
-        body: _widgetOptions.elementAt(_selectedIndex));
   }
 
-  Widget homePage() {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.backgroundYellow,
@@ -192,467 +150,89 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              FutureBuilder<List<dynamic>>(
-                future: getOrders(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<List<dynamic>> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  }
-                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                    final orders = snapshot.data!;
-                    return OrderWrapper(orders: orders);
-                  } else {
-                    return Text(
-                      "No orders",
-                      style: AppTypography.textMd.copyWith(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    );
-                  }
-                },
-              ),
+              for (var item in card)
+                Container(
+                  padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                  child: Container(
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFFFF2E0),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              // Sửa để tránh lỗi overflow
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(0, 15, 0, 0),
+                                    child: Text("User : ${item[0]}",
+                                        style: AppTypography.textSm
+                                            .copyWith(fontSize: 14)),
+                                  ),
+                                  Text(
+                                    "Order : ${item[1]}",
+                                    style: AppTypography.textSm.copyWith(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                  Text(
+                                    "Price : ${item[2]}",
+                                    style: AppTypography.textSm.copyWith(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                  // Text(
+                                  //   "Count : ${item[3]}",
+                                  //   style: AppTypography.textSm.copyWith(
+                                  //       fontSize: 14,
+                                  //       fontWeight: FontWeight.w400),
+                                  // ),
+                                  Text(
+                                    "Time : ${item[3]}",
+                                    style: AppTypography.textSm.copyWith(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Spacer(),
+                            Container(
+                              height: 120,
+                              width: 120,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: AppColors.backgroundOrange,
+                                      width: 1.5),
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.network(
+                                  item[4],
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.asset(
+                                      'assets/iconshop.jpg', // Đường dẫn đến hình ảnh thay thế
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                )
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget historyPage(
-      // final ShopModel? shop,
-      final String name,
-      final String rating,
-      final String location,
-      // final List menu,
-      final String ownerName,
-      final String upiID) {
-    List card = [
-      ["user1", "order1", "20", "2", "30-9-2024", ""],
-      ["user1", "order2", "25", "2", "30-9-2024", ""],
-      ["user1", "order3", "30", "2", "30-9-2024", ""],
-      ["user2", "order1", "20", "2", "30-9-2024", ""],
-      ["user2", "order2", "25", "2", "30-9-2024", ""],
-      ["user2", "order3", "40", "2", "30-9-2024", ""],
-      ["user3", "order1", "20", "2", "30-9-2024", ""]
-    ];
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundYellow,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.backgroundOrange,
-          ),
-          onPressed: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => UserType())),
-        ),
-        elevation: 0,
-        centerTitle: true,
-        title: Text("Order History",
-            style: AppTypography.textMd.copyWith(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppColors.backgroundOrange)),
-      ),
-      backgroundColor: AppColors.backgroundYellow,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              margin: EdgeInsets.all(20),
-              padding: EdgeInsets.all(20),
-              height: 120,
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black),
-                  borderRadius: const BorderRadius.all(Radius.circular(20))),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.pin_drop_rounded,
-                            size: 15,
-                          ),
-                          Text(location,
-                              style: AppTypography.textMd.copyWith(
-                                  fontSize: 12, fontWeight: FontWeight.w700)),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Icon(Icons.timelapse_rounded, size: 15),
-                          Text("9 AM TO 10 PM",
-                              style: AppTypography.textMd.copyWith(
-                                  fontSize: 12, fontWeight: FontWeight.w700)),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Icon(Icons.shopping_cart, size: 15),
-                          Text("${card.length} ITEMS IN STOCK",
-                              style: AppTypography.textMd.copyWith(
-                                  fontSize: 12, fontWeight: FontWeight.w700)),
-                          // Text("${menu.length} ITEMS IN STOCK",
-                          //     style: AppTypography.textMd.copyWith(
-                          //         fontSize: 12, fontWeight: FontWeight.w700)),
-                        ],
-                      ),
-                      Container(
-                          width: 30,
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: AppColors.signIn),
-                          child: Row(
-                            children: [
-                              Text(
-                                "0",
-                                style: AppTypography.textSm.copyWith(
-                                    fontSize: 15, fontWeight: FontWeight.w700),
-                              ),
-                              const Icon(
-                                Icons.star,
-                                size: 15,
-                              )
-                            ],
-                          ))
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                "All Orders",
-                style: AppTypography.textMd
-                    .copyWith(fontSize: 20, fontWeight: FontWeight.w700),
-              ),
-            ),
-            // for (var item in menu)
-            // ItemCard(
-            //     name: item["name"],
-            //     price: item["price"],
-            //     description: item["description"],
-            //     vegetarian: item["veg"],
-            //     img: item["img"]),
-            for (var item in card)
-              Container(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 5),
-                child: Container(
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFFFF2E0),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            // Sửa để tránh lỗi overflow
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                                  child: Text("Shop : ${item[0]}",
-                                      style: AppTypography.textSm
-                                          .copyWith(fontSize: 14)),
-                                ),
-                                Text(
-                                  "Order : ${item[1]}",
-                                  style: AppTypography.textSm.copyWith(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                Text(
-                                  "Price : ${item[2]}",
-                                  style: AppTypography.textSm.copyWith(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                Text(
-                                  "Count : ${item[3]}",
-                                  style: AppTypography.textSm.copyWith(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                Text(
-                                  "Time : ${item[4]}",
-                                  style: AppTypography.textSm.copyWith(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Spacer(),
-                          Container(
-                            height: 120,
-                            width: 120,
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: AppColors.backgroundOrange,
-                                    width: 1.5),
-                                borderRadius: BorderRadius.circular(20)),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
-                                item[5],
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Image.asset(
-                                    'assets/iconshop.jpg', // Đường dẫn đến hình ảnh thay thế
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )),
-              )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget infoPage() {
-    late TextEditingController ownerNameController;
-    late TextEditingController phoneNumberController;
-    late TextEditingController shopNameController;
-    late TextEditingController openingTimeController;
-    late TextEditingController closingTimeController;
-    late TextEditingController upiIdController;
-
-    ownerNameController = TextEditingController(text: widget.shop.ownerName);
-    phoneNumberController =
-        TextEditingController(text: widget.shop.phoneNumber);
-    shopNameController = TextEditingController(text: widget.shop.shopName);
-    openingTimeController =
-        TextEditingController(text: widget.shop.openingTime);
-    closingTimeController =
-        TextEditingController(text: widget.shop.closingTime);
-    upiIdController = TextEditingController(text: widget.shop.upiId);
-
-    Future<void> updateShop() async {
-      // Tìm kiếm document dựa trên điều kiện
-      final shopQuery = FirebaseFirestore.instance
-          .collection('shop')
-          .where('shop_id', isEqualTo: widget.shop.shopID);
-
-      // Lấy snapshot của document
-      final querySnapshot = await shopQuery.get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        // Giả sử bạn muốn cập nhật document đầu tiên tìm thấy
-        final shopRef = querySnapshot.docs.first.reference;
-
-        await shopRef.update({
-          'owner_name': ownerNameController.text,
-          'phone_number': phoneNumberController.text,
-          'shop_name': shopNameController.text,
-          'opening_time': openingTimeController.text,
-          'closing_time': closingTimeController.text,
-          'upi_id': upiIdController.text,
-        });
-      } else {
-        print("No shop found with the specified UPI ID.");
-      }
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundYellow,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.backgroundOrange,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        elevation: 0,
-        centerTitle: true,
-        title: Text("Profine",
-            style: AppTypography.textMd.copyWith(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppColors.backgroundOrange)),
-      ),
-      body: SingleChildScrollView(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                Container(
-                  height: 150,
-                  width: 500,
-                  // height: screenHeight! * 1 / 5,
-                  // width: screenWidth,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20)),
-                      color: Colors.amber[900]),
-                ),
-                Container(
-                  // height: screenHeight! * 0.5,
-                  // width: screenWidth,
-                  height: 500,
-                  width: 500,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20),
-                          bottomRight: Radius.circular(20)),
-                      color: Colors.white),
-                ),
-              ],
-            ),
-            Positioned(
-                top: 80,
-                left: 200,
-                child: Container(
-                  height: 130,
-                  width: 130,
-                  // height: screenHeight! * 0.2,
-                  // width: screenHeight! * 0.2,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: Color.fromRGBO(122, 103, 238, 1), width: 3),
-                    borderRadius: BorderRadius.all(Radius.circular(100)),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child: Image.asset(
-                      "assets/iconprofile.png",
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                )),
-            Positioned(
-                bottom: 80,
-                left: 140,
-                child: Column(
-                  children: [
-                    inputText(ownerNameController),
-                    inputText(phoneNumberController),
-                    inputText(shopNameController),
-                    inputText(openingTimeController),
-                    inputText(closingTimeController),
-                    inputText(upiIdController),
-                  ],
-                )),
-            Positioned(
-                top: 60,
-                left: 130,
-                child: Container(
-                  height: 120,
-                  width: 120,
-                  // height: screenHeight! * 0.2,
-                  // width: screenHeight! * 0.2,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: Color.fromRGBO(122, 103, 238, 1), width: 3),
-                    borderRadius: BorderRadius.all(Radius.circular(100)),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child: Image.asset(
-                      "assets/iconprofile.png",
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                )),
-            Positioned(
-                bottom: 45,
-                left: 55,
-                child: Column(
-                  children: [
-                    inputText(ownerNameController, "Owner Name"),
-                    inputText(phoneNumberController, "Phone Number"),
-                    inputText(shopNameController, "Shop Name"),
-                    inputText(openingTimeController, "Opening Time"),
-                    inputText(closingTimeController, "Closing Time"),
-                    inputText(upiIdController, "Upi Id"),
-                  ],
-                )),
-            Positioned(
-              bottom: -5,
-              left: 90,
-              child: GestureDetector(
-                onTap: () {
-                  updateShop();
-                },
-                child: Container(
-                  width: 200,
-                  height: 50,
-                  decoration: BoxDecoration(
-                      color: Color.fromRGBO(238, 118, 0, 1),
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-                  child: Center(
-                    child: Text(
-                      "ADD",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget inputText(TextEditingController text, String hintText) {
-    return Padding(
-      padding: const EdgeInsets.all(5),
-      child: Container(
-        width: 250,
-        // width: screenWidth! * 2 / 3,
-        child: TextFormField(
-          decoration: InputDecoration(
-            enabledBorder: OutlineInputBorder(
-              borderSide:
-                  BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-            ),
-            hintText: hintText,
-            suffixIcon: IconButton(
-              icon: Icon(
-                Icons.edit,
-                color: _isEditable
-                    ? Colors.grey[400]
-                    : Color.fromRGBO(238, 118, 0, 1),
-              ),
-              onPressed: () {
-                setState(() {
-                  if (_isEditable) {
-                    _isEditable = false;
-                  } else {
-                    _isEditable = true;
-                  }
-                });
-              },
-            ),
-          ),
-          // readOnly: _isEditable,
-          controller: text,
         ),
       ),
     );
@@ -680,7 +260,7 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                "Rs. 0.00",
+                "Rs. ${totalIncome.toStringAsFixed(2)}",
                 style: AppTypography.textMd.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.backgroundOrange,
@@ -734,6 +314,767 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class HistoryPage extends StatefulWidget {
+  final String shopName;
+
+  const HistoryPage({Key? key, required this.shopName}) : super(key: key);
+
+  @override
+  _HistoryPageState createState() => _HistoryPageState();
+}
+
+class _HistoryPageState extends State<HistoryPage> {
+  List card = [];
+  bool isLoading = true;
+  String errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchOrders();
+  }
+
+  Future<void> fetchOrders() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('orders')
+          .where('shop_name', isEqualTo: widget.shopName)
+          .get();
+
+      setState(() {
+        card = snapshot.docs.map((doc) {
+          var data = doc.data() as Map<String, dynamic>;
+          return [
+            data['buyer_name'] ?? 'Unknown',
+            data['order_name'] ?? 'Unknown',
+            data['price']?.toString() ?? '0',
+            data['date'] ?? 'Unknown',
+            data['img'] ?? 'Unknown', // Đảm bảo 'img' tồn tại trong Firestore
+          ];
+        }).toList();
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error fetching orders: $e';
+        isLoading = false;
+      });
+      print('Error fetching orders: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Order History",
+            style: AppTypography.textMd.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.backgroundOrange)),
+        backgroundColor: AppColors.backgroundYellow,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.backgroundOrange,
+          ),
+          onPressed: () => Navigator.push(
+              context, MaterialPageRoute(builder: (context) => UserType())),
+        ),
+        elevation: 0,
+        centerTitle: true,
+      ),
+      backgroundColor: AppColors.backgroundYellow,
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+              ? Center(child: Text(errorMessage))
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Thẻ thông tin cửa hàng hoặc bất kỳ widget nào bạn muốn hiển thị
+                      Container(
+                        margin: EdgeInsets.all(20),
+                        padding: EdgeInsets.all(20),
+                        height: 120,
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(20))),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.pin_drop_rounded,
+                                      size: 15,
+                                    ),
+                                    Text(widget.shopName,
+                                        style: AppTypography.textMd.copyWith(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700)),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Icon(Icons.timelapse_rounded, size: 15),
+                                    Text("9 AM TO 10 PM",
+                                        style: AppTypography.textMd.copyWith(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700)),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Icon(Icons.shopping_cart, size: 15),
+                                    Text("${card.length} ITEMS IN STOCK",
+                                        style: AppTypography.textMd.copyWith(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700)),
+                                  ],
+                                ),
+                                Container(
+                                    width: 30,
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: AppColors.signIn),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          "0",
+                                          style: AppTypography.textSm.copyWith(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700),
+                                        ),
+                                        const Icon(
+                                          Icons.star,
+                                          size: 15,
+                                        )
+                                      ],
+                                    ))
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Text(
+                          "All Orders",
+                          style: AppTypography.textMd.copyWith(
+                              fontSize: 20, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      card.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Text(
+                                "No orders found",
+                                style: AppTypography.textMd.copyWith(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: card.length,
+                              itemBuilder: (context, index) {
+                                final order = card[index];
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 0, 20, 5),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: const Color(0xFFFFF2E0),
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                          0, 15, 0, 0),
+                                                  child: Text(
+                                                      "User : ${order[0]}",
+                                                      style: AppTypography
+                                                          .textSm
+                                                          .copyWith(
+                                                              fontSize: 14)),
+                                                ),
+                                                Text(
+                                                  "Order : ${order[1]}",
+                                                  style: AppTypography.textSm
+                                                      .copyWith(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                ),
+                                                Text(
+                                                  "Price : ${order[2]}",
+                                                  style: AppTypography.textSm
+                                                      .copyWith(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                ),
+                                                Text(
+                                                  "Time : ${order[3]}",
+                                                  style: AppTypography.textSm
+                                                      .copyWith(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Spacer(),
+                                          Container(
+                                            height: 120,
+                                            width: 120,
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: AppColors
+                                                        .backgroundOrange,
+                                                    width: 1.5),
+                                                borderRadius:
+                                                    BorderRadius.circular(20)),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              child: Image.network(
+                                                order[4],
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return Image.asset(
+                                                    'assets/iconshop.jpg',
+                                                    fit: BoxFit.cover,
+                                                    width: double.infinity,
+                                                    height: double.infinity,
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                    ],
+                  ),
+                ),
+      // Nếu bạn muốn cuộn lên đầu khi có nhiều nội dung, hãy xem xét sử dụng ListView thay vì SingleChildScrollView với Column
+    );
+  }
+}
+
+class InfoPage extends StatefulWidget {
+  final ShopModel shop;
+
+  const InfoPage({Key? key, required this.shop}) : super(key: key);
+
+  @override
+  _InfoPageState createState() => _InfoPageState();
+}
+
+class _InfoPageState extends State<InfoPage> {
+  late TextEditingController ownerNameController;
+  late TextEditingController phoneNumberController;
+  late TextEditingController shopNameController;
+  late TextEditingController openingTimeController;
+  late TextEditingController closingTimeController;
+  late TextEditingController upiIdController;
+
+  bool _isEditable = false;
+  bool _isUpdating = false;
+  String _updateMessage = '';
+  bool _showMessage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ownerNameController = TextEditingController(text: widget.shop.ownerName);
+    phoneNumberController =
+        TextEditingController(text: widget.shop.phoneNumber);
+    shopNameController = TextEditingController(text: widget.shop.shopName);
+    openingTimeController =
+        TextEditingController(text: widget.shop.openingTime);
+    closingTimeController =
+        TextEditingController(text: widget.shop.closingTime);
+    upiIdController = TextEditingController(text: widget.shop.upiId);
+  }
+
+  @override
+  void dispose() {
+    ownerNameController.dispose();
+    phoneNumberController.dispose();
+    shopNameController.dispose();
+    openingTimeController.dispose();
+    closingTimeController.dispose();
+    upiIdController.dispose();
+    super.dispose();
+  }
+
+  Future<void> updateShop() async {
+    setState(() {
+      _isUpdating = true;
+      _updateMessage = '';
+      _showMessage = false;
+    });
+
+    try {
+      // Tìm kiếm document dựa trên điều kiện
+      final shopQuery = FirebaseFirestore.instance
+          .collection('shop')
+          .where('shop_id', isEqualTo: widget.shop.shopID);
+
+      // Lấy snapshot của document
+      final querySnapshot = await shopQuery.get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Giả sử bạn muốn cập nhật document đầu tiên tìm thấy
+        final shopRef = querySnapshot.docs.first.reference;
+
+        await shopRef.update({
+          'owner_name': ownerNameController.text,
+          'phone_number': phoneNumberController.text,
+          'shop_name': shopNameController.text,
+          'opening_time': openingTimeController.text,
+          'closing_time': closingTimeController.text,
+          'upi_id': upiIdController.text,
+        });
+
+        setState(() {
+          _updateMessage = 'Shop information updated successfully!';
+          _isEditable = false;
+          _showMessage = true;
+        });
+        Future.delayed(Duration(seconds: 5), () {
+          setState(() {
+            _showMessage = false; // Ẩn thông báo
+          });
+        });
+      } else {
+        setState(() {
+          _updateMessage = "No shop found with the specified Shop ID.";
+          _showMessage = true;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _updateMessage = 'Error updating shop: $e';
+        _showMessage = true;
+      });
+      print('Error updating shop: $e');
+    } finally {
+      setState(() {
+        _isUpdating = false;
+      });
+    }
+  }
+
+  Widget inputText(TextEditingController controller, String hintText) {
+    return Padding(
+      padding: const EdgeInsets.all(5),
+      child: Container(
+        width: 250,
+        child: TextFormField(
+          decoration: InputDecoration(
+            enabledBorder: OutlineInputBorder(
+              borderSide:
+                  BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            hintText: hintText,
+            suffixIcon: IconButton(
+              icon: Icon(
+                Icons.edit,
+                color: _isEditable
+                    ? Colors.grey[400]
+                    : Color.fromRGBO(238, 118, 0, 1),
+              ),
+              onPressed: () {
+                setState(() {
+                  _isEditable = !_isEditable;
+                });
+              },
+            ),
+          ),
+          readOnly: !_isEditable,
+          controller: controller,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Profile",
+            style: AppTypography.textMd.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.backgroundOrange)),
+        backgroundColor: AppColors.backgroundYellow,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.backgroundOrange,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        elevation: 0,
+        centerTitle: true,
+      ),
+      backgroundColor: AppColors.backgroundYellow,
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Container(
+                  height: 120,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20)),
+                      color: Colors.amber[900]),
+                ),
+                Container(
+                  height: 500,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20)),
+                      color: Colors.white),
+                ),
+              ],
+            ),
+            Positioned(
+              top: 60,
+              left: MediaQuery.of(context).size.width / 2 -
+                  60, // Căn giữa hình ảnh
+              child: Container(
+                height: 120,
+                width: 120,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Color.fromRGBO(122, 103, 238, 1), width: 3),
+                  borderRadius: BorderRadius.all(Radius.circular(100)),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: Image.asset(
+                    "assets/iconprofile.png",
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 45,
+              left: (MediaQuery.of(context).size.width - 250) /
+                  2, // Căn giữa form
+              child: Column(
+                children: [
+                  inputText(ownerNameController, "Owner Name"),
+                  inputText(phoneNumberController, "Phone Number"),
+                  inputText(shopNameController, "Shop Name"),
+                  inputText(openingTimeController, "Opening Time"),
+                  inputText(closingTimeController, "Closing Time"),
+                  inputText(upiIdController, "UPI ID"),
+                ],
+              ),
+            ),
+            Positioned(
+              bottom: -5,
+              left:
+                  (MediaQuery.of(context).size.width - 200) / 2, // Căn giữa nút
+              child: GestureDetector(
+                onTap: _isUpdating
+                    ? null
+                    : () {
+                        if (_isEditable) {
+                          updateShop();
+                        }
+                      },
+                child: Container(
+                  width: 200,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      color: Color.fromRGBO(238, 118, 0, 1),
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: Center(
+                    child: _isUpdating
+                        ? CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
+                        : Text(
+                            "UPDATE",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+            if (_showMessage && _updateMessage.isNotEmpty)
+              Positioned(
+                bottom: 60,
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: _updateMessage.contains('Error')
+                        ? Colors.redAccent
+                        : Colors.green,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    _updateMessage,
+                    style: TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SellerHomeScreen extends StatefulWidget {
+  final ShopModel shop;
+
+  const SellerHomeScreen({Key? key, required this.shop}) : super(key: key);
+
+  @override
+  _SellerHomeScreenState createState() => _SellerHomeScreenState();
+}
+
+class _SellerHomeScreenState extends State<SellerHomeScreen> {
+  final DatabaseService service = DatabaseService();
+
+  double? screenWidth;
+  double? screenHeight;
+  bool _isEditable = false;
+
+  Future<List<dynamic>> getOrders() async {
+    final ordersSnapshot = await FirebaseFirestore.instance
+        .collection("orders")
+        .where("shop_id", isEqualTo: widget.shop.shopID)
+        .limit(10)
+        .get();
+
+    return ordersSnapshot.docs.map((doc) => doc.data()).toList();
+  }
+
+  int _selectedIndex = 0;
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  List<Widget> _widgetOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _widgetOptions = [
+      HomePage(shop: widget.shop),
+      HistoryPage(shopName: widget.shop.shopName),
+      ntfPage(),
+      InfoPage(
+        shop: widget.shop,
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Truy cập MediaQuery trực tiếp trong build
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Scaffold(
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined, color: Colors.black),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history, color: Colors.black),
+              label: 'History',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notifications, color: Colors.black),
+              label: 'Notifications',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle_outlined, color: Colors.black),
+              label: 'Profile',
+            ),
+          ],
+          currentIndex:
+              _selectedIndex, // _selectedIndex should be managed if needed
+          selectedItemColor: Colors.black,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+        ),
+        body: _widgetOptions.elementAt(_selectedIndex));
+  }
+
+  Widget ntfPage() {
+    final List<Map<String, String>> notifications = [
+      {
+        "title": "Voucher giảm giá 20%",
+        "description": "Sử dụng mã: SAVE20 cho đơn hàng tiếp theo.",
+        "date": "01/10/2024",
+      },
+      {
+        "title": "Sự kiện ẩm thực",
+        "description": "Tham gia sự kiện ẩm thực vào thứ 7 này!",
+        "date": "02/10/2024",
+      },
+      {
+        "title": "Đơn hàng của bạn đã được xác nhận",
+        "description": "Đơn hàng #1234 sẽ được giao trong 30 phút.",
+        "date": "01/10/2024",
+      },
+      {
+        "title": "Thông tin mới về ứng dụng",
+        "description": "Cập nhật phiên bản mới với nhiều tính năng hấp dẫn.",
+        "date": "30/09/2024",
+      },
+      {
+        "title": "Khuyến mãi đặc biệt",
+        "description": "Giảm giá 15% cho đơn hàng từ 200.000đ.",
+        "date": "03/10/2024",
+      },
+      {
+        "title": "Hỗ trợ khách hàng",
+        "description": "Bạn có thể liên hệ với chúng tôi qua số hotline.",
+        "date": "29/09/2024",
+      },
+      {
+        "title": "Cập nhật món ăn mới",
+        "description": "Chúng tôi đã thêm món sushi mới vào menu.",
+        "date": "28/09/2024",
+      },
+    ];
+    return Scaffold(
+      body: ListView.builder(
+        itemCount: notifications.length,
+        itemBuilder: (context, index) {
+          return ntfcard(
+            notifications[index]["title"]!,
+            notifications[index]["description"]!,
+            notifications[index]["date"]!,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget ntfcard(String title, String description, String date) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      color: Colors.amber[50],
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.check_circle, // Biểu tượng tích xanh
+              color: Colors.green,
+              size: 24, // Kích thước biểu tượng
+            ),
+            const SizedBox(width: 10), // Khoảng cách giữa biểu tượng và tiêu đề
+            Expanded(
+              // Để tiêu đề và mô tả chiếm toàn bộ không gian còn lại
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 255, 145, 0),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text(
+                      date,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

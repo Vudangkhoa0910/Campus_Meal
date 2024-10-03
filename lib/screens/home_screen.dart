@@ -36,7 +36,12 @@ class ShopHeader extends StatelessWidget {
 class ShopCardWrapper extends StatelessWidget {
   final Buyer buyer;
   final List shops; // Map {name, imgURL, rating, location}
-  const ShopCardWrapper({super.key, required this.shops, required this.buyer});
+
+  const ShopCardWrapper({
+    super.key,
+    required this.shops,
+    required this.buyer,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -483,7 +488,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (snapshot.hasData) {
                       final campusFavs = snapshot.data!;
                       return ShopCardWrapper(
-                          shops: campusFavs, buyer: widget.buyer);
+                        shops: campusFavs,
+                        buyer: widget.buyer,
+                      );
                     } else {
                       return const CircularProgressIndicator(
                           color: AppColors.backgroundOrange);
@@ -510,7 +517,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          Cart(),
+          Cart(
+            buyer: widget.buyer,
+          ),
           HistoryPageUser(
             buyer: widget.buyer,
           ),

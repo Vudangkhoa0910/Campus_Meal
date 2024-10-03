@@ -1,5 +1,7 @@
 import 'package:campus_catalogue/constants/typography.dart';
+import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
+import 'package:campus_catalogue/screens/login.dart';
 import 'package:campus_catalogue/screens/userInformation/buyer_details.dart';
 import 'package:campus_catalogue/screens/userInformation/seller_details.dart';
 import 'package:flutter/material.dart';
@@ -70,6 +72,16 @@ class _UserTypeState extends State<UserType> {
         }
       }
     }
+  }
+
+  void logOut() {
+    // Xử lý đăng xuất tại đây, ví dụ: xóa thông tin đăng nhập, xóa token, v.v.
+    // Sau đó chuyển đến màn hình đăng nhập
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+          builder: (context) => LoginScreen()), // Đảm bảo LoginIn được import
+    );
   }
 
   @override
@@ -169,16 +181,21 @@ class _UserTypeState extends State<UserType> {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(10.0),
-            child: Container(
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: const Color(0xffF57C51),
-              ),
-              child: Center(
-                child: Text("Continue",
-                    style: AppTypography.textMd.copyWith(
-                        color: Colors.white, fontWeight: FontWeight.w700)),
+            child: GestureDetector(
+              onTap: () {
+                logOut();
+              },
+              child: Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.red,
+                ),
+                child: Center(
+                  child: Text("LOG OUT",
+                      style: AppTypography.textMd.copyWith(
+                          color: Colors.white, fontWeight: FontWeight.w700)),
+                ),
               ),
             ),
           ),

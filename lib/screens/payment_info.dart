@@ -1,35 +1,129 @@
 import 'dart:core';
 
+import 'package:campus_catalogue/models/buyer_model.dart';
+import 'package:campus_catalogue/services/database_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class PaymentInfo extends StatefulWidget {
-  const PaymentInfo({super.key});
+  Buyer buyer;
+  PaymentInfo({super.key, required this.buyer});
 
   @override
   State<PaymentInfo> createState() => _PaymentInfoState();
 }
 
 class _PaymentInfoState extends State<PaymentInfo> {
-  final List<String> dh = ["rice", "fish", "meat", "salad", "egg", "bread"];
-  final List<int> count = [2, 3, 4, 2, 4, 5];
-  final List<double> fee = [25.3, 24.6, 27.6, 28.9, 30, 10.5];
+  // final List<String> dh = ["rice", "fish", "meat", "salad", "egg", "bread"];
+  // final List<int> count = [2, 3, 4, 2, 4, 5];
+  // final List<double> fee = [25.3, 24.6, 27.6, 28.9, 30, 10.5];
   double total = 0.0;
+
+  List<Map<String, dynamic>> items = []; // Danh sách sản phẩm từ Firebase
+  List<int> quantities = []; // Danh sách số lượng cho từng sản phẩm
+  double totalPrice = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initRetrieval(); // Khởi tạo dữ liệu giỏ hàng
+  }
+
+  void _initRetrieval() async {
+    final data = await DatabaseService().getOrders(); // Lấy dữ liệu từ Firebase
+
+    if (data != null) {
+      for (var order in data) {
+        items.add({
+          'name': order['name'],
+          'price': order['price'],
+          'imgUrl': order['imgUrl'],
+          'count': order['count'] // Lấy hình ảnh từ Firebase
+        });
+        quantities.add(1); // Mặc định là 1 cho mỗi sản phẩm
+      }
+
+      if (mounted) {
+        setState(() {}); // Cập nhật trạng thái
+      }
+    }
+  }
+
+  Future<void> saveInvoice() async {
+    try {
+      final data =
+          await DatabaseService().getOrders(); // Lấy dữ liệu từ Firebase
+      // Duyệt qua từng sản phẩm trong danh sách
+      if (data != null) {
+        for (var item in data) {
+          await FirebaseFirestore.instance.collection('orders').add({
+            'buyer_name': item['buyer_name'],
+            'buyer_phone': item['buyer_phone'],
+            'date': item['date'],
+            'img': item['imgUrl'],
+            'order_name': item['name'],
+            'price': item['price'],
+            'shop_name': item['shop_name'],
+            'count': item['count']
+          });
+        }
+      }
+      // Thông báo lưu thành công
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Hóa đơn đã được lưu thành công!')),
+      );
+    } catch (e) {
+      // Xử lý lỗi nếu có
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi lưu hóa đơn: $e')),
+      );
+    }
+  }
+
+  Future<void> deleteBuy() async {
+    try {
+      // Lấy các tài liệu có buyer_name bằng với widget.buyer.userName
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('buy')
+          .where('buyer_name', isEqualTo: widget.buyer.userName)
+          .get();
+
+      // Xoá từng tài liệu trong kết quả truy vấn
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      print("Xoá thành công");
+    } catch (e) {
+      print("Lỗi khi xoá: $e");
+    }
+  }
 
   // Phương thức tính tổng
   void calculateTotal() {
-    if (count.length != fee.length) {
-      throw Exception('Hai danh sách count và fee phải có độ dài bằng nhau.');
-    }
+    // if (count.length != fee.length) {
+    //   throw Exception('Hai danh sách count và fee phải có độ dài bằng nhau.');
+    // }
 
     total = 0.0; // Đặt lại giá trị của total trước khi tính lại
-    for (int i = 0; i < count.length; i++) {
-      total += count[i] * fee[i];
+    for (int i = 0; i < items.length; i++) {
+      total += items[i]['count'] * items[i]['price'];
     }
   }
 
   @override
   Widget build(BuildContext context) {
     calculateTotal();
+
+    // Khởi tạo ScreenUtil
+    ScreenUtil.init(
+      context,
+      // designSize: const Size(360, 490), // Android
+      designSize: const Size(250, 900), // Kích thước thiết kế mặc định
+      minTextAdapt: true,
+      splitScreenMode: true,
+    );
+
     return Scaffold(
       appBar: AppBar(
         leading: Builder(builder: (BuildContext context) {
@@ -37,148 +131,140 @@ class _PaymentInfoState extends State<PaymentInfo> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              icon: const Icon(Icons.arrow_back_ios_new));
+              icon: const Icon(
+                Icons.arrow_back_ios_new,
+                color: Color(0xffF57C51),
+              ));
         }),
-        title: Text("Thanh toán"),
+        title: Text(
+          "Thanh toán",
+          style: TextStyle(color: Color(0xffF57C51)),
+        ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 50),
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.865,
-              width: MediaQuery.of(context).size.width * 0.8,
-              decoration: BoxDecoration(
-                  border: Border.all(
-                      width: 1.5, color: Color.fromARGB(218, 165, 32, 1)),
-                  borderRadius: BorderRadius.all(Radius.circular(20))),
-            ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 250.h,
+            width: 350.w,
+            child: Image.asset("assets/KhoaCyber.png"),
           ),
-          Column(
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: Container(
-                  child: Image.asset("assets\qrpay.jpg"),
+          Padding(
+            padding: EdgeInsets.all(15.r),
+            child: Container(
+              height: 300.h,
+              width: 250.w,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  width: 1.5.w,
+                  color: Color(0xffF57C51),
                 ),
+                borderRadius: BorderRadius.all(Radius.circular(20.r)),
               ),
-              Spacer(),
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(10),
+              child: ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Padding(
+                    padding: EdgeInsets.all(10.r),
                     child: Container(
-                        height: MediaQuery.of(context).size.height * 0.42,
-                        width: MediaQuery.of(context).size.width * 2 / 3,
-                        decoration: BoxDecoration(
-                            border: Border.all(
-                                width: 1.5,
-                                color: Color.fromARGB(218, 165, 32, 1)),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(20))),
-                        child: ListView.builder(
-                          itemCount: dh.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Container(
-                                padding: EdgeInsets.all(8),
-                                height: 80,
-                                width:
-                                    MediaQuery.of(context).size.width * 2 / 3,
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        width: 1.5,
-                                        color: Color.fromARGB(218, 165, 32, 1)),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(20))),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            dh[index],
-                                            style: TextStyle(
-                                                color: Colors.blue[800],
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold),
-                                          )
-                                        ],
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            "Số lượng : ${count[index]}",
-                                            style: TextStyle(
-                                                color: Colors.blue[800],
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w400),
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Text(
-                                            "Giá : ${fee[index]}",
-                                            style: TextStyle(
-                                                color: Colors.blue[800],
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w400),
-                                          ),
-                                        ],
-                                      )
-                                    ],
-                                  ),
+                      padding: EdgeInsets.all(8.r),
+                      height: 80.h,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 1.5.w,
+                          color: Color(0xffF57C51),
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(20.r)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            items[index]["name"],
+                            style: TextStyle(
+                              color: Colors.blue[800],
+                              fontSize: 20.sp, // Font động
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "Số lượng : ${items[index]["count"]}",
+                                style: TextStyle(
+                                  color: Colors.blue[800],
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w400,
                                 ),
                               ),
-                            );
-                          },
-                        )),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 2 / 3,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Tổng : ",
-                            style: TextStyle(
-                                color: Colors.amber[900],
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold)),
-                        Text("${total}",
-                            style: TextStyle(
-                                color: Colors.blue[600],
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold))
-                      ],
+                              SizedBox(height: 5.h),
+                              Text(
+                                "Giá : ${items[index]["price"]}",
+                                style: TextStyle(
+                                  color: Colors.blue[800],
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
-                  )
-                ],
+                  );
+                },
               ),
-              Spacer(),
-              Container(
-                width: 200,
-                height: 50,
-                decoration: BoxDecoration(
-                    color: Colors.amber[800],
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-                child: Center(
-                    child: Text(
+            ),
+          ),
+          Container(
+            width: 200.w,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Tổng : ",
+                    style: TextStyle(
+                      color: Color(0xffF57C51),
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.bold,
+                    )),
+                Text("${total}",
+                    style: TextStyle(
+                      color: Colors.blue[600],
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.bold,
+                    ))
+              ],
+            ),
+          ),
+          Spacer(),
+          GestureDetector(
+            onTap: () {
+              saveInvoice();
+              setState(() {
+                deleteBuy();
+              });
+            },
+            child: Container(
+              width: 200.w,
+              height: 50.h,
+              decoration: BoxDecoration(
+                color: Color(0xffF57C51),
+                borderRadius: BorderRadius.all(Radius.circular(10.r)),
+              ),
+              child: Center(
+                child: Text(
                   "Lưu hoá đơn",
                   style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                )),
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-              Spacer()
-            ],
+            ),
           ),
+          Spacer(),
         ],
       ),
     );

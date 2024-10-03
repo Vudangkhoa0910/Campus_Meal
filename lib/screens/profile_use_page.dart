@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart'; // Đảm bảo rằng bạn đã import trang đăng nhập
 
 class ProfileUsePage extends StatefulWidget {
-  final Buyer buyer; // Keep the buyer variable as final
+  Buyer buyer;
   ProfileUsePage({super.key, required this.buyer});
 
   @override
@@ -41,48 +41,26 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
   }
 
   Future<void> updateBuyer() async {
-    try {
-      final buyerQuery = FirebaseFirestore.instance
-          .collection('Buyer')
-          .where('user_id', isEqualTo: widget.buyer.user_id);
+    // Tìm kiếm document dựa trên điều kiện
+    final buyerQuery = FirebaseFirestore.instance
+        .collection('Buyer')
+        .where('user_id', isEqualTo: widget.buyer.user_id);
 
-      final querySnapshot = await buyerQuery.get();
+    // Lấy snapshot của document
+    final querySnapshot = await buyerQuery.get();
 
-      if (querySnapshot.docs.isNotEmpty) {
-        final buyerRef = querySnapshot.docs.first.reference;
+    if (querySnapshot.docs.isNotEmpty) {
+      // Giả sử bạn muốn cập nhật document đầu tiên tìm thấy
+      final buyerRef = querySnapshot.docs.first.reference;
 
-        await buyerRef.update({
-          'user_name': userNameController.text,
-          'phone': phoneNumberController.text,
-          'email': emailController.text,
-          'address': addressController.text
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Thông tin đã được lưu thành công!"),
-            backgroundColor: Colors.green,
-          ),
-        );
-        setState(() {
-          _isEditable = false; 
-        });
-      } else {
-        print("No buyer found");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Không tìm thấy người mua"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Lỗi khi lưu thông tin: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      await buyerRef.update({
+        'user_name': userNameController.text,
+        'phone': phoneNumberController.text,
+        'email': emailController.text,
+        'address': addressController.text
+      });
+    } else {
+      print("No buyer found ");
     }
   }
 
@@ -91,7 +69,8 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
     // Sau đó chuyển đến màn hình đăng nhập
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen()), // Đảm bảo LoginIn được import
+      MaterialPageRoute(
+          builder: (context) => LoginScreen()), // Đảm bảo LoginIn được import
     );
   }
 
@@ -115,7 +94,7 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
                   ),
                 ),
                 Container(
-                  height: MediaQuery.of(context).size.height - 120,
+                  height: 500,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(
@@ -128,99 +107,83 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
               ],
             ),
             Positioned(
-              top: 15,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Text(
-                  "Campus Meal",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.topCenter,
+              top: 60,
+              left: 120,
               child: Container(
-                margin: const EdgeInsets.only(top: 50),
-                height: 150,
-                width: 150,
+                height: 120,
+                width: 120,
                 decoration: BoxDecoration(
                   border: Border.all(
                       color: Color.fromRGBO(122, 103, 238, 1), width: 3),
-                  borderRadius: BorderRadius.circular(100),
+                  borderRadius: BorderRadius.all(Radius.circular(100)),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: Image.asset(
-                    "assets/Ảnh.jpg",
+                    "assets/iconprofile.png",
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 220),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    inputText(userNameController, "User Name"),
-                    inputText(phoneNumberController, "Phone Number"),
-                    inputText(emailController, "Email"),
-                    inputText(addressController, "Address"),
-                    const SizedBox(height: 10),
-                    GestureDetector(
-                      onTap: () {
-                        updateBuyer();
-                      },
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 2 / 3,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(238, 118, 0, 1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Add",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
+            Positioned(
+              bottom: 170,
+              left: 55,
+              child: Column(
+                children: [
+                  inputText(userNameController, "User Name"),
+                  inputText(phoneNumberController, "Phone Number"),
+                  inputText(emailController, "Email"),
+                  inputText(addressController, "Address")
+                ],
+              ),
+            ),
+            Positioned(
+              bottom: 115,
+              left: 80,
+              child: GestureDetector(
+                onTap: () {
+                  updateBuyer();
+                },
+                child: Container(
+                  width: 200,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      color: Color.fromRGBO(238, 118, 0, 1),
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: Center(
+                    child: Text(
+                      "UPDATE",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 10),
-                    GestureDetector(
-                      onTap: logOut, // Gọi phương thức logOut khi nút được nhấn
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 2 / 3,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.red, // Màu nền cho nút đăng xuất
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Log Out",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
+            Positioned(
+              bottom: 55,
+              left: 80,
+              child: GestureDetector(
+                onTap: () {
+                  logOut();
+                },
+                child: Container(
+                  width: 200,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: Center(
+                    child: Text(
+                      "LOG OUT",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+            )
           ],
         ),
       ),
@@ -229,21 +192,24 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
 
   Widget inputText(TextEditingController controller, String hintText) {
     return Padding(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(5),
       child: Container(
         width: MediaQuery.of(context).size.width * 2 / 3,
         child: TextFormField(
           controller: controller,
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(
-                  width: 2, color: _isEditable 
-                      ? Color.fromRGBO(238, 118, 0, 1)
-                      : Colors.grey),
+              borderSide:
+                  BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
             hintText: hintText,
-            hintStyle: TextStyle(color: Colors.grey[400]), // Hint text color
+            focusedBorder: OutlineInputBorder(
+              borderSide:
+                  BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
+              borderRadius: BorderRadius.all(
+                  Radius.circular(10)), // Không có viền khi có tiêu điểm
+            ),
             suffixIcon: IconButton(
               icon: Icon(
                 Icons.edit,

@@ -19,6 +19,7 @@ class DatabaseService {
         .add(employeeData.toMap());
     await _db.collection("cart_items").add(employeeData.toMap());
   }
+
   addShop(ShopModel employeeData) async {
     Set s = {};
 
@@ -76,5 +77,65 @@ class DatabaseService {
     return snapshot.docs
         .map((docSnapshot) => OrderModel.fromDocumentSnapshot(docSnapshot))
         .toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getOrders() async {
+    List<Map<String, dynamic>> orders = [];
+
+    try {
+      // Giả sử bạn lấy tất cả tài liệu trong bộ sưu tập "buy"
+      QuerySnapshot buySnapshot = await _db.collection('buy').get();
+
+      for (var buyDoc in buySnapshot.docs) {
+        // Giả sử "orders" là một mảng trong tài liệu
+        List<dynamic> ordersList = buyDoc['orders'];
+
+        for (var order in ordersList) {
+          orders.add({
+            'buyer_name': order['buyer_name'],
+            'buyer_phone': order['buyer_phone'],
+            'shop_name': order['shop_name'],
+            'date': order['date'],
+            'name': order['order_name'],
+            'price': order['price'],
+            'imgUrl': order['img'],
+            'count': order['count'],
+          });
+        }
+      }
+    } catch (e) {
+      print("Error fetching orders: $e");
+    }
+
+    return orders;
+  }
+
+  Future<void> updateOrdersQuantities(
+      List<Map<String, dynamic>> items, List<int> quantities) async {
+    for (var i = 0; i < items.length; i++) {
+      // Tìm buyer dựa trên điều kiện phù hợp nếu có
+      QuerySnapshot buyQuery = await FirebaseFirestore.instance
+          .collection('buy') // Collection 'buy'
+          .get(); // Lấy tất cả các buyers hoặc có điều kiện khác nếu cần
+      int index = 0;
+
+      if (buyQuery.docs.isNotEmpty) {
+        // Duyệt qua từng buyer tìm được
+        for (var buyDoc in buyQuery.docs) {
+          // Lấy danh sách orders của buyer
+          List<dynamic> orders = List.from(buyDoc['orders']);
+
+          // Cập nhật order tương ứng với quantity từ items[i]
+          for (var j = 0; j < orders.length; j++) {
+            // Cập nhật 'count' cho mỗi order dựa vào quantities[i]
+            orders[j]['count'] = quantities[index];
+          }
+
+          // Cập nhật lại toàn bộ danh sách orders cho buyer
+          await buyDoc.reference.update({'orders': orders});
+          index++;
+        }
+      }
+    }
   }
 }

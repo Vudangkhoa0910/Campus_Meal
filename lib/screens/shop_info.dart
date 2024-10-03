@@ -1,7 +1,9 @@
 import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
+import 'package:campus_catalogue/models/buy_model.dart';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/models/item_model.dart';
+import 'package:campus_catalogue/models/order_model.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,15 +17,17 @@ class ItemCard extends StatelessWidget {
   final bool vegetarian;
   final String img;
   final Buyer buyer;
-  const ItemCard(
-      {super.key,
-      required this.shopName,
-      required this.name,
-      required this.price,
-      required this.description,
-      required this.vegetarian,
-      required this.img,
-      required this.buyer});
+
+  const ItemCard({
+    super.key,
+    required this.shopName,
+    required this.name,
+    required this.price,
+    required this.description,
+    required this.vegetarian,
+    required this.img,
+    required this.buyer,
+  });
 
   Future<void> addOrder(String buyerPhone, String buyerName, String shopName,
       num price, String date, String orderName, String img) async {
@@ -48,6 +52,60 @@ class ItemCard extends StatelessWidget {
     }).catchError((error) {
       print("Failed to add order: $error");
     });
+  }
+
+  // Future<void> addBuy(String buyerName, List<OrderModel> orders) async {
+  //   CollectionReference buy = FirebaseFirestore.instance.collection('buy');
+
+  //   // Tạo một đối tượng Buy và thêm nó vào Firestore
+  //   Buy newBuy = Buy(buyerName: buyerName, orders: orders);
+
+  //   return buy.add(newBuy.toMap()).then((value) {
+  //     print("Buy Added");
+  //   }).catchError((error) {
+  //     print("Failed to add buy: $error");
+  //   });
+  // }
+  Future<void> addBuy(String buyerName, List<OrderModel> orders) async {
+    CollectionReference buy = FirebaseFirestore.instance.collection('buy');
+
+    // Lấy dữ liệu cũ từ Firestore
+    QuerySnapshot existingBuys = await buy.get();
+
+    // Kiểm tra xem các trường trong orders đã tồn tại hay chưa
+    bool exists = false;
+    for (var doc in existingBuys.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+
+      // Kiểm tra từng order trong danh sách orders
+      List<dynamic> existingOrders =
+          data['orders']; // Giả sử 'orders' là một danh sách
+      for (var order in orders) {
+        // Duyệt qua từng order trong existingOrders để kiểm tra trùng lặp
+        for (var existingOrder in existingOrders) {
+          if (existingOrder['buyer_name'] == order.buyerName &&
+              existingOrder['shop_name'] == order.shopName &&
+              existingOrder['order_name'] == order.orderName) {
+            exists = true;
+            break; // Dừng vòng lặp nếu tìm thấy trùng lặp
+          }
+        }
+        if (exists) break; // Dừng nếu đã tìm thấy trùng lặp
+      }
+      if (exists) break; // Dừng nếu đã tìm thấy trùng lặp
+    }
+
+    // Nếu không có trùng lặp, thêm tài liệu mới vào Firestore
+    if (!exists) {
+      Buy newBuy = Buy(buyerName: buyerName, orders: orders);
+      return buy.add(newBuy.toMap()).then((value) {
+        print("Buy Added");
+      }).catchError((error) {
+        print("Failed to add buy: $error");
+      });
+    } else {
+      print("Buy with the same order already exists. Not added.");
+    }
   }
 
   String formatDate(DateTime date) {
@@ -103,8 +161,24 @@ class ItemCard extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          addOrder(buyer.phone, buyer.userName, shopName, price,
-                              formatDate(DateTime.now()), name, img);
+                          addBuy(
+                            buyer.userName,
+                            [
+                              // Thay đổi ở đây để truyền danh sách các OrderModel
+                              OrderModel(
+                                buyerPhone: buyer.phone,
+                                buyerName: buyer.userName,
+                                shopName: shopName,
+                                count: 1,
+                                price: price,
+                                date: formatDate(DateTime.now()),
+                                orderName: name,
+                                img: img,
+                              ),
+                            ],
+                          );
+                          // addOrder(buyer.phone, buyer.userName, shopName, price,
+                          //     formatDate(DateTime.now()), name, img);
                         },
                         child: Container(
                           width: 200,
@@ -160,6 +234,7 @@ class ItemCard extends StatelessWidget {
 class ShopPage extends StatefulWidget {
   final ShopModel? shop;
   // final String shopName;
+
   final String name;
   final String rating;
   final String location;
@@ -171,6 +246,7 @@ class ShopPage extends StatefulWidget {
     super.key,
     this.shop,
     // required this.shopName,
+
     required this.name,
     required this.rating,
     required this.location,

@@ -3,6 +3,7 @@ import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/order_model.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
+import 'package:campus_catalogue/screens/login.dart';
 import 'package:campus_catalogue/screens/userType_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_catalogue/services/database_service.dart';
@@ -51,11 +52,13 @@ class HomePageState extends State<HomePage> {
   bool isLoading = true;
   String errorMessage = '';
   double totalIncome = 0.0;
+  List menu = [];
 
   @override
   void initState() {
     super.initState();
     fetchOrders();
+    initializeMenu();
   }
 
   Future<void> fetchOrders() async {
@@ -89,15 +92,19 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  List<Map<String, dynamic>> menu = [];
+  // List<Map<String, dynamic>> menu = [];
   void initializeMenu() {
-    menu = List<Map<String, dynamic>>.from(widget.shop.menu.map((item) => {
-          "name": item["name"],
-          "price": item["price"],
-          "vegetarian": item["vegetarian"],
-          "description": item["description"],
-          "category": item["category"],
-        }));
+    setState(() {
+      menu = List<Map<String, dynamic>>.from(widget.shop.menu.map((item) => {
+            "name": item["name"],
+            "price": item["price"],
+            "vegetarian": item["vegetarian"],
+            "description": item["description"],
+            "category": item["category"],
+            "img": item['img']
+          }));
+      isLoading = false;
+    });
   }
 
   @override
@@ -145,12 +152,12 @@ class HomePageState extends State<HomePage> {
               _buildUpdateMenuButton(context),
               const SizedBox(height: 12),
               Text(
-                "Current Orders",
+                "Menu",
                 style: AppTypography.textMd.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              for (var item in card)
+              for (var item in menu)
                 Container(
                   padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
                   child: Container(
@@ -171,18 +178,21 @@ class HomePageState extends State<HomePage> {
                                   Padding(
                                     padding:
                                         const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                                    child: Text("User : ${item[0]}",
+                                    child: Text(
+                                        // "User : ${item[0]}",
+                                        "Name : ${item['name']}",
                                         style: AppTypography.textSm
                                             .copyWith(fontSize: 14)),
                                   ),
+                                  // Text(
+                                  //   "Order : ${item[1]}",
+                                  //   style: AppTypography.textSm.copyWith(
+                                  //       fontSize: 14,
+                                  //       fontWeight: FontWeight.w400),
+                                  // ),
                                   Text(
-                                    "Order : ${item[1]}",
-                                    style: AppTypography.textSm.copyWith(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                  Text(
-                                    "Price : ${item[2]}",
+                                    // "Price : ${item[2]}",
+                                    "Price : ${item['price']}",
                                     style: AppTypography.textSm.copyWith(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400),
@@ -194,7 +204,7 @@ class HomePageState extends State<HomePage> {
                                   //       fontWeight: FontWeight.w400),
                                   // ),
                                   Text(
-                                    "Time : ${item[3]}",
+                                    "Description : ${item['description']}",
                                     style: AppTypography.textSm.copyWith(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400),
@@ -214,7 +224,7 @@ class HomePageState extends State<HomePage> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
                                 child: Image.network(
-                                  item[4],
+                                  item['img'],
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Image.asset(
@@ -321,9 +331,9 @@ class HomePageState extends State<HomePage> {
 }
 
 class HistoryPage extends StatefulWidget {
-  final String shopName;
+  final ShopModel shop;
 
-  const HistoryPage({Key? key, required this.shopName}) : super(key: key);
+  const HistoryPage({Key? key, required this.shop}) : super(key: key);
 
   @override
   _HistoryPageState createState() => _HistoryPageState();
@@ -344,7 +354,7 @@ class _HistoryPageState extends State<HistoryPage> {
     try {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('orders')
-          .where('shop_name', isEqualTo: widget.shopName)
+          .where('shop_name', isEqualTo: widget.shop.shopName)
           .get();
 
       setState(() {
@@ -421,7 +431,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                       Icons.pin_drop_rounded,
                                       size: 15,
                                     ),
-                                    Text(widget.shopName,
+                                    Text(widget.shop.shopName,
                                         style: AppTypography.textMd.copyWith(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w700)),
@@ -430,7 +440,8 @@ class _HistoryPageState extends State<HistoryPage> {
                                 Row(
                                   children: [
                                     Icon(Icons.timelapse_rounded, size: 15),
-                                    Text("9 AM TO 10 PM",
+                                    Text(
+                                        "${widget.shop.openingTime} AM TO ${widget.shop.closingTime} PM",
                                         style: AppTypography.textMd.copyWith(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w700)),
@@ -703,6 +714,16 @@ class _InfoPageState extends State<InfoPage> {
     }
   }
 
+  void logOut() {
+    // Xử lý đăng xuất tại đây, ví dụ: xóa thông tin đăng nhập, xóa token, v.v.
+    // Sau đó chuyển đến màn hình đăng nhập
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+          builder: (context) => LoginScreen()), // Đảm bảo LoginIn được import
+    );
+  }
+
   Widget inputText(TextEditingController controller, String hintText) {
     return Padding(
       padding: const EdgeInsets.all(5),
@@ -711,6 +732,12 @@ class _InfoPageState extends State<InfoPage> {
         child: TextFormField(
           decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
+              borderSide:
+                  BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              // Đổi thành OutlineInputBorder để giữ viền khi có focus
               borderSide:
                   BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
               borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -752,7 +779,8 @@ class _InfoPageState extends State<InfoPage> {
             Icons.arrow_back_ios_new_rounded,
             color: AppColors.backgroundOrange,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.push(
+              context, MaterialPageRoute(builder: (context) => UserType())),
         ),
         elevation: 0,
         centerTitle: true,
@@ -820,37 +848,63 @@ class _InfoPageState extends State<InfoPage> {
               ),
             ),
             Positioned(
-              bottom: -5,
+              bottom: 0,
               left:
                   (MediaQuery.of(context).size.width - 200) / 2, // Căn giữa nút
-              child: GestureDetector(
-                onTap: _isUpdating
-                    ? null
-                    : () {
-                        if (_isEditable) {
-                          updateShop();
-                        }
-                      },
-                child: Container(
-                  width: 200,
-                  height: 50,
-                  decoration: BoxDecoration(
-                      color: Color.fromRGBO(238, 118, 0, 1),
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-                  child: Center(
-                    child: _isUpdating
-                        ? CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          )
-                        : Text(
-                            "UPDATE",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
-                          ),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: _isUpdating
+                        ? null
+                        : () {
+                            if (_isEditable) {
+                              updateShop();
+                            }
+                          },
+                    child: Container(
+                      width: 100,
+                      height: 45,
+                      decoration: BoxDecoration(
+                          color: Color.fromRGBO(238, 118, 0, 1),
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                      child: Center(
+                        child: _isUpdating
+                            ? CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              )
+                            : Text(
+                                "UPDATE",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                      ),
+                    ),
                   ),
-                ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      logOut();
+                    },
+                    child: Container(
+                      width: 100,
+                      height: 45,
+                      decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                      child: Center(
+                        child: Text(
+                          "LOG OUT",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
             if (_showMessage && _updateMessage.isNotEmpty)
@@ -921,7 +975,7 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
     _widgetOptions = [
       HomePage(shop: widget.shop),
-      HistoryPage(shopName: widget.shop.shopName),
+      HistoryPage(shop: widget.shop),
       ntfPage(),
       InfoPage(
         shop: widget.shop,

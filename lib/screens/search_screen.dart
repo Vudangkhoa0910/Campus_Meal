@@ -5,7 +5,9 @@ import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
 
 class SearchInput extends StatefulWidget {
-  const SearchInput({super.key});
+  final Buyer buyer;
+  const SearchInput({super.key, required this.buyer});
+
   @override
   State<SearchInput> createState() => _SearchInputState();
 }
@@ -17,39 +19,38 @@ class _SearchInputState extends State<SearchInput> {
 
   @override
   void dispose() {
-    // Clean up the controller when the widget is disposed.
     searchController.dispose();
     super.dispose();
   }
 
-  getSearchResult(searchTerm) async {
+  Future<List> getSearchResult(String searchTerm) async {
     final searchResult = await FirebaseFirestore.instance
         .collection("cache")
         .doc(searchTerm)
         .get();
-    return searchResult;
+    return searchResult['list'] ?? [];
   }
 
-  void searchSubmit(context) async {
+  void searchSubmit(BuildContext context) async {
     searchTerms = searchController.text.split(' ');
     List shops = [];
-    for (int i = 0; i < searchTerms.length; i++) {
-      var tmp = (await getSearchResult(searchTerms[i]));
-      shopSearchResult = tmp['list'];
 
-      for (var shop in shopSearchResult) {
-        shops.add(shop);
-      }
-
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => SearchScreen(
-                    title: "Explore IITG",
-                    shopResults: shopSearchResult,
-                    isSearch: true,
-                  )));
+    for (String term in searchTerms) {
+      var tmp = await getSearchResult(term);
+      shops.addAll(tmp);
     }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchScreen(
+          title: "Explore IITG",
+          shopResults: shops,
+          isSearch: true,
+          buyer: widget.buyer,
+        ),
+      ),
+    );
   }
 
   @override
@@ -68,25 +69,28 @@ class _SearchInputState extends State<SearchInput> {
                   autofocus: false,
                   cursorColor: Colors.grey,
                   decoration: InputDecoration(
-                      isDense: true,
-                      fillColor: Colors.white,
-                      filled: true,
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                              width: 1, color: AppColors.backgroundOrange)),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                              width: 1, color: AppColors.backgroundOrange)),
-                      hintText: 'Search',
-                      hintStyle:
-                          const TextStyle(color: Colors.grey, fontSize: 18),
-                      suffixIcon: const Icon(
-                        Icons.search,
-                        color: AppColors.secondary,
-                        size: 30,
-                      )),
+                    isDense: true,
+                    fillColor: Colors.white,
+                    filled: true,
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                          width: 1, color: AppColors.backgroundOrange),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(
+                          width: 1, color: AppColors.backgroundOrange),
+                    ),
+                    hintText: 'Search',
+                    hintStyle:
+                        const TextStyle(color: Colors.grey, fontSize: 18),
+                    suffixIcon: const Icon(
+                      Icons.search,
+                      color: AppColors.secondary,
+                      size: 30,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -104,6 +108,8 @@ class ShopCard extends StatelessWidget {
   final List menu;
   final String ownerName;
   final String upiID;
+  final Buyer buyer;
+
   const ShopCard({
     super.key,
     required this.name,
@@ -112,92 +118,86 @@ class ShopCard extends StatelessWidget {
     required this.menu,
     required this.ownerName,
     required this.upiID,
+    required this.buyer,
   });
 
   @override
   Widget build(BuildContext context) {
-    // if (status) {
-    //   _status = "Open";
-    // } else {
-    //   _status = "Closed";
-    // }
-
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => ShopPage(
-                    name: name,
-                    rating: "0",
-                    location: location,
-                    menu: menu,
-                    ownerName: ownerName,
-                    upiID: upiID,
-                  )),
+            builder: (context) => ShopPage(
+              name: name,
+              rating: "0",
+              location: location,
+              menu: menu,
+              ownerName: ownerName,
+              upiID: upiID,
+              buyer: buyer,
+            ),
+          ),
         );
       },
       child: Container(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 5),
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 5),
         child: Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            color: const Color(0xFFFFF2E0),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: AppTypography.textMd.copyWith(
-                            fontSize: 20, fontWeight: FontWeight.w700),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          color: const Color(0xFFFFF2E0),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: AppTypography.textMd
+                          .copyWith(fontSize: 20, fontWeight: FontWeight.w700),
+                    ),
+                    Row(
+                      children: [
+                        const Icon(Icons.pin_drop, size: 18),
+                        Text(location,
+                            style: AppTypography.textSm.copyWith(
+                                fontSize: 12, fontWeight: FontWeight.w400)),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Icon(Icons.door_back_door_rounded, size: 18),
+                      ],
+                    ),
+                    Container(
+                      width: 40,
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: const Color(0xFFFFFEF6),
                       ),
-                      Row(
+                      child: Row(
                         children: [
-                          const Icon(Icons.pin_drop, size: 18),
-                          Text(location,
-                              style: AppTypography.textSm.copyWith(
-                                  fontSize: 12, fontWeight: FontWeight.w400)),
+                          Text(
+                            rating,
+                            style: AppTypography.textSm.copyWith(
+                                fontSize: 15, fontWeight: FontWeight.w700),
+                          ),
+                          const Icon(Icons.star, size: 15)
                         ],
                       ),
-                      Row(
-                        children: [
-                          const Icon(Icons.door_back_door_rounded, size: 18),
-                          // Text(_status,
-                          //     style: AppTypography.textSm.copyWith(
-                          //         fontSize: 10, fontWeight: FontWeight.normal)),
-                        ],
-                      ),
-                      Container(
-                          width: 40,
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: const Color(0xFFFFFEF6)),
-                          child: Row(
-                            children: [
-                              Text(
-                                rating,
-                                style: AppTypography.textSm.copyWith(
-                                    fontSize: 15, fontWeight: FontWeight.w700),
-                              ),
-                              const Icon(
-                                Icons.star,
-                                size: 15,
-                              )
-                            ],
-                          ))
-                    ],
-                  ),
-                  Image.asset("assets/temp.png")
-                ],
-              ),
-            )),
+                    )
+                  ],
+                ),
+                Image.asset("assets/temp.png"),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -207,11 +207,15 @@ class SearchScreen extends StatefulWidget {
   final List shopResults;
   final bool isSearch;
   final String title;
-  const SearchScreen(
-      {super.key,
-      required this.shopResults,
-      required this.isSearch,
-      required this.title});
+  final Buyer buyer;
+
+  const SearchScreen({
+    super.key,
+    required this.shopResults,
+    required this.isSearch,
+    required this.title,
+    required this.buyer,
+  });
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -219,7 +223,9 @@ class SearchScreen extends StatefulWidget {
 
 class ShopHeader extends StatelessWidget {
   final String name;
-  const ShopHeader({super.key, required this.name});
+  final Buyer buyer;
+
+  const ShopHeader({super.key, required this.name, required this.buyer});
 
   @override
   Widget build(BuildContext context) {
@@ -227,11 +233,13 @@ class ShopHeader extends StatelessWidget {
       alignment: Alignment.topLeft,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-        child: Text(name,
-            style: AppTypography.textMd.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: AppColors.secondary)),
+        child: Text(
+          name,
+          style: AppTypography.textMd.copyWith(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.secondary),
+        ),
       ),
     );
   }
@@ -242,84 +250,90 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     List openShops = widget.shopResults;
     List closedShops = [];
-    print(widget.shopResults);
+
     return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: AppColors.backgroundOrange,
-            ),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.backgroundOrange,
           ),
-          backgroundColor: AppColors.backgroundYellow,
-          elevation: 0,
-          centerTitle: true,
-          title: Text("Explore IITG",
-              style: AppTypography.textMd.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.backgroundOrange)),
         ),
         backgroundColor: AppColors.backgroundYellow,
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SearchInput(),
-              const ShopHeader(name: "Currently open shops"),
-              for (var shop in openShops)
-                GestureDetector(
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ShopPage(
-                                name: shop["shop_name"],
-                                rating: "0",
-                                location: shop["location"],
-                                menu: shop["menu"],
-                                ownerName: shop["owner_name"],
-                                upiID: shop["upi_id"],
-                              ))),
-                  child: ShopCard(
-                    name: shop["shop_name"],
-                    rating: "0",
-                    location: shop["location"],
-                    //status: true,
-                    menu: shop["menu"],
-                    ownerName: shop["owner_name"],
-                    upiID: shop["upi_id"],
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          "Explore IITG",
+          style: AppTypography.textMd.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.backgroundOrange),
+        ),
+      ),
+      backgroundColor: AppColors.backgroundYellow,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SearchInput(buyer: widget.buyer),
+            ShopHeader(name: "Currently open shops", buyer: widget.buyer),
+            for (var shop in openShops)
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ShopPage(
+                      name: shop["shop_name"],
+                      rating: "0",
+                      location: shop["location"],
+                      menu: shop["menu"],
+                      ownerName: shop["owner_name"],
+                      upiID: shop["upi_id"],
+                      buyer: widget.buyer,
+                    ),
                   ),
                 ),
-              const ShopHeader(name: "Currently closed shops"),
-              for (var shop in closedShops)
-                ShopCard(
+                child: ShopCard(
                   name: shop["shop_name"],
                   rating: "0",
                   location: shop["location"],
-                  //status: true,
                   menu: shop["menu"],
                   ownerName: shop["owner_name"],
                   upiID: shop["upi_id"],
-                )
-            ],
-          ),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          selectedItemColor: AppColors.backgroundOrange,
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.history_rounded),
-              label: 'Orders',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
-              label: 'Cart',
-            ),
+                  buyer: widget.buyer,
+                ),
+              ),
+            ShopHeader(name: "Currently closed shops", buyer: widget.buyer),
+            for (var shop in closedShops)
+              ShopCard(
+                name: shop["shop_name"],
+                rating: "0",
+                location: shop["location"],
+                menu: shop["menu"],
+                ownerName: shop["owner_name"],
+                upiID: shop["upi_id"],
+                buyer: widget.buyer,
+              ),
           ],
-        ));
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        selectedItemColor: AppColors.backgroundOrange,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history_rounded),
+            label: 'Orders',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Cart',
+          ),
+        ],
+      ),
+    );
   }
 }

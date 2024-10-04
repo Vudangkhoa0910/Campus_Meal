@@ -79,12 +79,15 @@ class DatabaseService {
         .toList();
   }
 
-  Future<List<Map<String, dynamic>>> getOrders() async {
+  Future<List<Map<String, dynamic>>> getOrders(String buyerName) async {
     List<Map<String, dynamic>> orders = [];
 
     try {
       // Giả sử bạn lấy tất cả tài liệu trong bộ sưu tập "buy"
-      QuerySnapshot buySnapshot = await _db.collection('buy').get();
+      QuerySnapshot buySnapshot = await _db
+          .collection('buy')
+          .where('buyer_name', isEqualTo: buyerName)
+          .get();
 
       for (var buyDoc in buySnapshot.docs) {
         // Giả sử "orders" là một mảng trong tài liệu

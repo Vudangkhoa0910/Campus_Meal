@@ -812,21 +812,36 @@ class _InfoPageState extends State<InfoPage> {
               ],
             ),
             Positioned(
-              top: 60,
-              left: MediaQuery.of(context).size.width / 2 -
-                  60, // Căn giữa hình ảnh
+              top: 15,
+              
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Text(
+                  "Campus Meal",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.topCenter,
               child: Container(
-                height: 120,
-                width: 120,
+                margin: const EdgeInsets.only(top: 50),
+                height: 130,
+                width: 130,
                 decoration: BoxDecoration(
                   border: Border.all(
                       color: Color.fromRGBO(122, 103, 238, 1), width: 3),
-                  borderRadius: BorderRadius.all(Radius.circular(100)),
+                  borderRadius: BorderRadius.circular(100),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: Image.asset(
-                    "assets/iconprofile.png",
+                    "assets/Ảnh.jpg",
                     fit: BoxFit.cover,
                   ),
                 ),

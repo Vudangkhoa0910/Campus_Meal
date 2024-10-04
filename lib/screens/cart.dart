@@ -27,7 +27,8 @@ class _CartState extends State<Cart> {
 
   // Khởi tạo dữ liệu từ Firebase
   void _initRetrieval() async {
-    final data = await DatabaseService().getOrders(); // Lấy dữ liệu từ Firebase
+    final data = await DatabaseService()
+        .getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
 
     if (data != null) {
       for (var order in data) {

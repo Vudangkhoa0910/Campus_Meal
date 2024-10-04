@@ -1,4 +1,5 @@
 import 'package:campus_catalogue/models/buyer_model.dart';
+import 'package:campus_catalogue/screens/api_chat.dart';
 import 'package:campus_catalogue/screens/cart.dart';
 import 'package:campus_catalogue/screens/history_user_page.dart';
 import 'package:campus_catalogue/screens/ntf_user_page.dart';
@@ -193,8 +194,7 @@ class ShopCard extends StatelessWidget {
 }
 
 class LocationCardWrapper extends StatefulWidget {
-  final Buyer buyer;
-  const LocationCardWrapper({super.key, required this.buyer});
+  const LocationCardWrapper({super.key});
 
   @override
   State<LocationCardWrapper> createState() => _LocationCardWrapperState();
@@ -210,15 +210,14 @@ class _LocationCardWrapperState extends State<LocationCardWrapper> {
     for (var doc in searchResult.docs) {
       shopSearchResults.add(doc.data());
     }
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => SearchScreen(
-                  shopResults: shopSearchResults,
-                  isSearch: true,
-                  title: "Explore IITG",
-                  buyer: widget.buyer,
-                )));
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (context) => SearchScreen(
+    //               shopResults: shopSearchResults,
+    //               isSearch: true,
+    //               title: "Explore IITG",
+    //             )));
   }
 
   @override
@@ -323,8 +322,7 @@ class LocationCard extends StatelessWidget {
 }
 
 class SearchInput extends StatefulWidget {
-  final Buyer buyer;
-  const SearchInput({super.key, required this.buyer});
+  const SearchInput({super.key});
   @override
   State<SearchInput> createState() => _SearchInputState();
 }
@@ -361,15 +359,14 @@ class _SearchInputState extends State<SearchInput> {
             await FirebaseFirestore.instance.collection("shop").doc(shop).get();
         shops.add(tmp.data());
       }
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => SearchScreen(
-                    shopResults: shops.toList(),
-                    isSearch: true,
-                    title: "Explore IITG",
-                    buyer: widget.buyer,
-                  )));
+      // Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => SearchScreen(
+      //               shopResults: shops.toList(),
+      //               isSearch: true,
+      //               title: "Explore IITG",
+      //             )));
     }
   }
 
@@ -419,8 +416,8 @@ class _SearchInputState extends State<SearchInput> {
 }
 
 class HomeScreen extends StatefulWidget {
-  final Buyer buyer;
-  const HomeScreen({Key? key, required this.buyer}) : super(key: key);
+  Buyer buyer;
+  HomeScreen({Key? key, required this.buyer}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -437,12 +434,30 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   Future<List> getCampusFavouriteShops() async {
+    List tmp = [];
     final shops = await FirebaseFirestore.instance
         .collection("shop")
         .orderBy("rating", descending: true)
         .limit(10)
         .get();
-    return shops.docs; // Có thể trả về thẳng docs thay vì thêm vào list tmp.
+    for (var doc in shops.docs) {
+      tmp.add(doc);
+    }
+    return tmp;
+  }
+
+  // Method to open the chat window
+  void _openChatWindow() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.8, // Adjust the height as needed
+          child: FoodChatScreen(),
+        );
+      },
+    );
   }
 
   @override
@@ -453,7 +468,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const UserType()),
+              MaterialPageRoute(builder: (context) => UserType()),
             );
           },
           icon: const Icon(
@@ -471,59 +486,76 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: AppColors.backgroundOrange)),
       ),
       backgroundColor: AppColors.backgroundYellow,
-      body: IndexedStack(
-        index: _selectedIndex,
+      body: Stack(
         children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                SearchInput(buyer: widget.buyer),
-                LocationCardWrapper(buyer: widget.buyer),
-                const ShopHeader(name: "Campus Favourites"),
-                FutureBuilder<List<dynamic>>(
-                  future: getCampusFavouriteShops(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<dynamic>> snapshot) {
-                    if (snapshot.hasData) {
-                      final campusFavs = snapshot.data!;
-                      return ShopCardWrapper(
-                        shops: campusFavs,
-                        buyer: widget.buyer,
-                      );
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                            color: AppColors.backgroundOrange),
-                      );
-                    }
-                  },
+          // Main content of the screen
+          IndexedStack(
+            index: _selectedIndex,
+            children: [
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SearchInput(),
+                    const LocationCardWrapper(),
+                    const ShopHeader(name: "Campus Favourites"),
+                    FutureBuilder<List<dynamic>>(
+                      future: getCampusFavouriteShops(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<List<dynamic>> snapshot) {
+                        if (snapshot.hasData) {
+                          final campusFavs = snapshot.data!;
+                          return ShopCardWrapper(
+                            shops: campusFavs,
+                            buyer: widget.buyer,
+                          );
+                        } else {
+                          return const CircularProgressIndicator(
+                              color: AppColors.backgroundOrange);
+                        }
+                      },
+                    ),
+                    const ShopHeader(name: "Recommended"),
+                    FutureBuilder<List<dynamic>>(
+                      future: getCampusFavouriteShops(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<List<dynamic>> snapshot) {
+                        if (snapshot.hasData) {
+                          final campusFavs = snapshot.data!;
+                          return ShopCardWrapper(
+                            shops: campusFavs,
+                            buyer: widget.buyer,
+                          );
+                        } else {
+                          return const CircularProgressIndicator(
+                              color: AppColors.backgroundOrange);
+                        }
+                      },
+                    ),
+                  ],
                 ),
-                const ShopHeader(name: "Recommended"),
-                FutureBuilder<List<dynamic>>(
-                  future: getCampusFavouriteShops(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<List<dynamic>> snapshot) {
-                    if (snapshot.hasData) {
-                      final campusFavs = snapshot.data!;
-                      return ShopCardWrapper(
-                        shops: campusFavs,
-                        buyer: widget.buyer,
-                      );
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                            color: AppColors.backgroundOrange),
-                      );
-                    }
-                  },
-                ),
-              ],
+              ),
+              Cart(
+                buyer: widget.buyer,
+              ),
+              HistoryPageUser(
+                buyer: widget.buyer,
+              ),
+              NtfUserPage(),
+              ProfileUsePage(
+                buyer: widget.buyer,
+              )
+            ],
+          ),
+          // Positioned chat icon in the bottom-right corner
+          Positioned(
+            bottom: 15,
+            right: 15,
+            child: FloatingActionButton(
+              onPressed: _openChatWindow,
+              backgroundColor: const Color.fromARGB(255, 255, 139, 44),
+              child: const Icon(Icons.chat, color: Colors.white),
             ),
           ),
-          Cart(buyer: widget.buyer),
-          HistoryPageUser(buyer: widget.buyer),
-          const NtfUserPage(),
-          ProfileUsePage(buyer: widget.buyer)
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

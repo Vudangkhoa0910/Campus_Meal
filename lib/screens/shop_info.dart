@@ -8,6 +8,7 @@ import 'package:campus_catalogue/services/database_service.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ItemCard extends StatelessWidget {
   final String shopName;

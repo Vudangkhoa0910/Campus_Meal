@@ -193,7 +193,8 @@ class ShopCard extends StatelessWidget {
 }
 
 class LocationCardWrapper extends StatefulWidget {
-  const LocationCardWrapper({super.key});
+  final Buyer buyer;
+  const LocationCardWrapper({super.key, required this.buyer});
 
   @override
   State<LocationCardWrapper> createState() => _LocationCardWrapperState();
@@ -216,6 +217,7 @@ class _LocationCardWrapperState extends State<LocationCardWrapper> {
                   shopResults: shopSearchResults,
                   isSearch: true,
                   title: "Explore IITG",
+                  buyer: widget.buyer,
                 )));
   }
 
@@ -321,7 +323,8 @@ class LocationCard extends StatelessWidget {
 }
 
 class SearchInput extends StatefulWidget {
-  const SearchInput({super.key});
+  final Buyer buyer;
+  const SearchInput({super.key, required this.buyer});
   @override
   State<SearchInput> createState() => _SearchInputState();
 }
@@ -365,6 +368,7 @@ class _SearchInputState extends State<SearchInput> {
                     shopResults: shops.toList(),
                     isSearch: true,
                     title: "Explore IITG",
+                    buyer: widget.buyer,
                   )));
     }
   }
@@ -415,8 +419,8 @@ class _SearchInputState extends State<SearchInput> {
 }
 
 class HomeScreen extends StatefulWidget {
-  Buyer buyer;
-  HomeScreen({Key? key, required this.buyer}) : super(key: key);
+  final Buyer buyer;
+  const HomeScreen({Key? key, required this.buyer}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -433,16 +437,12 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   Future<List> getCampusFavouriteShops() async {
-    List tmp = [];
     final shops = await FirebaseFirestore.instance
         .collection("shop")
         .orderBy("rating", descending: true)
         .limit(10)
         .get();
-    for (var doc in shops.docs) {
-      tmp.add(doc);
-    }
-    return tmp;
+    return shops.docs; // Có thể trả về thẳng docs thay vì thêm vào list tmp.
   }
 
   @override
@@ -451,10 +451,9 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            // Navigate back to the UserTypeSelectionScreen
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => UserType()),
+              MaterialPageRoute(builder: (context) => const UserType()),
             );
           },
           icon: const Icon(
@@ -478,8 +477,8 @@ class _HomeScreenState extends State<HomeScreen> {
           SingleChildScrollView(
             child: Column(
               children: [
-                const SearchInput(),
-                const LocationCardWrapper(),
+                SearchInput(buyer: widget.buyer),
+                LocationCardWrapper(buyer: widget.buyer),
                 const ShopHeader(name: "Campus Favourites"),
                 FutureBuilder<List<dynamic>>(
                   future: getCampusFavouriteShops(),
@@ -492,8 +491,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         buyer: widget.buyer,
                       );
                     } else {
-                      return const CircularProgressIndicator(
-                          color: AppColors.backgroundOrange);
+                      return const Center(
+                        child: CircularProgressIndicator(
+                            color: AppColors.backgroundOrange),
+                      );
                     }
                   },
                 ),
@@ -509,38 +510,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         buyer: widget.buyer,
                       );
                     } else {
-                      return const CircularProgressIndicator(
-                          color: AppColors.backgroundOrange);
+                      return const Center(
+                        child: CircularProgressIndicator(
+                            color: AppColors.backgroundOrange),
+                      );
                     }
                   },
                 ),
               ],
             ),
           ),
-          Cart(
-            buyer: widget.buyer,
-          ),
-          HistoryPageUser(
-            buyer: widget.buyer,
-          ),
-          NtfUserPage(),
-          ProfileUsePage(
-            buyer: widget.buyer,
-          )
+          Cart(buyer: widget.buyer),
+          HistoryPageUser(buyer: widget.buyer),
+          const NtfUserPage(),
+          ProfileUsePage(buyer: widget.buyer)
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        // selectedItemColor: AppColors.backgroundOrange,
-        type: BottomNavigationBarType.fixed, // Đảm bảo loại là fixed
-        backgroundColor: Colors.white, // Tuỳ chọn: Đặt màu nền mong muốn
-        selectedItemColor: AppColors.backgroundOrange, // Màu của mục được chọn
-        unselectedItemColor: Colors.grey, // Màu của các mục không được chọn
-        // selectedLabelStyle: AppTypography.textMd.copyWith(
-        //   fontWeight: FontWeight.w700, // Tuỳ chọn: Kiểu chữ của nhãn được chọn
-        // ),
-        // unselectedLabelStyle: AppTypography.textMd.copyWith(
-        //   fontWeight: FontWeight.w400,
-        // ), // Tuỳ chọn: Kiểu chữ của nhãn không được chọn
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: AppColors.backgroundOrange,
+        unselectedItemColor: Colors.grey,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),

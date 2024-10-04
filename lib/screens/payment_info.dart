@@ -1,9 +1,9 @@
 import 'dart:core';
-
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PaymentInfo extends StatefulWidget {
   Buyer buyer;
@@ -30,7 +30,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
   }
 
   void _initRetrieval() async {
-    final data = await DatabaseService().getOrders(); // Lấy dữ liệu từ Firebase
+    final data = await DatabaseService().getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
 
     if (data != null) {
       for (var order in data) {
@@ -52,7 +52,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
   Future<void> saveInvoice() async {
     try {
       final data =
-          await DatabaseService().getOrders(); // Lấy dữ liệu từ Firebase
+          await DatabaseService().getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
       // Duyệt qua từng sản phẩm trong danh sách
       if (data != null) {
         for (var item in data) {
@@ -143,7 +143,6 @@ class _PaymentInfoState extends State<PaymentInfo> {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 10),
           SizedBox(
             height: 250.h,
             width: 350.w,
@@ -152,8 +151,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
           Padding(
             padding: EdgeInsets.all(15.r),
             child: Container(
-              height: 300.h,
-              width: 250.w,
+              height: 330.h,
+              width: 280.w,
               decoration: BoxDecoration(
                 border: Border.all(
                   width: 1.5.w,
@@ -165,10 +164,10 @@ class _PaymentInfoState extends State<PaymentInfo> {
                 itemCount: items.length,
                 itemBuilder: (BuildContext context, int index) {
                   return Padding(
-                    padding: EdgeInsets.all(10.r),
+                    padding: EdgeInsets.all(8.r),
                     child: Container(
-                      padding: EdgeInsets.all(8.r),
-                      height: 80.h,
+                      padding: EdgeInsets.all(5.r),
+                      height: 100.h,
                       decoration: BoxDecoration(
                         border: Border.all(
                           width: 1.5.w,
@@ -179,36 +178,53 @@ class _PaymentInfoState extends State<PaymentInfo> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            items[index]["name"],
-                            style: TextStyle(
-                              color: Colors.blue[800],
-                              fontSize: 20.sp, // Font động
-                              fontWeight: FontWeight.bold,
+                          // Displaying the image
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8.r), // Adding border radius
+                            child: Image.network(
+                              items[index]["imgUrl"],
+                              width: 50.w,
+                              height: 70.h,
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                "Số lượng : ${items[index]["count"]}",
-                                style: TextStyle(
-                                  color: Colors.blue[800],
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w400,
-                                ),
+                          // Displaying the product name and price details
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.w),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    items[index]["name"],
+                                    style: TextStyle(
+                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                      fontSize: 20.sp, // Dynamic font
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 5.h),
+                                  Text(
+                                    "Số lượng : ${items[index]["count"]}",
+                                    style: TextStyle(
+                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  SizedBox(height: 5.h),
+                                  Text(
+                                    "Giá : ${items[index]["price"]}",
+                                    style: TextStyle(
+                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: 5.h),
-                              Text(
-                                "Giá : ${items[index]["price"]}",
-                                style: TextStyle(
-                                  color: Colors.blue[800],
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
-                          )
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -230,7 +246,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
                     )),
                 Text("${total}",
                     style: TextStyle(
-                      color: Colors.blue[600],
+                      color: const Color.fromARGB(255, 0, 0, 0),
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
                     ))

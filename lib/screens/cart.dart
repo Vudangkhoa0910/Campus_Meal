@@ -1,13 +1,12 @@
 import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/buyer_model.dart';
-import 'package:campus_catalogue/models/item_model.dart';
 import 'package:campus_catalogue/screens/payment_info.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:flutter/material.dart';
 
 class Cart extends StatefulWidget {
-  Buyer buyer;
+  final Buyer buyer;
   Cart({Key? key, required this.buyer}) : super(key: key);
 
   @override
@@ -15,14 +14,40 @@ class Cart extends StatefulWidget {
 }
 
 class _CartState extends State<Cart> {
-  List<Map<String, dynamic>> items = []; // Danh sách sản phẩm từ Firebase
-  List<int> quantities = []; // Danh sách số lượng cho từng sản phẩm
+  List<Map<String, dynamic>> items = []; 
+  List<int> quantities = []; 
   double totalPrice = 0;
+  String selectedVoucher = '';
+  TextEditingController voucherController = TextEditingController(); // Controller for voucher input
+
+  // List of voucher options
+  final List<Map<String, dynamic>> vouchers = [
+    {
+      'label': '10% OFF',
+      'icon': Icons.percent,
+      'description': 'Save 10% on your order'
+    },
+    {
+      'label': '20% OFF',
+      'icon': Icons.local_offer,
+      'description': 'Get 20% discount on your total'
+    },
+    {
+      'label': 'Free Shipping',
+      'icon': Icons.local_shipping,
+      'description': 'Enjoy free shipping on your order'
+    },
+    {
+      'label': 'Buy 1 Get 1 Free',
+      'icon': Icons.redeem,
+      'description': 'Get another item for free!'
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
-    _initRetrieval(); // Khởi tạo dữ liệu giỏ hàng
+    _initRetrieval(); // Initialize and retrieve cart data
   }
 
   // Khởi tạo dữ liệu từ Firebase
@@ -46,13 +71,11 @@ class _CartState extends State<Cart> {
     }
   }
 
-  // Cập nhật số lượng từ các TextField
+  // Update quantities of items based on user input
   void _updateQuantities() {
     for (var i = 0; i < items.length; i++) {
       final text = quantities[i].toString();
-      quantities[i] =
-          int.tryParse(text) ?? quantities[i]; // Cập nhật nếu có thay đổi
-      print(quantities[i]);
+      quantities[i] = int.tryParse(text) ?? quantities[i]; // Update quantities
     }
   }
 
@@ -69,37 +92,101 @@ class _CartState extends State<Cart> {
               child: ListView.separated(
                 itemBuilder: (context, index) {
                   return ItemCard(
-                    name: items[index]['name'], // Truyền tên sản phẩm
-                    price: items[index]['price'], // Truyền giá sản phẩm
-                    imgUrl: items[index]['imgUrl'], // Truyền hình ảnh sản phẩm
-                    count: quantities[index], // Truyền số lượng cho ItemCard
+                    name: items[index]['name'],
+                    price: items[index]['price'],
+                    imgUrl: items[index]['imgUrl'],
+                    count: quantities[index],
                     onQuantityChanged: (newCount) {
-                      quantities[index] =
-                          newCount; // Cập nhật số lượng khi thay đổi
+                      quantities[index] = newCount;
                     },
                   );
                 },
                 separatorBuilder: (context, index) => const SizedBox(
                   height: 10,
                 ),
-                itemCount: items.isNotEmpty
-                    ? items.length
-                    : 0, // Kiểm tra nếu danh sách không trống
+                itemCount: items.isNotEmpty ? items.length : 0,
               ),
             ),
             const Spacer(),
+            // Voucher section starts here
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Voucher Discount',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: voucherController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter voucher code',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.orange, width: 2),
+                            borderRadius: BorderRadius.circular(8), // Bo viền góc tròn
+                          ),
+                          child: DropdownButton<String>(
+                            value: selectedVoucher.isEmpty ? null : selectedVoucher,
+                            hint: const Text('Select voucher'),
+                            items: vouchers.map((voucher) {
+                              return DropdownMenuItem<String>(
+                                value: voucher['label'],
+                                child: Row(
+                                  children: [
+                                    Icon(voucher['icon'], color: Colors.orange),
+                                    const SizedBox(width: 8),
+                                    Text(voucher['label']),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedVoucher = value ?? '';
+                            voucherController.clear(); // Clear manual entry if dropdown is selected
+                          });
+                        },
+                      ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10), // Add space between voucher and pay button
             GestureDetector(
               onTap: () async {
-                _updateQuantities(); // Cập nhật số lượng từ các TextField
-                await DatabaseService().updateOrdersQuantities(
-                    items, quantities); // Cập nhật số lượng lên Firebase
+                _updateQuantities(); // Update quantities from user input
+                await DatabaseService().updateOrdersQuantities(items, quantities, widget.buyer.userName);
 
+                // Navigate to PaymentInfo screen
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => PaymentInfo(
-                            buyer: widget.buyer,
-                          )),
+                    builder: (context) => PaymentInfo(
+                      buyer: widget.buyer,
+                    ),
+                  ),
                 );
               },
               child: Row(
@@ -115,10 +202,13 @@ class _CartState extends State<Cart> {
                           color: const Color(0xffF57C51),
                         ),
                         child: Center(
-                          child: Text("Pay",
-                              style: AppTypography.textMd.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700)),
+                          child: Text(
+                            "Pay",
+                            style: AppTypography.textMd.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -133,19 +223,20 @@ class _CartState extends State<Cart> {
   }
 }
 
+// ItemCard widget to display each cart item
 class ItemCard extends StatefulWidget {
-  final String name; // Tên sản phẩm
-  final double price; // Giá sản phẩm
-  final String imgUrl; // Đường dẫn hình ảnh sản phẩm
-  final num count; // Số lượng
-  final Function(int) onQuantityChanged; // Callback để cập nhật số lượng
+  final String name; 
+  final double price;
+  final String imgUrl; 
+  final num count; 
+  final Function(int) onQuantityChanged; 
 
   ItemCard({
     Key? key,
     required this.name,
     required this.price,
     required this.imgUrl,
-    required this.count, // Nhận tham số quantity
+    required this.count,
     required this.onQuantityChanged,
   }) : super(key: key);
 
@@ -160,24 +251,26 @@ class _ItemCardState extends State<ItemCard> {
   @override
   void initState() {
     super.initState();
-    _count = widget.count.toInt(); // Khởi tạo số lượng từ widget
-    _controller.text = _count.toString(); // Cập nhật controller với số lượng
+    _count = widget.count.toInt();
+    _controller.text = _count.toString(); 
   }
 
+  // Increment the quantity
   void _increment() {
     setState(() {
       _count++;
       _controller.text = _count.toString();
-      widget.onQuantityChanged(_count); // Gọi callback khi thay đổi số lượng
+      widget.onQuantityChanged(_count); 
     });
   }
 
+  // Decrement the quantity
   void _decrement() {
     setState(() {
       if (_count > 1) {
         _count--;
         _controller.text = _count.toString();
-        widget.onQuantityChanged(_count); // Gọi callback khi thay đổi số lượng
+        widget.onQuantityChanged(_count);
       }
     });
   }
@@ -186,107 +279,65 @@ class _ItemCardState extends State<ItemCard> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.orange, width: 2),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(10),
       ),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(5),
       child: Row(
         children: [
-          Image.network(
-            widget.imgUrl,
-            height: 80,
+          Container(
             width: 80,
-            fit: BoxFit.cover,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.name,
-                  style: AppTypography.textSm.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  "Price: \$${widget.price.toStringAsFixed(2)}",
-                  style: AppTypography.textSm.copyWith(fontSize: 14),
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: _decrement,
-                      child: Container(
-                        height: 25,
-                        width: 25,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                            border: Border.all(width: 0.5, color: Colors.black),
-                            color: Colors.amber[900]),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.remove,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Container(
-                      height: 25,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                        border: Border.all(width: 0.5, color: Colors.black),
-                      ),
-                      alignment: Alignment.center,
-                      child: TextField(
-                        controller: _controller,
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                        ),
-                        style: TextStyle(fontSize: 16),
-                        readOnly: true,
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: _increment,
-                      child: Container(
-                        height: 25,
-                        width: 25,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                            border: Border.all(width: 0.5, color: Colors.black),
-                            color: Colors.amber[900]),
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.add,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              ],
+            height: 80,
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color.fromARGB(255, 255, 146, 3), width: 2), 
+              borderRadius: BorderRadius.circular(10), 
             ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                widget.imgUrl,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(width: 20),
+          // Display product details
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.name,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "\$${widget.price}",
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ],
+          ),
+          const Spacer(),
+          // Quantity controls
+          IconButton(
+            icon: const Icon(Icons.remove),
+            onPressed: _decrement,
+          ),
+          SizedBox(
+            width: 30,
+            child: TextField(
+              controller: _controller,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              onChanged: (value) {
+                setState(() {
+                  _count = int.tryParse(value) ?? 1; 
+                });
+                widget.onQuantityChanged(_count); 
+              },
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: _increment,
           ),
         ],
       ),

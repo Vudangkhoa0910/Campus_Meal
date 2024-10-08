@@ -4,6 +4,7 @@ import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/order_model.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
 import 'package:campus_catalogue/screens/login.dart';
+import 'package:campus_catalogue/screens/sele_buyer.dart';
 import 'package:campus_catalogue/screens/userType_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_catalogue/services/database_service.dart';
@@ -864,8 +865,7 @@ class _InfoPageState extends State<InfoPage> {
             ),
             Positioned(
               bottom: 0,
-              left:
-                  (MediaQuery.of(context).size.width - 200) / 2, // Căn giữa nút
+              left: (MediaQuery.of(context).size.width - 300) / 2, // Điều chỉnh độ rộng để chứa 3 nút
               child: Row(
                 children: [
                   GestureDetector(
@@ -891,8 +891,7 @@ class _InfoPageState extends State<InfoPage> {
                             : Text(
                                 "UPDATE",
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                                    color: Colors.white, fontWeight: FontWeight.bold),
                               ),
                       ),
                     ),
@@ -918,7 +917,33 @@ class _InfoPageState extends State<InfoPage> {
                         ),
                       ),
                     ),
-                  )
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  // Nút CHAT
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => BuyerSelectionScreen(shop: widget.shop)), // Điều hướng tới màn hình chat
+                      );
+                    },
+                    child: Container(
+                      width: 100,
+                      height: 45,
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                      child: Center(
+                        child: Text(
+                          "CHAT",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

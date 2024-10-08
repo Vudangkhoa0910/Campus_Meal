@@ -4,10 +4,10 @@ class NtfUserPage extends StatefulWidget {
   const NtfUserPage({super.key});
 
   @override
-  State<NtfUserPage> createState() => _NtfUserPageState();
+  State<NtfUserPage> createState() => NtfUserPageState();
 }
 
-class _NtfUserPageState extends State<NtfUserPage> {
+class NtfUserPageState extends State<NtfUserPage> {
   // Dữ liệu giả để mô phỏng thông báo
   final List<Map<String, String>> notifications = [
     {
@@ -96,7 +96,8 @@ class NotificationCard extends StatelessWidget {
               size: 24, // Kích thước biểu tượng
             ),
             const SizedBox(width: 10), // Khoảng cách giữa biểu tượng và tiêu đề
-            Expanded( // Để tiêu đề và mô tả chiếm toàn bộ không gian còn lại
+            Expanded(
+              // Để tiêu đề và mô tả chiếm toàn bộ không gian còn lại
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

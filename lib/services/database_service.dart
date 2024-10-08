@@ -113,12 +113,14 @@ class DatabaseService {
     return orders;
   }
 
-  Future<void> updateOrdersQuantities(
-      List<Map<String, dynamic>> items, List<int> quantities) async {
+  Future<void> updateOrdersQuantities(List<Map<String, dynamic>> items,
+      List<num> quantities, String buyerName) async {
     for (var i = 0; i < items.length; i++) {
       // Tìm buyer dựa trên điều kiện phù hợp nếu có
       QuerySnapshot buyQuery = await FirebaseFirestore.instance
-          .collection('buy') // Collection 'buy'
+          .collection('buy')
+          .where('buyer_name', isEqualTo: buyerName)
+          // Collection 'buy'
           .get(); // Lấy tất cả các buyers hoặc có điều kiện khác nếu cần
       int index = 0;
 
@@ -137,6 +139,37 @@ class DatabaseService {
           // Cập nhật lại toàn bộ danh sách orders cho buyer
           await buyDoc.reference.update({'orders': orders});
           index++;
+        }
+      }
+    }
+  }
+
+  Future<void> deleteOrder(String buyerName, String orderName) async {
+    // Truy cập đến collection 'buy'
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('buy')
+        .where('buyer_name', isEqualTo: buyerName)
+        .get();
+
+    // Lặp qua từng document trong 'buy'
+    for (var doc in snapshot.docs) {
+      // Lấy danh sách orders từ từng buyer
+      List orders = doc['orders'] ?? [];
+
+      // Tìm chỉ số của order cần xóa
+      int orderIndex =
+          orders.indexWhere((order) => order['order_name'] == orderName);
+      if (orderIndex != -1) {
+        // Xóa order khỏi danh sách orders
+        orders.removeAt(orderIndex);
+
+        // Kiểm tra xem orders có còn lại không
+        if (orders.isEmpty) {
+          // Nếu orders trống, xóa tài liệu buy
+          await doc.reference.delete();
+        } else {
+          // Nếu còn order, cập nhật lại document
+          await doc.reference.update({'orders': orders});
         }
       }
     }

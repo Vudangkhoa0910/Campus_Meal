@@ -1,3 +1,11 @@
+import 'package:campus_catalogue/models/buyer_model.dart';
+import 'package:campus_catalogue/screens/cart.dart';
+import 'package:campus_catalogue/screens/home_screen.dart';
+import 'package:campus_catalogue/services/database_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'dart:core';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/services/database_service.dart';
@@ -30,7 +38,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
   }
 
   void _initRetrieval() async {
-    final data = await DatabaseService().getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
+    final data = await DatabaseService()
+        .getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
 
     if (data != null) {
       for (var order in data) {
@@ -51,8 +60,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
 
   Future<void> saveInvoice() async {
     try {
-      final data =
-          await DatabaseService().getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
+      final data = await DatabaseService()
+          .getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
       // Duyệt qua từng sản phẩm trong danh sách
       if (data != null) {
         for (var item in data) {
@@ -87,8 +96,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
           .collection('buy')
           .where('buyer_name', isEqualTo: widget.buyer.userName)
           .get();
-
-      // Xoá từng tài liệu trong kết quả truy vấn
+// Xoá từng tài liệu trong kết quả truy vấn
       for (var doc in querySnapshot.docs) {
         await doc.reference.delete();
       }
@@ -129,7 +137,10 @@ class _PaymentInfoState extends State<PaymentInfo> {
         leading: Builder(builder: (BuildContext context) {
           return IconButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => HomeScreen(buyer: widget.buyer)));
               },
               icon: const Icon(
                 Icons.arrow_back_ios_new,
@@ -180,7 +191,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
                         children: [
                           // Displaying the image
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(8.r), // Adding border radius
+                            borderRadius: BorderRadius.circular(
+                                8.r), // Adding border radius
                             child: Image.network(
                               items[index]["imgUrl"],
                               width: 50.w,

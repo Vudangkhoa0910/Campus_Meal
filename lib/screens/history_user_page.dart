@@ -1,6 +1,7 @@
 import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/buyer_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class HistoryPageUser extends StatefulWidget {
@@ -8,19 +9,47 @@ class HistoryPageUser extends StatefulWidget {
   HistoryPageUser({super.key, required this.buyer});
 
   @override
-  State<HistoryPageUser> createState() => _HistoryPageUserState();
+  State<HistoryPageUser> createState() => HistoryPageUserState();
 }
 
-class _HistoryPageUserState extends State<HistoryPageUser> {
-  List card = [
-    ["shop1", "order1", "20", "2", "30-9-2024", ""],
-    ["shop1", "order2", "25", "2", "30-9-2024", ""],
-    ["shop1", "order3", "30", "2", "30-9-2024", ""],
-    ["shop2", "order1", "20", "2", "30-9-2024", ""],
-    ["shop2", "order2", "25", "2", "30-9-2024", ""],
-    ["shop2", "order3", "40", "2", "30-9-2024", ""],
-    ["shop3", "order1", "20", "2", "30-9-2024", ""]
-  ];
+class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
+  List card = []; // Khởi tạo danh sách card rỗng
+
+  void reloadData() {
+    fetchOrders();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchOrders(); // Gọi hàm lấy đơn hàng khi khởi tạo
+  }
+
+  Future<void> fetchOrders() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('orders') // Tên collection của bạn
+          .where('buyer_name',
+              isEqualTo: widget.buyer.userName) // Lọc theo tên buyer
+          .get();
+
+      setState(() {
+        card = snapshot.docs.map((doc) {
+          var data = doc.data() as Map<String, dynamic>;
+          return [
+            data['shop_name'] ?? 'Unknown',
+            data['order_name'] ?? 'Unknown',
+            data['price']?.toString() ?? '0',
+            data['date'] ?? 'Unknown',
+            data['img'] ?? 'Unknown',
+          ];
+        }).toList();
+      });
+    } catch (e) {
+      print('Error fetching orders: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,14 +156,14 @@ class _HistoryPageUserState extends State<HistoryPageUser> {
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400),
                                 ),
+                                // Text(
+                                //   "Count : ${item[3]}",
+                                //   style: AppTypography.textSm.copyWith(
+                                //       fontSize: 14,
+                                //       fontWeight: FontWeight.w400),
+                                // ),
                                 Text(
-                                  "Count : ${item[3]}",
-                                  style: AppTypography.textSm.copyWith(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                Text(
-                                  "Time : ${item[4]}",
+                                  "Time : ${item[3]}",
                                   style: AppTypography.textSm.copyWith(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400),
@@ -154,7 +183,7 @@ class _HistoryPageUserState extends State<HistoryPageUser> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: Image.network(
-                                item[5],
+                                item[4],
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Image.asset(

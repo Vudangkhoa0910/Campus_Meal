@@ -46,37 +46,11 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // Stream lấy tin nhắn trực tiếp từ Firestore
-Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>> _getMessagesStream() async* {
-  final sellerStream = _firestore
-      .collection('chats')
-      .where('senderId', isEqualTo: currentUserId)
-      .where('receiverId', isEqualTo: widget.buyer.user_id)
-      .orderBy('timestamp', descending: false)
-      .snapshots();
-
-  final buyerStream = _firestore
-      .collection('chats')
-      .where('senderId', isEqualTo: widget.buyer.user_id)
-      .where('receiverId', isEqualTo: currentUserId)
-      .orderBy('timestamp', descending: false)
-      .snapshots();
-
-  // Combine two streams into one
-  await for (var sellerSnapshot in sellerStream) {
-    var buyerSnapshot = await buyerStream.first;
-    
-    final allMessages = [
-      ...sellerSnapshot.docs,
-      ...buyerSnapshot.docs
-    ];
-
-    allMessages.sort((a, b) => a['timestamp'].compareTo(b['timestamp']));
-
-    yield allMessages;
+  Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>> _getMessages() {
+    return _firestore.collection('chats').orderBy('timestamp', descending: false).snapshots().map((snapshot) {
+      return snapshot.docs;
+    });
   }
-}
-
 
   // Hàm định dạng thời gian
   String _formatTimestamp(Timestamp timestamp) {
@@ -105,7 +79,7 @@ Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>> _getMessagesStream() a
         children: [
           Expanded(
             child: StreamBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
-              stream: _getMessagesStream(),
+              stream: _getMessages(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());

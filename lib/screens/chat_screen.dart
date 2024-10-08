@@ -2,7 +2,10 @@ import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart'; // Thêm Firebase Storage
+import 'package:image_picker/image_picker.dart'; // Thêm image picker
 import 'package:intl/intl.dart'; // For formatting date and time
+import 'dart:io';
 
 class ChatScreen extends StatefulWidget {
   final Buyer buyer; // Buyer object
@@ -17,14 +20,18 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance; // Thêm Firebase Storage
+  final ImagePicker _picker = ImagePicker(); // Thêm image picker
   final ScrollController _scrollController = ScrollController();
 
-  void _sendMessage() async {
-    if (_messageController.text.isNotEmpty) {
+  // Hàm gửi tin nhắn
+  void _sendMessage({String? imageUrl}) async {
+    if (_messageController.text.isNotEmpty || imageUrl != null) {
       final message = {
         'senderId': widget.buyer.user_id, // Buyer là người gửi
         'receiverId': widget.shop.shopID,  // Shop là người nhận
         'content': _messageController.text,
+        'imageUrl': imageUrl ?? '', // Gửi URL hình ảnh nếu có
         'timestamp': Timestamp.now(),
       };
 
@@ -37,6 +44,29 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  // Hàm chọn và tải lên ảnh
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      _uploadImage(imageFile);
+    }
+  }
+
+  Future<void> _uploadImage(File image) async {
+    try {
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      Reference ref = _storage.ref().child('chat_images').child(fileName);
+      UploadTask uploadTask = ref.putFile(image);
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      _sendMessage(imageUrl: downloadUrl); // Gửi tin nhắn với URL hình ảnh
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
+  }
+
+  // Hàm lấy tin nhắn
   Stream<List<QueryDocumentSnapshot<Map<String, dynamic>>>> _getMessages() {
     return _firestore.collection('chats').orderBy('timestamp', descending: false).snapshots().map((snapshot) {
       return snapshot.docs;
@@ -102,10 +132,19 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: Column(
                             crossAxisAlignment: isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                messageData['content'],
-                                style: TextStyle(fontSize: 15),
-                              ),
+                              // Hiển thị ảnh nếu có
+                              if (messageData['imageUrl'] != null && messageData['imageUrl'].isNotEmpty)
+                                Image.network(
+                                  messageData['imageUrl'],
+                                  height: 150,
+                                  width: 150,
+                                  fit: BoxFit.cover,
+                                ),
+                              if (messageData['content'].isNotEmpty)
+                                Text(
+                                  messageData['content'],
+                                  style: TextStyle(fontSize: 15),
+                                ),
                               SizedBox(height: 5),
                               Text(
                                 _formatTimestamp(messageTimestamp), // Display timestamp
@@ -130,6 +169,11 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
+                // Nút chọn ảnh
+                IconButton(
+                  icon: Icon(Icons.photo, color: Colors.orange),
+                  onPressed: _pickImage,
+                ),
                 Expanded(
                   child: TextField(
                     controller: _messageController,
@@ -147,9 +191,10 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 SizedBox(width: 8),
+                // Nút gửi tin nhắn
                 IconButton(
                   icon: Icon(Icons.send, color: Colors.orange),
-                  onPressed: _sendMessage,
+                  onPressed: () => _sendMessage(),
                 ),
               ],
             ),

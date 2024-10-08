@@ -1,11 +1,11 @@
+import 'dart:developer';
 import 'package:campus_catalogue/models/buyer_model.dart';
-import 'package:campus_catalogue/screens/api_chat.dart';
+import 'package:campus_catalogue/models/order_model.dart';
+import 'package:campus_catalogue/screens/api_chart.dart';
 import 'package:campus_catalogue/screens/cart.dart';
 import 'package:campus_catalogue/screens/history_user_page.dart';
 import 'package:campus_catalogue/screens/ntf_user_page.dart';
 import 'package:campus_catalogue/screens/profile_use_page.dart';
-import 'package:campus_catalogue/screens/search_screen.dart';
-import 'package:campus_catalogue/screens/search_screen.dart';
 import 'package:campus_catalogue/screens/search_screen.dart';
 import 'package:campus_catalogue/screens/shop_info.dart';
 import 'package:campus_catalogue/screens/userType_screen.dart';
@@ -194,7 +194,8 @@ class ShopCard extends StatelessWidget {
 }
 
 class LocationCardWrapper extends StatefulWidget {
-  const LocationCardWrapper({super.key});
+  final Buyer buyer;
+  const LocationCardWrapper({super.key, required this.buyer});
 
   @override
   State<LocationCardWrapper> createState() => _LocationCardWrapperState();
@@ -210,14 +211,15 @@ class _LocationCardWrapperState extends State<LocationCardWrapper> {
     for (var doc in searchResult.docs) {
       shopSearchResults.add(doc.data());
     }
-    // Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //         builder: (context) => SearchScreen(
-    //               shopResults: shopSearchResults,
-    //               isSearch: true,
-    //               title: "Explore IITG",
-    //             )));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => SearchScreen(
+                  shopResults: shopSearchResults,
+                  isSearch: true,
+                  title: "Explore IITG",
+                  buyer: widget.buyer,
+                )));
   }
 
   @override
@@ -243,39 +245,39 @@ class _LocationCardWrapperState extends State<LocationCardWrapper> {
                   GestureDetector(
                     onTap: () =>
                         getShopsFromLocation("Hostel Canteen", context),
-                    child: const LocationCard(
+                    child: LocationCard(
                         name: "Hostel Canteens",
                         imgURL: "assets/hostel_canteens.png"),
                   ),
                   GestureDetector(
                     onTap: () =>
                         getShopsFromLocation("Hostel Juice Centre", context),
-                    child: const LocationCard(
+                    child: LocationCard(
                         name: "Hostel Juice Centres",
                         imgURL: "assets/core_canteens.png"),
                   ),
                   GestureDetector(
                     onTap: () =>
                         getShopsFromLocation("Market Complex", context),
-                    child: const LocationCard(
+                    child: LocationCard(
                         name: "Market Complex",
                         imgURL: "assets/market_complex.png"),
                   ),
                   GestureDetector(
                     onTap: () => getShopsFromLocation("Khokha Market", context),
-                    child: const LocationCard(
+                    child: LocationCard(
                         name: "Khokha Market",
                         imgURL: "assets/khokha_stalls.png"),
                   ),
                   GestureDetector(
                     onTap: () => getShopsFromLocation("Food Court", context),
-                    child: const LocationCard(
+                    child: LocationCard(
                         name: "Food Court", imgURL: "assets/food_court.png"),
                   ),
                   GestureDetector(
                     onTap: () =>
                         getShopsFromLocation("Swimming Pool Area", context),
-                    child: const LocationCard(
+                    child: LocationCard(
                         name: "Swimming Pool Area",
                         imgURL: "assets/food_van.png"),
                   ),
@@ -290,7 +292,7 @@ class _LocationCardWrapperState extends State<LocationCardWrapper> {
 class LocationCard extends StatelessWidget {
   final String name;
   final String imgURL;
-  const LocationCard({super.key, required this.name, required this.imgURL});
+  LocationCard({super.key, required this.name, required this.imgURL});
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -322,7 +324,8 @@ class LocationCard extends StatelessWidget {
 }
 
 class SearchInput extends StatefulWidget {
-  const SearchInput({super.key});
+  final Buyer buyer;
+  SearchInput({super.key, required this.buyer});
   @override
   State<SearchInput> createState() => _SearchInputState();
 }
@@ -359,14 +362,15 @@ class _SearchInputState extends State<SearchInput> {
             await FirebaseFirestore.instance.collection("shop").doc(shop).get();
         shops.add(tmp.data());
       }
-      // Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //         builder: (context) => SearchScreen(
-      //               shopResults: shops.toList(),
-      //               isSearch: true,
-      //               title: "Explore IITG",
-      //             )));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => SearchScreen(
+                    shopResults: shops.toList(),
+                    isSearch: true,
+                    title: "Explore IITG",
+                    buyer: widget.buyer,
+                  )));
     }
   }
 
@@ -416,7 +420,7 @@ class _SearchInputState extends State<SearchInput> {
 }
 
 class HomeScreen extends StatefulWidget {
-  Buyer buyer;
+  final Buyer buyer;
   HomeScreen({Key? key, required this.buyer}) : super(key: key);
 
   @override
@@ -433,17 +437,22 @@ class _HomeScreenState extends State<HomeScreen> {
     "Profile",
   ];
 
+  // Định nghĩa GlobalKeys cho từng trang
+  final GlobalKey<CartState> _cartKey = GlobalKey<CartState>();
+  final GlobalKey<HistoryPageUserState> _historyKey =
+      GlobalKey<HistoryPageUserState>();
+  final GlobalKey<NtfUserPageState> _notificationsKey =
+      GlobalKey<NtfUserPageState>();
+  final GlobalKey<ProfileUsePageState> _profileKey =
+      GlobalKey<ProfileUsePageState>();
+
   Future<List> getCampusFavouriteShops() async {
-    List tmp = [];
     final shops = await FirebaseFirestore.instance
         .collection("shop")
         .orderBy("rating", descending: true)
         .limit(10)
         .get();
-    for (var doc in shops.docs) {
-      tmp.add(doc);
-    }
-    return tmp;
+    return shops.docs; // Có thể trả về thẳng docs thay vì thêm vào list tmp.
   }
 
   // Method to open the chat window
@@ -468,7 +477,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => UserType()),
+              MaterialPageRoute(builder: (context) => const UserType()),
             );
           },
           icon: const Icon(
@@ -495,8 +504,8 @@ class _HomeScreenState extends State<HomeScreen> {
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    const SearchInput(),
-                    const LocationCardWrapper(),
+                    SearchInput(buyer: widget.buyer),
+                    LocationCardWrapper(buyer: widget.buyer),
                     const ShopHeader(name: "Campus Favourites"),
                     FutureBuilder<List<dynamic>>(
                       future: getCampusFavouriteShops(),
@@ -534,16 +543,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              Cart(
-                buyer: widget.buyer,
-              ),
-              HistoryPageUser(
-                buyer: widget.buyer,
-              ),
-              NtfUserPage(),
-              ProfileUsePage(
-                buyer: widget.buyer,
-              )
+              Cart(key: _cartKey, buyer: widget.buyer),
+              HistoryPageUser(key: _historyKey, buyer: widget.buyer),
+              NtfUserPage(key: _notificationsKey),
+              ProfileUsePage(key: _profileKey, buyer: widget.buyer),
             ],
           ),
           // Positioned chat icon in the bottom-right corner
@@ -590,6 +593,23 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _selectedIndex = index;
           });
+          switch (index) {
+            case 0:
+              // Tùy chọn: Reload trang Home nếu cần
+              break;
+            case 1:
+              _cartKey.currentState?.reloadData();
+              break;
+            case 2:
+              _historyKey.currentState?.reloadData();
+              break;
+            case 3:
+              //
+              break;
+            case 4:
+              //
+              break;
+          }
         },
       ),
     );

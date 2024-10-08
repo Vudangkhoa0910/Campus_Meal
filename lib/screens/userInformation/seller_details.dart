@@ -419,6 +419,12 @@ class _SellerAdditionalState extends State<SellerAdditional> {
   String imgUrl = "";
   final ImagePicker _picker = ImagePicker();
 
+  @override
+  void dispose() {
+    // Hủy bỏ bất kỳ công việc nào nếu cần thiết
+    super.dispose();
+  }
+
   Future<String> uploadImageToFirebase(File imageFile) async {
     try {
       // Tạo một reference trong Firebase Storage
@@ -442,24 +448,43 @@ class _SellerAdditionalState extends State<SellerAdditional> {
 
   Future<void> getImage() async {
     try {
+      print('Starting image picker...');
       var image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null) {
+        print('Image picked: ${image.path}');
+
+        // Kiểm tra xem widget còn mounted trước khi gọi setState
+        if (!mounted) return;
+
         setState(() {
           sampleImage = image;
         });
 
+        print('Uploading image to Firebase...');
         // Tải hình ảnh lên Firebase Storage
         String downloadUrl =
             await uploadImageToFirebase(File(sampleImage!.path));
+
+        print('Image uploaded. URL: $downloadUrl');
+
+        // Kiểm tra lại mounted sau khi tải ảnh
+        if (!mounted) return;
+
         setState(() {
           imgUrl = downloadUrl;
         });
 
         // Bạn có thể lưu URL vào Firestore hoặc hiển thị trong giao diện
         print("Image uploaded! URL: $downloadUrl");
+      } else {
+        print('No image selected.');
       }
     } catch (e) {
       print("Error picking/uploading image: $e");
+
+      // Kiểm tra mounted trước khi gọi ScaffoldMessenger
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to upload image: $e')),
       );

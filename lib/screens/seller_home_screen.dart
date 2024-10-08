@@ -4,7 +4,9 @@ import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/order_model.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
 import 'package:campus_catalogue/screens/login.dart';
+import 'package:campus_catalogue/screens/add_menu.dart';
 import 'package:campus_catalogue/screens/sele_buyer.dart';
+import 'package:campus_catalogue/screens/update_menu.dart';
 import 'package:campus_catalogue/screens/userType_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_catalogue/services/database_service.dart';
@@ -166,6 +168,12 @@ class HomePageState extends State<HomePage> {
                           color: const Color(0xFFFFF2E0),
                           borderRadius: BorderRadius.circular(10)),
                       child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            border: Border.all(
+                              width: 1.5,
+                              color: AppColors.backgroundOrange,
+                            )),
                         padding: const EdgeInsets.all(10),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -215,8 +223,8 @@ class HomePageState extends State<HomePage> {
                             ),
                             Spacer(),
                             Container(
-                              height: 120,
-                              width: 120,
+                              height: 90,
+                              width: 90,
                               decoration: BoxDecoration(
                                   border: Border.all(
                                       color: AppColors.backgroundOrange,
@@ -303,28 +311,62 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _buildUpdateMenuButton(BuildContext context) {
+    final List<String> items = ["Update Menu", "Add Menu"];
+
     return Center(
-      child: GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => EditMenu(menu: menu)),
-        ),
-        child: Container(
-          width: 340,
-          padding: const EdgeInsets.symmetric(vertical: 35),
-          decoration: BoxDecoration(
-            color: AppColors.signIn,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Center(
-            child: Text(
-              "Update Menu",
-              style: AppTypography.textMd.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
+      child: SizedBox(
+        height: 100, // Đảm bảo chiều cao cho ListView
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          itemCount: items.length,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: () {
+                if (index == 0) {
+                  // Điều hướng đến trang chỉnh sửa menu
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            UpdateMenuItemPage(shop: widget.shop, menu: menu)),
+                  );
+                } else if (index == 1) {
+                  // Điều hướng đến trang thêm menu
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            AddMenuItemPage(shop: widget.shop, menu: menu)),
+                  );
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 5),
+                child: Container(
+                  width: 160,
+                  padding: const EdgeInsets.symmetric(vertical: 35),
+                  decoration: BoxDecoration(
+                      color: AppColors.signIn,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        width: 1.5,
+                        color: AppColors.backgroundOrange,
+                      )),
+                  child: Center(
+                    child: Text(
+                      items[index],
+                      style: AppTypography.textMd.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 20,
+                        color: AppColors.backgroundOrange,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -813,36 +855,21 @@ class _InfoPageState extends State<InfoPage> {
               ],
             ),
             Positioned(
-              top: 15,
-              
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Text(
-                  "Campus Meal",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.topCenter,
+              top: 60,
+              left: MediaQuery.of(context).size.width / 2 -
+                  60, // Căn giữa hình ảnh
               child: Container(
-                margin: const EdgeInsets.only(top: 50),
-                height: 130,
-                width: 130,
+                height: 120,
+                width: 120,
                 decoration: BoxDecoration(
                   border: Border.all(
                       color: Color.fromRGBO(122, 103, 238, 1), width: 3),
-                  borderRadius: BorderRadius.circular(100),
+                  borderRadius: BorderRadius.all(Radius.circular(100)),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: Image.asset(
-                    "assets/Ảnh.jpg",
+                    "assets/iconprofile.png",
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -865,7 +892,8 @@ class _InfoPageState extends State<InfoPage> {
             ),
             Positioned(
               bottom: 0,
-              left: (MediaQuery.of(context).size.width - 300) / 2, // Điều chỉnh độ rộng để chứa 3 nút
+              left:
+                  (MediaQuery.of(context).size.width - 300) / 2, // Căn giữa nút
               child: Row(
                 children: [
                   GestureDetector(
@@ -891,7 +919,8 @@ class _InfoPageState extends State<InfoPage> {
                             : Text(
                                 "UPDATE",
                                 style: TextStyle(
-                                    color: Colors.white, fontWeight: FontWeight.bold),
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
                               ),
                       ),
                     ),
@@ -926,7 +955,10 @@ class _InfoPageState extends State<InfoPage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => BuyerSelectionScreen(shop: widget.shop)), // Điều hướng tới màn hình chat
+                        MaterialPageRoute(
+                            builder: (context) => BuyerSelectionScreen(
+                                shop: widget
+                                    .shop)), // Điều hướng tới màn hình chat
                       );
                     },
                     child: Container(

@@ -2,11 +2,12 @@ import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/screens/login.dart';
+import 'package:campus_catalogue/screens/shop_chat.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart'; // Đảm bảo rằng bạn đã import trang đăng nhập
+import 'package:flutter/material.dart';
 
 class ProfileUsePage extends StatefulWidget {
-  final Buyer buyer; // Keep the buyer variable as final
+  final Buyer buyer; // Giữ biến buyer là final
   ProfileUsePage({super.key, required this.buyer});
 
   @override
@@ -87,11 +88,9 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
   }
 
   void logOut() {
-    // Xử lý đăng xuất tại đây, ví dụ: xóa thông tin đăng nhập, xóa token, v.v.
-    // Sau đó chuyển đến màn hình đăng nhập
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen()), // Đảm bảo LoginIn được import
+      MaterialPageRoute(builder: (context) => LoginScreen()),
     );
   }
 
@@ -129,7 +128,6 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
             ),
             Positioned(
               top: 15,
-              
               left: 0,
               right: 0,
               child: Center(
@@ -181,7 +179,7 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
                       },
                       child: Container(
                         width: MediaQuery.of(context).size.width * 2 / 3,
-                        height: 50,
+                        height: 35,
                         decoration: BoxDecoration(
                           color: const Color.fromRGBO(238, 118, 0, 1),
                           borderRadius: BorderRadius.circular(10),
@@ -199,12 +197,41 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
                     ),
                     const SizedBox(height: 10),
                     GestureDetector(
-                      onTap: logOut, // Gọi phương thức logOut khi nút được nhấn
+                      onTap: () {
+                        // Pass the buyer object when navigating to ShopSelectionScreen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ShopSelectionScreen(buyer: widget.buyer), // Truyền buyer vào đây
+                          ),
+                        );
+                      },
                       child: Container(
                         width: MediaQuery.of(context).size.width * 2 / 3,
-                        height: 50,
+                        height: 35,
                         decoration: BoxDecoration(
-                          color: Colors.red, // Màu nền cho nút đăng xuất
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            "Chat",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: logOut,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 2 / 3,
+                        height: 35,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Center(
@@ -228,7 +255,7 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
     );
   }
 
- Widget inputText(TextEditingController controller, String hintText) {
+  Widget inputText(TextEditingController controller, String hintText) {
     return Padding(
       padding: const EdgeInsets.all(5),
       child: Container(
@@ -245,8 +272,7 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
             focusedBorder: OutlineInputBorder(
               borderSide:
                   BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
-              borderRadius: BorderRadius.all(
-                  Radius.circular(10)), // Không có viền khi có tiêu điểm
+              borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
             suffixIcon: IconButton(
               icon: Icon(

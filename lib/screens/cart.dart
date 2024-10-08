@@ -3,6 +3,7 @@ import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/screens/payment_info.dart';
 import 'package:campus_catalogue/services/database_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class Cart extends StatefulWidget {
@@ -10,15 +11,30 @@ class Cart extends StatefulWidget {
   Cart({Key? key, required this.buyer}) : super(key: key);
 
   @override
-  _CartState createState() => _CartState();
+  CartState createState() => CartState();
 }
 
-class _CartState extends State<Cart> {
-  List<Map<String, dynamic>> items = []; 
-  List<int> quantities = []; 
-  double totalPrice = 0;
+class CartState extends State<Cart> with RouteAware {
+  void reloadData() {
+    _initRetrieval();
+  }
+
+  void removeItem(int index) async {
+    final itemName = items[index]['name']; // Lấy tên item để xóa từ Firebase
+    await DatabaseService()
+        .deleteOrder(widget.buyer.userName, itemName); // Gọi phương thức xóa
+    setState(() {
+      items.removeAt(index);
+      quantities.removeAt(index);
+    });
+  }
+
+  List<Map<String, dynamic>> items = [];
+  List<num> quantities = [];
+  num totalPrice = 0;
   String selectedVoucher = '';
-  TextEditingController voucherController = TextEditingController(); // Controller for voucher input
+  TextEditingController voucherController =
+      TextEditingController(); // Controller for voucher input
 
   // List of voucher options
   final List<Map<String, dynamic>> vouchers = [
@@ -44,11 +60,11 @@ class _CartState extends State<Cart> {
     },
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _initRetrieval(); // Initialize and retrieve cart data
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _initRetrieval(); // Initialize and retrieve cart data
+  // }
 
   // Khởi tạo dữ liệu từ Firebase
   void _initRetrieval() async {
@@ -88,7 +104,7 @@ class _CartState extends State<Cart> {
         child: Column(
           children: [
             SizedBox(
-              height: 400,
+              height: 200,
               child: ListView.separated(
                 itemBuilder: (context, index) {
                   return ItemCard(
@@ -99,6 +115,7 @@ class _CartState extends State<Cart> {
                     onQuantityChanged: (newCount) {
                       quantities[index] = newCount;
                     },
+                    onRemove: () => removeItem(index),
                   );
                 },
                 separatorBuilder: (context, index) => const SizedBox(
@@ -141,43 +158,48 @@ class _CartState extends State<Cart> {
                       ),
                       const SizedBox(width: 10),
                       DecoratedBox(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.orange, width: 2),
-                            borderRadius: BorderRadius.circular(8), // Bo viền góc tròn
-                          ),
-                          child: DropdownButton<String>(
-                            value: selectedVoucher.isEmpty ? null : selectedVoucher,
-                            hint: const Text('Select voucher'),
-                            items: vouchers.map((voucher) {
-                              return DropdownMenuItem<String>(
-                                value: voucher['label'],
-                                child: Row(
-                                  children: [
-                                    Icon(voucher['icon'], color: Colors.orange),
-                                    const SizedBox(width: 8),
-                                    Text(voucher['label']),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedVoucher = value ?? '';
-                            voucherController.clear(); // Clear manual entry if dropdown is selected
-                          });
-                        },
-                      ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.orange, width: 2),
+                          borderRadius:
+                              BorderRadius.circular(8), // Bo viền góc tròn
+                        ),
+                        child: DropdownButton<String>(
+                          value:
+                              selectedVoucher.isEmpty ? null : selectedVoucher,
+                          hint: const Text('Select voucher'),
+                          items: vouchers.map((voucher) {
+                            return DropdownMenuItem<String>(
+                              value: voucher['label'],
+                              child: Row(
+                                children: [
+                                  Icon(voucher['icon'], color: Colors.orange),
+                                  const SizedBox(width: 8),
+                                  Text(voucher['label']),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedVoucher = value ?? '';
+                              voucherController
+                                  .clear(); // Clear manual entry if dropdown is selected
+                            });
+                          },
+                        ),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 10), // Add space between voucher and pay button
+            const SizedBox(
+                height: 10), // Add space between voucher and pay button
             GestureDetector(
               onTap: () async {
                 _updateQuantities(); // Update quantities from user input
-                await DatabaseService().updateOrdersQuantities(items, quantities, widget.buyer.userName);
+                await DatabaseService().updateOrdersQuantities(
+                    items, quantities, widget.buyer.userName);
 
                 // Navigate to PaymentInfo screen
                 Navigator.push(
@@ -225,11 +247,12 @@ class _CartState extends State<Cart> {
 
 // ItemCard widget to display each cart item
 class ItemCard extends StatefulWidget {
-  final String name; 
-  final double price;
-  final String imgUrl; 
-  final num count; 
-  final Function(int) onQuantityChanged; 
+  final String name;
+  final num price;
+  final String imgUrl;
+  final num count;
+  final Function(int) onQuantityChanged;
+  final Function() onRemove; // Thêm hàm xóa
 
   ItemCard({
     Key? key,
@@ -238,6 +261,7 @@ class ItemCard extends StatefulWidget {
     required this.imgUrl,
     required this.count,
     required this.onQuantityChanged,
+    required this.onRemove, // Thêm hàm xóa
   }) : super(key: key);
 
   @override
@@ -252,7 +276,7 @@ class _ItemCardState extends State<ItemCard> {
   void initState() {
     super.initState();
     _count = widget.count.toInt();
-    _controller.text = _count.toString(); 
+    _controller.text = _count.toString();
   }
 
   // Increment the quantity
@@ -260,7 +284,7 @@ class _ItemCardState extends State<ItemCard> {
     setState(() {
       _count++;
       _controller.text = _count.toString();
-      widget.onQuantityChanged(_count); 
+      widget.onQuantityChanged(_count);
     });
   }
 
@@ -286,11 +310,12 @@ class _ItemCardState extends State<ItemCard> {
       child: Row(
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
-              border: Border.all(color: const Color.fromARGB(255, 255, 146, 3), width: 2), 
-              borderRadius: BorderRadius.circular(10), 
+              border: Border.all(
+                  color: const Color.fromARGB(255, 255, 146, 3), width: 2),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
@@ -307,7 +332,8 @@ class _ItemCardState extends State<ItemCard> {
             children: [
               Text(
                 widget.name,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Text(
                 "\$${widget.price}",
@@ -322,22 +348,28 @@ class _ItemCardState extends State<ItemCard> {
             onPressed: _decrement,
           ),
           SizedBox(
-            width: 30,
+            width: 15,
             child: TextField(
               controller: _controller,
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               onChanged: (value) {
                 setState(() {
-                  _count = int.tryParse(value) ?? 1; 
+                  _count = int.tryParse(value) ?? 1;
                 });
-                widget.onQuantityChanged(_count); 
+                widget.onQuantityChanged(_count);
               },
             ),
           ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: _increment,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () {
+              widget.onRemove(); // Gọi hàm xóa khi nhấn nút
+            },
           ),
         ],
       ),

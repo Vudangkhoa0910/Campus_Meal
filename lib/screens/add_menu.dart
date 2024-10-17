@@ -1,5 +1,6 @@
 import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
+import 'package:campus_catalogue/screens/seller_home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
@@ -12,10 +13,10 @@ class AddMenuItemPage extends StatefulWidget {
   final List<dynamic> menu;
 
   const AddMenuItemPage({
-    Key? key,
+    super.key,
     required this.shop,
     required this.menu,
-  }) : super(key: key);
+  });
 
   @override
   State<AddMenuItemPage> createState() => _AddMenuItemPageState();
@@ -28,7 +29,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
   // Các trường nhập liệu
   String name = '';
   String description = '';
-  double price = 0.0;
+  num price = 0.0;
   bool vegetarian = false;
   String imgUrl = '';
   List<String> categories = [];
@@ -149,19 +150,40 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
             }
           ]),
         });
-        print(newKey);
-        print(docId);
+
+        // Hiển thị thông báo thêm thành công
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Thêm menu thành công")),
         );
 
-        Navigator.pop(context);
+        // Tìm lại thông tin shop và điều hướng đến SellerHomeScreen
+        QuerySnapshot shopSnapshot = await _firestore
+            .collection('shop')
+            .where('shop_id', isEqualTo: widget.shop.shopID)
+            .get();
+
+        if (shopSnapshot.docs.isNotEmpty) {
+          // Điều hướng đến màn hình SellerHomeScreen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SellerHomeScreen(shop: widget.shop),
+            ),
+          );
+        } else {
+          // Nếu không tìm thấy shop
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Shop không tồn tại")),
+          );
+        }
       } else {
+        // Không tìm thấy cửa hàng tương ứng
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Không tìm thấy cửa hàng tương ứng")),
         );
       }
     } catch (e) {
+      // Xử lý lỗi khi thêm menu
       print("Lỗi khi thêm menu: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Lỗi khi thêm menu: $e")),
@@ -188,6 +210,44 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Builder(builder: (BuildContext context) {
+          return IconButton(
+            onPressed: () async {
+              try {
+                // Truy vấn Firestore dựa trên shop_id
+                QuerySnapshot shopSnapshot = await FirebaseFirestore.instance
+                    .collection('shop')
+                    .where('shop_id', isEqualTo: widget.shop.shopID)
+                    .get();
+
+                if (shopSnapshot.docs.isNotEmpty) {
+                  // Lấy document đầu tiên (giả sử mỗi shop_id là duy nhất)
+                  DocumentSnapshot shopDoc = shopSnapshot.docs.first;
+                  Map<String, dynamic> shopData =
+                      shopDoc.data() as Map<String, dynamic>;
+
+                  // Điều hướng đến màn hình SellerHomeScreen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SellerHomeScreen(shop: widget.shop),
+                    ),
+                  );
+                } else {
+                  // Nếu không tìm thấy shop
+                  print("Shop không tồn tại");
+                }
+              } catch (e) {
+                // Xử lý lỗi khi truy vấn Firestore
+                print("Lỗi khi truy vấn Firestore: $e");
+              }
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: Color(0xffF57C51),
+            ),
+          );
+        }),
         title: const Text(
           "Add New Menu",
           style: TextStyle(color: AppColors.backgroundOrange),

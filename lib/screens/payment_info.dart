@@ -3,6 +3,7 @@ import 'package:campus_catalogue/screens/cart.dart';
 import 'package:campus_catalogue/screens/home_screen.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -30,31 +31,56 @@ class _PaymentInfoState extends State<PaymentInfo> {
   List<Map<String, dynamic>> items = []; // Danh sách sản phẩm từ Firebase
   List<int> quantities = []; // Danh sách số lượng cho từng sản phẩm
   double totalPrice = 0;
+  num discount = 1;
 
   @override
   void initState() {
     super.initState();
     _initRetrieval(); // Khởi tạo dữ liệu giỏ hàng
+    getDiscount();
   }
 
   void _initRetrieval() async {
     final data = await DatabaseService()
         .getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
 
-    if (data != null) {
-      for (var order in data) {
-        items.add({
-          'name': order['name'],
-          'price': order['price'],
-          'imgUrl': order['imgUrl'],
-          'count': order['count'] // Lấy hình ảnh từ Firebase
-        });
-        quantities.add(1); // Mặc định là 1 cho mỗi sản phẩm
-      }
+    for (var order in data) {
+      items.add({
+        'name': order['name'],
+        'price': order['price'],
+        'imgUrl': order['imgUrl'],
+        'count': order['count'] // Lấy hình ảnh từ Firebase
+      });
+      quantities.add(1); // Mặc định là 1 cho mỗi sản phẩm
+    }
 
-      if (mounted) {
-        setState(() {}); // Cập nhật trạng thái
-      }
+    if (mounted) {
+      setState(() {}); // Cập nhật trạng thái
+    }
+  }
+
+  Future<void> getDiscount() async {
+    // Lấy instance của FirebaseFirestore
+    FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    // Lấy instance của FirebaseAuth
+    FirebaseAuth _auth = FirebaseAuth.instance;
+
+    // Lấy document từ Firestore
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('buy')
+        .where('buyer_name', isEqualTo: widget.buyer.userName)
+        .get();
+
+    // Lấy giá trị của 'discount' từ document
+    if (querySnapshot.docs.isNotEmpty) {
+      // Lấy DocumentSnapshot đầu tiên
+      DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
+
+      // Xử lý documentSnapshot
+      print(documentSnapshot.data());
+    } else {
+      print('No documents found');
     }
   }
 
@@ -63,23 +89,21 @@ class _PaymentInfoState extends State<PaymentInfo> {
       final data = await DatabaseService()
           .getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
       // Duyệt qua từng sản phẩm trong danh sách
-      if (data != null) {
-        for (var item in data) {
-          await FirebaseFirestore.instance.collection('orders').add({
-            'buyer_name': item['buyer_name'],
-            'buyer_phone': item['buyer_phone'],
-            'date': item['date'],
-            'img': item['imgUrl'],
-            'order_name': item['name'],
-            'price': item['price'],
-            'shop_name': item['shop_name'],
-            'count': item['count']
-          });
-        }
+      for (var item in data) {
+        await FirebaseFirestore.instance.collection('orders').add({
+          'buyer_name': item['buyer_name'],
+          'buyer_phone': item['buyer_phone'],
+          'date': item['date'],
+          'img': item['imgUrl'],
+          'order_name': item['name'],
+          'price': item['price'],
+          'shop_name': item['shop_name'],
+          'count': item['count']
+        });
       }
       // Thông báo lưu thành công
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hóa đơn đã được lưu thành công!')),
+        const SnackBar(content: Text('Hóa đơn đã được lưu thành công!')),
       );
     } catch (e) {
       // Xử lý lỗi nếu có
@@ -114,8 +138,16 @@ class _PaymentInfoState extends State<PaymentInfo> {
     // }
 
     total = 0.0; // Đặt lại giá trị của total trước khi tính lại
+    // for (int i = 0; i < items.length; i++) {
+    //   total += items[i]['count'] * items[i]['price'];
+    // }
     for (int i = 0; i < items.length; i++) {
-      total += items[i]['count'] * items[i]['price'];
+      double itemPrice = items[i]['count'] * items[i]['price'];
+
+      // Áp dụng discount
+      double discountedPrice = itemPrice - (itemPrice * discount / 10);
+
+      total += discountedPrice;
     }
   }
 
@@ -147,8 +179,8 @@ class _PaymentInfoState extends State<PaymentInfo> {
                 color: Color(0xffF57C51),
               ));
         }),
-        title: Text(
-          "Thanh toán",
+        title: const Text(
+          "Pay",
           style: TextStyle(color: Color(0xffF57C51)),
         ),
       ),
@@ -167,7 +199,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
               decoration: BoxDecoration(
                 border: Border.all(
                   width: 1.5.w,
-                  color: Color(0xffF57C51),
+                  color: const Color(0xffF57C51),
                 ),
                 borderRadius: BorderRadius.all(Radius.circular(20.r)),
               ),
@@ -182,7 +214,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
                       decoration: BoxDecoration(
                         border: Border.all(
                           width: 1.5.w,
-                          color: Color(0xffF57C51),
+                          color: const Color(0xffF57C51),
                         ),
                         borderRadius: BorderRadius.all(Radius.circular(20.r)),
                       ),
@@ -217,7 +249,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
                                   ),
                                   SizedBox(height: 5.h),
                                   Text(
-                                    "Số lượng : ${items[index]["count"]}",
+                                    "Quantity : ${items[index]["count"]}",
                                     style: TextStyle(
                                       color: const Color.fromARGB(255, 0, 0, 0),
                                       fontSize: 15.sp,
@@ -226,7 +258,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
                                   ),
                                   SizedBox(height: 5.h),
                                   Text(
-                                    "Giá : ${items[index]["price"]}",
+                                    "Total : ${items[index]["price"]}",
                                     style: TextStyle(
                                       color: const Color.fromARGB(255, 0, 0, 0),
                                       fontSize: 15.sp,
@@ -245,18 +277,18 @@ class _PaymentInfoState extends State<PaymentInfo> {
               ),
             ),
           ),
-          Container(
+          SizedBox(
             width: 200.w,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Tổng : ",
+                Text("Total : ",
                     style: TextStyle(
-                      color: Color(0xffF57C51),
+                      color: const Color(0xffF57C51),
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
                     )),
-                Text("${total}",
+                Text("$total",
                     style: TextStyle(
                       color: const Color.fromARGB(255, 0, 0, 0),
                       fontSize: 20.sp,
@@ -265,7 +297,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
               ],
             ),
           ),
-          Spacer(),
+          const Spacer(),
           GestureDetector(
             onTap: () {
               saveInvoice();
@@ -277,12 +309,12 @@ class _PaymentInfoState extends State<PaymentInfo> {
               width: 200.w,
               height: 50.h,
               decoration: BoxDecoration(
-                color: Color(0xffF57C51),
+                color: const Color(0xffF57C51),
                 borderRadius: BorderRadius.all(Radius.circular(10.r)),
               ),
               child: Center(
                 child: Text(
-                  "Lưu hoá đơn",
+                  "Pay",
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16.sp,
@@ -292,7 +324,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
               ),
             ),
           ),
-          Spacer(),
+          const Spacer(),
         ],
       ),
     );

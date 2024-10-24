@@ -55,7 +55,7 @@ class HomePageState extends State<HomePage> {
   List card = [];
   bool isLoading = true;
   String errorMessage = '';
-  double totalIncome = 0.0;
+  num totalIncome = 0;
   List menu = [];
 
   @override
@@ -76,11 +76,11 @@ class HomePageState extends State<HomePage> {
         card = snapshot.docs.map((doc) {
           var data = doc.data() as Map<String, dynamic>;
 
-          totalIncome += (data['price'] ?? 0) as double;
+          totalIncome += (data['price'] ?? 0);
           return [
             data['buyer_name'] ?? 'Unknown',
             data['order_name'] ?? 'Unknown',
-            data['price']?.toString() ?? '0',
+            data['price'] ?? 0,
             data['date'] ?? 'Unknown',
             data['img'] ?? 'Unknown', // Đảm bảo 'img' tồn tại trong Firestore
           ];
@@ -97,7 +97,20 @@ class HomePageState extends State<HomePage> {
   }
 
   // List<Map<String, dynamic>> menu = [];
-void initializeMenu() async {
+  // void initializeMenu() {
+  //   setState(() {
+  //     menu = List<Map<String, dynamic>>.from(widget.shop.menu.map((item) => {
+  //           "name": item["name"],
+  //           "price": item["price"],
+  //           "vegetarian": item["vegetarian"],
+  //           "description": item["description"],
+  //           "category": item["category"],
+  //           "img": item['img']
+  //         }));
+  //     isLoading = false;
+  //   });
+  // }
+  void initializeMenu() async {
     setState(() {
       isLoading = true;
     });
@@ -153,17 +166,27 @@ void initializeMenu() async {
             Icons.arrow_back_ios_new_rounded,
             color: AppColors.backgroundOrange,
           ),
-          onPressed: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => UserType())),
+          onPressed: () => Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const UserType())),
         ),
         elevation: 0,
         centerTitle: true,
-        title: Text(
-          "Explore IITG",
-          style: AppTypography.textMd.copyWith(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: AppColors.backgroundOrange,
+        title: GestureDetector(
+          onTap: () {
+            // Gọi hàm initializeMenu khi nhấn vào title
+            setState(() {
+              initializeMenu();
+            });
+          },
+          child: SingleChildScrollView(
+            child: Text(
+              "Explore IITG",
+              style: AppTypography.textMd.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.backgroundOrange,
+              ),
+            ),
           ),
         ),
       ),
@@ -195,14 +218,15 @@ void initializeMenu() async {
               ),
               for (var item in menu)
                 Container(
-                  padding: EdgeInsets.fromLTRB(0, 0, 0, 5),
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
                   child: Container(
                       decoration: BoxDecoration(
                           color: const Color(0xFFFFF2E0),
                           borderRadius: BorderRadius.circular(10)),
                       child: Container(
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(20)),
                             border: Border.all(
                               width: 1.5,
                               color: AppColors.backgroundOrange,
@@ -254,7 +278,7 @@ void initializeMenu() async {
                                 ],
                               ),
                             ),
-                            Spacer(),
+                            const Spacer(),
                             Container(
                               height: 90,
                               width: 90,
@@ -304,7 +328,7 @@ void initializeMenu() async {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Today’s income",
+                "Total income",
                 style: AppTypography.textMd.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -312,7 +336,7 @@ void initializeMenu() async {
               ),
               const SizedBox(height: 4),
               Text(
-                "Rs. ${totalIncome.toStringAsFixed(2)}",
+                "Rs. ${totalIncome.toString()}",
                 style: AppTypography.textMd.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.backgroundOrange,
@@ -351,7 +375,7 @@ void initializeMenu() async {
         height: 100, // Đảm bảo chiều cao cho ListView
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 5),
           itemCount: items.length,
           itemBuilder: (BuildContext context, int index) {
             return GestureDetector(
@@ -375,10 +399,10 @@ void initializeMenu() async {
                 }
               },
               child: Padding(
-                padding: const EdgeInsets.only(right: 5),
+                padding: const EdgeInsets.only(right: 15),
                 child: Container(
-                  width: 160,
-                  padding: const EdgeInsets.symmetric(vertical: 35),
+                  width: 150,
+                  padding: const EdgeInsets.symmetric(vertical: 25),
                   decoration: BoxDecoration(
                       color: AppColors.signIn,
                       borderRadius: BorderRadius.circular(10),
@@ -409,7 +433,7 @@ void initializeMenu() async {
 class HistoryPage extends StatefulWidget {
   final ShopModel shop;
 
-  const HistoryPage({Key? key, required this.shop}) : super(key: key);
+  const HistoryPage({super.key, required this.shop});
 
   @override
   _HistoryPageState createState() => _HistoryPageState();
@@ -470,15 +494,15 @@ class _HistoryPageState extends State<HistoryPage> {
             Icons.arrow_back_ios_new_rounded,
             color: AppColors.backgroundOrange,
           ),
-          onPressed: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => UserType())),
+          onPressed: () => Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const UserType())),
         ),
         elevation: 0,
         centerTitle: true,
       ),
       backgroundColor: AppColors.backgroundYellow,
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
               ? Center(child: Text(errorMessage))
               : SingleChildScrollView(
@@ -487,11 +511,12 @@ class _HistoryPageState extends State<HistoryPage> {
                     children: [
                       // Thẻ thông tin cửa hàng hoặc bất kỳ widget nào bạn muốn hiển thị
                       Container(
-                        margin: EdgeInsets.all(20),
-                        padding: EdgeInsets.all(20),
+                        margin: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(20),
                         height: 120,
                         decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
+                            border: Border.all(
+                                color: AppColors.backgroundOrange, width: 2),
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(20))),
                         child: Row(
@@ -503,55 +528,66 @@ class _HistoryPageState extends State<HistoryPage> {
                               children: [
                                 Row(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.pin_drop_rounded,
-                                      size: 15,
+                                      size: 25,
                                     ),
-                                    Text(widget.shop.shopName,
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(widget.shop.shopName.toUpperCase(),
                                         style: AppTypography.textMd.copyWith(
-                                            fontSize: 12,
+                                            fontSize: 16,
                                             fontWeight: FontWeight.w700)),
                                   ],
                                 ),
                                 Row(
                                   children: [
-                                    Icon(Icons.timelapse_rounded, size: 15),
+                                    const Icon(Icons.timelapse_rounded,
+                                        size: 25),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
                                     Text(
                                         "${widget.shop.openingTime} AM TO ${widget.shop.closingTime} PM",
                                         style: AppTypography.textMd.copyWith(
-                                            fontSize: 12,
+                                            fontSize: 16,
                                             fontWeight: FontWeight.w700)),
                                   ],
                                 ),
                                 Row(
                                   children: [
-                                    Icon(Icons.shopping_cart, size: 15),
+                                    const Icon(Icons.shopping_cart, size: 25),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
                                     Text("${card.length} ITEMS IN STOCK",
                                         style: AppTypography.textMd.copyWith(
-                                            fontSize: 12,
+                                            fontSize: 16,
                                             fontWeight: FontWeight.w700)),
                                   ],
                                 ),
-                                Container(
-                                    width: 30,
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(5),
-                                        color: AppColors.signIn),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          "0",
-                                          style: AppTypography.textSm.copyWith(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w700),
-                                        ),
-                                        const Icon(
-                                          Icons.star,
-                                          size: 15,
-                                        )
-                                      ],
-                                    ))
+                                // Container(
+                                //     width: 30,
+                                //     padding: const EdgeInsets.all(2),
+                                //     decoration: BoxDecoration(
+                                //         borderRadius: BorderRadius.circular(5),
+                                //         color: AppColors.signIn),
+                                //     child: Row(
+                                //       children: [
+                                //         Text(
+                                //           "0",
+                                //           style: AppTypography.textSm.copyWith(
+                                //               fontSize: 15,
+                                //               fontWeight: FontWeight.w700),
+                                //         ),
+                                //         const Icon(
+                                //           Icons.star,
+                                //           size: 15,
+                                //         )
+                                //       ],
+                                //     )
+                                //     )
                               ],
                             ),
                           ],
@@ -578,7 +614,7 @@ class _HistoryPageState extends State<HistoryPage> {
                             )
                           : ListView.builder(
                               shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               itemCount: card.length,
                               itemBuilder: (context, index) {
                                 final order = card[index];
@@ -641,7 +677,7 @@ class _HistoryPageState extends State<HistoryPage> {
                                               ],
                                             ),
                                           ),
-                                          Spacer(),
+                                          const Spacer(),
                                           Container(
                                             height: 120,
                                             width: 120,
@@ -688,7 +724,7 @@ class _HistoryPageState extends State<HistoryPage> {
 class InfoPage extends StatefulWidget {
   final ShopModel shop;
 
-  const InfoPage({Key? key, required this.shop}) : super(key: key);
+  const InfoPage({super.key, required this.shop});
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -766,7 +802,7 @@ class _InfoPageState extends State<InfoPage> {
           _isEditable = false;
           _showMessage = true;
         });
-        Future.delayed(Duration(seconds: 5), () {
+        Future.delayed(const Duration(seconds: 5), () {
           setState(() {
             _showMessage = false; // Ẩn thông báo
           });
@@ -796,23 +832,24 @@ class _InfoPageState extends State<InfoPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-          builder: (context) => LoginScreen()), // Đảm bảo LoginIn được import
+          builder: (context) =>
+              const LoginScreen()), // Đảm bảo LoginIn được import
     );
   }
 
   Widget inputText(TextEditingController controller, String hintText) {
     return Padding(
       padding: const EdgeInsets.all(5),
-      child: Container(
+      child: SizedBox(
         width: 250,
         child: TextFormField(
           decoration: InputDecoration(
-            enabledBorder: OutlineInputBorder(
+            enabledBorder: const OutlineInputBorder(
               borderSide:
                   BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
-            focusedBorder: OutlineInputBorder(
+            focusedBorder: const OutlineInputBorder(
               // Đổi thành OutlineInputBorder để giữ viền khi có focus
               borderSide:
                   BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
@@ -824,7 +861,7 @@ class _InfoPageState extends State<InfoPage> {
                 Icons.edit,
                 color: _isEditable
                     ? Colors.grey[400]
-                    : Color.fromRGBO(238, 118, 0, 1),
+                    : const Color.fromRGBO(238, 118, 0, 1),
               ),
               onPressed: () {
                 setState(() {
@@ -855,8 +892,8 @@ class _InfoPageState extends State<InfoPage> {
             Icons.arrow_back_ios_new_rounded,
             color: AppColors.backgroundOrange,
           ),
-          onPressed: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => UserType())),
+          onPressed: () => Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const UserType())),
         ),
         elevation: 0,
         centerTitle: true,
@@ -871,7 +908,7 @@ class _InfoPageState extends State<InfoPage> {
                   height: 120,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(20),
                           topRight: Radius.circular(20)),
                       color: Colors.amber[900]),
@@ -879,7 +916,7 @@ class _InfoPageState extends State<InfoPage> {
                 Container(
                   height: 500,
                   width: double.infinity,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(20),
                           bottomRight: Radius.circular(20)),
@@ -896,13 +933,13 @@ class _InfoPageState extends State<InfoPage> {
                 width: 120,
                 decoration: BoxDecoration(
                   border: Border.all(
-                      color: Color.fromRGBO(122, 103, 238, 1), width: 3),
-                  borderRadius: BorderRadius.all(Radius.circular(100)),
+                      color: const Color.fromRGBO(122, 103, 238, 1), width: 3),
+                  borderRadius: const BorderRadius.all(Radius.circular(100)),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: Image.asset(
-                    "assets/Ảnh.jpg",
+                    "assets/iconprofile.png",
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -940,16 +977,16 @@ class _InfoPageState extends State<InfoPage> {
                     child: Container(
                       width: 100,
                       height: 45,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                           color: Color.fromRGBO(238, 118, 0, 1),
                           borderRadius: BorderRadius.all(Radius.circular(10))),
                       child: Center(
                         child: _isUpdating
-                            ? CircularProgressIndicator(
+                            ? const CircularProgressIndicator(
                                 valueColor:
                                     AlwaysStoppedAnimation<Color>(Colors.white),
                               )
-                            : Text(
+                            : const Text(
                                 "UPDATE",
                                 style: TextStyle(
                                     color: Colors.white,
@@ -958,7 +995,7 @@ class _InfoPageState extends State<InfoPage> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 10,
                   ),
                   GestureDetector(
@@ -968,10 +1005,10 @@ class _InfoPageState extends State<InfoPage> {
                     child: Container(
                       width: 100,
                       height: 45,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                           color: Colors.red,
                           borderRadius: BorderRadius.all(Radius.circular(10))),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           "LOG OUT",
                           style: TextStyle(
@@ -980,7 +1017,7 @@ class _InfoPageState extends State<InfoPage> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 10,
                   ),
                   // Nút CHAT
@@ -997,10 +1034,10 @@ class _InfoPageState extends State<InfoPage> {
                     child: Container(
                       width: 100,
                       height: 45,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                           color: Colors.blue,
                           borderRadius: BorderRadius.all(Radius.circular(10))),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           "CHAT",
                           style: TextStyle(
@@ -1018,7 +1055,7 @@ class _InfoPageState extends State<InfoPage> {
                 left: 20,
                 right: 20,
                 child: Container(
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: _updateMessage.contains('Error')
                         ? Colors.redAccent
@@ -1027,7 +1064,7 @@ class _InfoPageState extends State<InfoPage> {
                   ),
                   child: Text(
                     _updateMessage,
-                    style: TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Colors.white),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -1042,7 +1079,7 @@ class _InfoPageState extends State<InfoPage> {
 class SellerHomeScreen extends StatefulWidget {
   final ShopModel shop;
 
-  const SellerHomeScreen({Key? key, required this.shop}) : super(key: key);
+  const SellerHomeScreen({super.key, required this.shop});
 
   @override
   _SellerHomeScreenState createState() => _SellerHomeScreenState();
@@ -1051,8 +1088,28 @@ class SellerHomeScreen extends StatefulWidget {
 class _SellerHomeScreenState extends State<SellerHomeScreen> {
   final DatabaseService service = DatabaseService();
 
+  double? screenWidth;
+  double? screenHeight;
+  final bool _isEditable = false;
+
+  Future<List<dynamic>> getOrders() async {
+    final ordersSnapshot = await FirebaseFirestore.instance
+        .collection("orders")
+        .where("shop_id", isEqualTo: widget.shop.shopID)
+        .limit(10)
+        .get();
+
+    return ordersSnapshot.docs.map((doc) => doc.data()).toList();
+  }
+
   int _selectedIndex = 0;
-  late List<Widget> _widgetOptions;
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  List<Widget> _widgetOptions = [];
 
   @override
   void initState() {
@@ -1060,354 +1117,391 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     _widgetOptions = [
       HomePage(shop: widget.shop),
       HistoryPage(shop: widget.shop),
-      ntfPage(), // Hiển thị thông báo
-      InfoPage(shop: widget.shop),
+      ntfPage(),
+      InfoPage(
+        shop: widget.shop,
+      ),
     ];
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Truy cập MediaQuery trực tiếp trong build
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined, color: Colors.black),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history, color: Colors.black),
-            label: 'History',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications, color: Colors.black),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle_outlined, color: Colors.black),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.black,
-        onTap: _onItemTapped,
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Colors.white, // Ghi đè màu nền trắng
+        ),
+        child: BottomNavigationBar(
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined, color: Colors.black),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.history, color: Colors.black),
+              label: 'History',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notifications, color: Colors.black),
+              label: 'Notifications',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle_outlined, color: Colors.black),
+              label: 'Profile',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.black,
+          unselectedItemColor: Colors.grey,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+        ),
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
     );
   }
 
   Widget ntfPage() {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text(
-        'Notifications',
-        style: TextStyle(
-          fontWeight: FontWeight.bold, // Đặt chữ in đậm
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text("Notifications",
+            style: AppTypography.textMd.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.backgroundOrange)),
+        backgroundColor: AppColors.backgroundYellow,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.backgroundOrange,
+          ),
+          onPressed: () => Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const UserType())),
         ),
+        elevation: 0,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.add,
+              color: AppColors.backgroundOrange,
+            ), // Nút "Add" để tạo thông báo mới
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        createNotificationForm()), // Điều hướng đến form tạo thông báo
+              );
+            },
+          ),
+        ],
       ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.add), // Nút "Add" để tạo thông báo mới
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => createNotificationForm()), // Điều hướng đến form tạo thông báo
-            );
-          },
-        ),
-      ],
-    ),
-    body: Column(
-      children: [
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('notifications')
-                .where('shop_id', isEqualTo: widget.shop.shopID) // Lọc thông báo theo shop
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              }
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(child: Text('No notifications available'));
-              }
-              final notifications = snapshot.data!.docs;
-
-              return ListView.builder(
-                itemCount: notifications.length,
-                itemBuilder: (context, index) {
-                  final data = notifications[index].data() as Map<String, dynamic>;
-                  return ntfcard(
-                    data['title'] ?? 'No Title',
-                    data['description'] ?? 'No Description',
-                    data['date'] ?? 'Unknown Date',
-                    onEdit: () {
-                      // Điều hướng đến trang chỉnh sửa thông báo
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditNotificationForm(
-                            notificationId: notifications[index].id,
-                            initialTitle: data['title'],
-                            initialDescription: data['description'],
-                          ),
-                        ),
-                      );
-                    },
-                    onDelete: () {
-                      // Xóa thông báo
-                      FirebaseFirestore.instance
-                          .collection('notifications')
-                          .doc(notifications[index].id)
-                          .delete();
-                    },
-                  );
-                },
-              );
-            },
-          ),
-        ),
-        // Phần hiển thị thông báo giả từ khách hàng
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            'Received Notifications',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: fakeNotifications.length,
-            itemBuilder: (context, index) {
-              final fakeData = fakeNotifications[index];
-              return ntfcard(
-                fakeData['title'] ?? 'No Title',
-                fakeData['description'] ?? 'No Description',
-                fakeData['date'] ?? 'Unknown Date',
-              );
-            },
-          ),
-        ),
-      ],
-    ),
-  );
-  
-}
-
-// Danh sách thông báo giả từ khách hàng
-final List<Map<String, String>> fakeNotifications = [
-  {
-    "title": "Đơn hàng từ Khách hàng Khoa",
-    "description": "Khách hàng A đã đặt hàng với mã: #1001.",
-    "date": "01/10/2024",
-  },
-  {
-    "title": "Đơn hàng từ Khách hàng Nam",
-    "description": "Khách hàng B đã đặt hàng với mã: #1002.",
-    "date": "02/10/2024",
-  },
-  {
-    "title": "Đơn hàng từ Khách hàng Tuấn",
-    "description": "Khách hàng C đã đặt hàng với mã: #1003.",
-    "date": "01/10/2024",
-  },
-];
-
-  // Hiển thị card thông báo
-Widget ntfcard(
-  String title,
-  String description,
-  String date, {
-  VoidCallback? onEdit,
-  VoidCallback? onDelete,
-}) {
-  return Card(
-    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-    elevation: 3,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
-    ),
-    color: Colors.amber[50],
-    child: Padding(
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
         children: [
-          Icon(
-            Icons.check_circle,
-            color: Colors.green,
-            size: 24,
-          ),
-          const SizedBox(width: 10),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 255, 145, 0),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Text(
-                    date,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Nút chỉnh sửa nếu có
-          if (onEdit != null)
-            IconButton(
-              icon: Icon(Icons.edit, color: Colors.blue),
-              onPressed: onEdit,
-            ),
-          // Nút xóa nếu có
-          if (onDelete != null)
-            IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
-              onPressed: () {
-                // Hiện hộp thoại xác nhận trước khi xóa
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text('Xác nhận xóa'),
-                      content: Text('Bạn có chắc chắn muốn xóa thông báo này không?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop(); // Đóng hộp thoại
-                          },
-                          child: Text('Hủy'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            if (onDelete != null) onDelete(); // Gọi hàm xóa
-                            Navigator.of(context).pop(); // Đóng hộp thoại
-                          },
-                          child: Text('Xóa'),
-                        ),
-                      ],
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('notifications')
+                  .where('shop_id',
+                      isEqualTo: widget.shop.shopID) // Lọc thông báo theo shop
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text('No notifications available'));
+                }
+                final notifications = snapshot.data!.docs;
+
+                return ListView.builder(
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final data =
+                        notifications[index].data() as Map<String, dynamic>;
+                    return ntfcard(
+                      data['title'] ?? 'No Title',
+                      data['description'] ?? 'No Description',
+                      data['date'] ?? 'Unknown Date',
+                      onEdit: () {
+                        // Điều hướng đến trang chỉnh sửa thông báo
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditNotificationForm(
+                              notificationId: notifications[index].id,
+                              initialTitle: data['title'],
+                              initialDescription: data['description'],
+                            ),
+                          ),
+                        );
+                      },
+                      onDelete: () {
+                        // Xóa thông báo
+                        FirebaseFirestore.instance
+                            .collection('notifications')
+                            .doc(notifications[index].id)
+                            .delete();
+                      },
                     );
                   },
                 );
               },
             ),
+          ),
+          // Phần hiển thị thông báo giả từ khách hàng
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Received Notifications',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: fakeNotifications.length,
+              itemBuilder: (context, index) {
+                final fakeData = fakeNotifications[index];
+                return ntfcard(
+                  fakeData['title'] ?? 'No Title',
+                  fakeData['description'] ?? 'No Description',
+                  fakeData['date'] ?? 'Unknown Date',
+                );
+              },
+            ),
+          ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
 
+// Danh sách thông báo giả từ khách hàng
+  final List<Map<String, String>> fakeNotifications = [
+    {
+      "title": "Đơn hàng từ Khách hàng Khoa",
+      "description": "Khách hàng A đã đặt hàng với mã: #1001.",
+      "date": "01/10/2024",
+    },
+    {
+      "title": "Đơn hàng từ Khách hàng Nam",
+      "description": "Khách hàng B đã đặt hàng với mã: #1002.",
+      "date": "02/10/2024",
+    },
+    {
+      "title": "Đơn hàng từ Khách hàng Tuấn",
+      "description": "Khách hàng C đã đặt hàng với mã: #1003.",
+      "date": "01/10/2024",
+    },
+  ];
+
+  // Hiển thị card thông báo
+  Widget ntfcard(
+    String title,
+    String description,
+    String date, {
+    VoidCallback? onEdit,
+    VoidCallback? onDelete,
+  }) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      color: Colors.amber[50],
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.check_circle,
+              color: Colors.green,
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 255, 145, 0),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text(
+                      date,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Nút chỉnh sửa nếu có
+            if (onEdit != null)
+              IconButton(
+                icon: Icon(Icons.edit, color: Colors.blue),
+                onPressed: onEdit,
+              ),
+            // Nút xóa nếu có
+            if (onDelete != null)
+              IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  // Hiện hộp thoại xác nhận trước khi xóa
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Xác nhận xóa'),
+                        content: Text(
+                            'Bạn có chắc chắn muốn xóa thông báo này không?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Đóng hộp thoại
+                            },
+                            child: Text('Hủy'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              if (onDelete != null) onDelete(); // Gọi hàm xóa
+                              Navigator.of(context).pop(); // Đóng hộp thoại
+                            },
+                            child: Text('Xóa'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   // Form tạo thông báo mới
-Widget createNotificationForm() {
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  Widget createNotificationForm() {
+    final _titleController = TextEditingController();
+    final _descriptionController = TextEditingController();
 
-  return Scaffold(
-    appBar: AppBar(
-      title: Text("Create Notification"),
-      backgroundColor: const Color.fromARGB(255, 254, 181, 122),
-    ),
-    body: Container(
-      color: Colors.white, // Màu nền chính
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Center(
-          child: SingleChildScrollView( // Cho phép cuộn nếu cần thiết
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: "Title",
-                    labelStyle: TextStyle(color: Colors.black54), // Màu chữ label
-                    border: OutlineInputBorder(), // Viền ô nhập
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.amber, width: 2.0), // Màu viền khi có tiêu điểm
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Create Notification"),
+        backgroundColor: const Color.fromARGB(255, 254, 181, 122),
+      ),
+      body: Container(
+        color: Colors.white, // Màu nền chính
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Center(
+            child: SingleChildScrollView(
+              // Cho phép cuộn nếu cần thiết
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: "Title",
+                      labelStyle:
+                          TextStyle(color: Colors.black54), // Màu chữ label
+                      border: OutlineInputBorder(), // Viền ô nhập
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Colors.amber,
+                            width: 2.0), // Màu viền khi có tiêu điểm
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    labelText: "Description",
-                    labelStyle: TextStyle(color: Colors.black54), // Màu chữ label
-                    border: OutlineInputBorder(), // Viền ô nhập
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.amber, width: 2.0), // Màu viền khi có tiêu điểm
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: _descriptionController,
+                    decoration: InputDecoration(
+                      labelText: "Description",
+                      labelStyle:
+                          TextStyle(color: Colors.black54), // Màu chữ label
+                      border: OutlineInputBorder(), // Viền ô nhập
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Colors.amber,
+                            width: 2.0), // Màu viền khi có tiêu điểm
+                      ),
                     ),
+                    maxLines: 4, // Cho phép nhiều dòng
                   ),
-                  maxLines: 4, // Cho phép nhiều dòng
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    createNotification(_titleController.text, _descriptionController.text);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 207, 236, 125),
-                    padding: EdgeInsets.symmetric(vertical: 15), // Padding cho nút
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      createNotification(
+                          _titleController.text, _descriptionController.text);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 207, 236, 125),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 15), // Padding cho nút
+                    ),
+                    child: Text("Create",
+                        style:
+                            TextStyle(fontSize: 16)), // Kích thước chữ lớn hơn
                   ),
-                  child: Text("Create", style: TextStyle(fontSize: 16)), // Kích thước chữ lớn hơn
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
 // Hàm tạo thông báo và lưu vào Firestore
-void createNotification(String title, String description) async {
-  CollectionReference notifications = FirebaseFirestore.instance.collection('notifications');
+  void createNotification(String title, String description) async {
+    CollectionReference notifications =
+        FirebaseFirestore.instance.collection('notifications');
 
-  await notifications.add({
-    'title': title,
-    'description': description,
-    'date': DateFormat('dd/MM/yyyy').format(DateTime.now()), // Lưu ngày tạo
-    'shop_id': widget.shop.shopID, // Gán shop ID cho thông báo
-  });
+    await notifications.add({
+      'title': title,
+      'description': description,
+      'date': DateFormat('dd/MM/yyyy').format(DateTime.now()), // Lưu ngày tạo
+      'shop_id': widget.shop.shopID, // Gán shop ID cho thông báo
+    });
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Notification created successfully!')),
-  );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Notification created successfully!')),
+    );
 
-  Navigator.pop(context); // Quay lại sau khi tạo
+    Navigator.pop(context); // Quay lại sau khi tạo
+  }
 }
-}
-
 
 class OrderTile extends StatelessWidget {
   final String buyerPhone;
@@ -1539,14 +1633,15 @@ class _EditNotificationFormState extends State<EditNotificationForm> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Edit Notification"),
-        backgroundColor:  const Color.fromARGB(255, 254, 181, 122),
+        backgroundColor: const Color.fromARGB(255, 254, 181, 122),
       ),
       body: Container(
         color: Colors.white, // Màu nền chính
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Center(
-            child: SingleChildScrollView( // Cho phép cuộn nếu cần thiết
+            child: SingleChildScrollView(
+              // Cho phép cuộn nếu cần thiết
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1555,10 +1650,13 @@ class _EditNotificationFormState extends State<EditNotificationForm> {
                     controller: _titleController,
                     decoration: InputDecoration(
                       labelText: "Title",
-                      labelStyle: TextStyle(color: Colors.black54), // Màu chữ label
+                      labelStyle:
+                          TextStyle(color: Colors.black54), // Màu chữ label
                       border: OutlineInputBorder(), // Viền ô nhập
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.amber, width: 2.0), // Màu viền khi có tiêu điểm
+                        borderSide: BorderSide(
+                            color: Colors.amber,
+                            width: 2.0), // Màu viền khi có tiêu điểm
                       ),
                     ),
                   ),
@@ -1567,10 +1665,13 @@ class _EditNotificationFormState extends State<EditNotificationForm> {
                     controller: _descriptionController,
                     decoration: InputDecoration(
                       labelText: "Description",
-                      labelStyle: TextStyle(color: Colors.black54), // Màu chữ label
+                      labelStyle:
+                          TextStyle(color: Colors.black54), // Màu chữ label
                       border: OutlineInputBorder(), // Viền ô nhập
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.amber, width: 2.0), // Màu viền khi có tiêu điểm
+                        borderSide: BorderSide(
+                            color: Colors.amber,
+                            width: 2.0), // Màu viền khi có tiêu điểm
                       ),
                     ),
                     maxLines: 4, // Cho phép nhiều dòng
@@ -1578,14 +1679,19 @@ class _EditNotificationFormState extends State<EditNotificationForm> {
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      updateNotification(widget.notificationId, _titleController.text, _descriptionController.text);
+                      updateNotification(widget.notificationId,
+                          _titleController.text, _descriptionController.text);
                       Navigator.pop(context); // Quay lại trang trước
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 207, 236, 125), // Màu nền của nút
-                      padding: EdgeInsets.symmetric(vertical: 15), // Padding cho nút
+                      backgroundColor: const Color.fromARGB(
+                          255, 207, 236, 125), // Màu nền của nút
+                      padding:
+                          EdgeInsets.symmetric(vertical: 15), // Padding cho nút
                     ),
-                    child: Text("Update", style: TextStyle(fontSize: 16)), // Kích thước chữ lớn hơn
+                    child: Text("Update",
+                        style:
+                            TextStyle(fontSize: 16)), // Kích thước chữ lớn hơn
                   ),
                 ],
               ),
@@ -1598,7 +1704,10 @@ class _EditNotificationFormState extends State<EditNotificationForm> {
 
   // Hàm cập nhật thông báo trong Firestore
   void updateNotification(String id, String title, String description) async {
-    await FirebaseFirestore.instance.collection('notifications').doc(id).update({
+    await FirebaseFirestore.instance
+        .collection('notifications')
+        .doc(id)
+        .update({
       'title': title,
       'description': description,
     });

@@ -1,9 +1,10 @@
 import 'dart:developer';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/models/order_model.dart';
-import 'package:campus_catalogue/screens/api_chart.dart';
+import 'package:campus_catalogue/screens/api_chat.dart';
 import 'package:campus_catalogue/screens/cart.dart';
 import 'package:campus_catalogue/screens/history_user_page.dart';
+import 'package:campus_catalogue/screens/map_screen.dart';
 import 'package:campus_catalogue/screens/ntf_user_page.dart';
 import 'package:campus_catalogue/screens/profile_use_page.dart';
 import 'package:campus_catalogue/screens/search_screen.dart';
@@ -429,6 +430,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  bool _isExpanded = false;
+  
   final List<String> _titles = [
     "Explore IITG",
     "Cart",
@@ -466,6 +469,15 @@ class _HomeScreenState extends State<HomeScreen> {
           child: FoodChatScreen(),
         );
       },
+    );
+  }
+
+    void _openMap() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MapScreen(),
+      ),
     );
   }
 
@@ -551,12 +563,62 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           // Positioned chat icon in the bottom-right corner
           Positioned(
-            bottom: 15,
-            right: 15,
-            child: FloatingActionButton(
-              onPressed: _openChatWindow,
-              backgroundColor: const Color.fromARGB(255, 255, 139, 44),
-              child: const Icon(Icons.chat, color: Colors.white),
+            bottom: 10,
+            right: 10,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Background color of the block
+                    borderRadius: BorderRadius.circular(20), // Rounded corners
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  padding: _isExpanded ? const EdgeInsets.all(5.0) : EdgeInsets.zero,
+                  height: _isExpanded ? 120 : 0, // Adjust the height based on state
+                  width: _isExpanded ? 60 : 0, // Adjust the width based on state
+                  child: _isExpanded
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FloatingActionButton(
+                              onPressed: _openMap,
+                              backgroundColor: const Color.fromARGB(255, 255, 139, 44),
+                              child: const Icon(Icons.map, color: Colors.white),
+                              mini: true, // Small version of the button
+                            ),
+                            const SizedBox(height: 10), // Spacing between buttons
+                            FloatingActionButton(
+                              onPressed: _openChatWindow,
+                              backgroundColor: const Color.fromARGB(255, 255, 139, 44),
+                              child: const Icon(Icons.chat, color: Colors.white),
+                              mini: true,
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                const SizedBox(height: 10), // Space between container and toggle button
+                FloatingActionButton(
+                  onPressed: () {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  },
+                  backgroundColor: const Color.fromARGB(255, 255, 139, 44),
+                  child: Icon(
+                    _isExpanded ? Icons.close : Icons.add,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

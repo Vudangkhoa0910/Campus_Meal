@@ -327,6 +327,7 @@ class LocationCard extends StatelessWidget {
 class SearchInput extends StatefulWidget {
   final Buyer buyer;
   const SearchInput({super.key, required this.buyer});
+  
   @override
   State<SearchInput> createState() => _SearchInputState();
 }
@@ -334,7 +335,7 @@ class SearchInput extends StatefulWidget {
 class _SearchInputState extends State<SearchInput> {
   final searchController = TextEditingController();
   List<String> searchTerms = [];
-  List shopSearchResult = [];
+  List<dynamic> shopSearchResult = [];
 
   @override
   void dispose() {
@@ -343,37 +344,56 @@ class _SearchInputState extends State<SearchInput> {
     super.dispose();
   }
 
-  getSearchResult(searchTerm) async {
+  Future<List<dynamic>> getSearchResult(String searchTerm) async {
     final searchResult = await FirebaseFirestore.instance
         .collection("cache")
         .doc(searchTerm)
         .get();
-    return searchResult;
-  }
 
-  void searchSubmit(context) async {
-    searchTerms = searchController.text.split(' ');
-    Set shops = {};
-    for (int i = 0; i < searchTerms.length; i++) {
-      var tmp = (await getSearchResult(searchTerms[i]));
-      shopSearchResult = tmp['list'];
-
-      for (var shop in shopSearchResult) {
-        final tmp =
-            await FirebaseFirestore.instance.collection("shop").doc(shop).get();
-        shops.add(tmp.data());
-      }
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => SearchScreen(
-                    shopResults: shops.toList(),
-                    isSearch: true,
-                    title: "Explore IITG",
-                    buyer: widget.buyer,
-                  )));
+    // Kiểm tra tài liệu có tồn tại không
+    if (searchResult.exists) {
+      return searchResult['list'] ?? [];
+    } else {
+      return [];
     }
   }
+
+  void searchSubmit(BuildContext context) async {
+  searchTerms = searchController.text.split(' ');
+  Set<dynamic> shops = {};
+
+  for (String term in searchTerms) {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection("shop")
+        .where("shop_name", isGreaterThanOrEqualTo: term)
+        .where("shop_name", isLessThanOrEqualTo: term + '\uf8ff') 
+        .get();
+
+    for (var shopDoc in querySnapshot.docs) {
+      shops.add(shopDoc.data()); 
+    }
+  }
+
+  if (shops.isNotEmpty) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchScreen(
+          shopResults: shops.toList(),
+          isSearch: true,
+          title: "Explore IITG",
+          buyer: widget.buyer,
+        ),
+      ),
+    );
+  } else {
+    // Hiển thị thông báo nếu không tìm thấy kết quả nào
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Không tìm thấy kết quả nào.')),
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -391,25 +411,25 @@ class _SearchInputState extends State<SearchInput> {
                   autofocus: false,
                   cursorColor: Colors.grey,
                   decoration: InputDecoration(
-                      isDense: true,
-                      fillColor: Colors.white,
-                      filled: true,
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                              width: 1, color: AppColors.backgroundOrange)),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                              width: 1, color: AppColors.backgroundOrange)),
-                      hintText: 'Search',
-                      hintStyle:
-                          const TextStyle(color: Colors.grey, fontSize: 18),
-                      suffixIcon: const Icon(
-                        Icons.search,
-                        color: AppColors.secondary,
-                        size: 30,
-                      )),
+                    isDense: true,
+                    fillColor: Colors.white,
+                    filled: true,
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(width: 1, color: AppColors.backgroundOrange),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(width: 1, color: AppColors.backgroundOrange),
+                    ),
+                    hintText: 'Search',
+                    hintStyle: const TextStyle(color: Colors.grey, fontSize: 18),
+                    suffixIcon: const Icon(
+                      Icons.search,
+                      color: AppColors.secondary,
+                      size: 30,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -419,6 +439,7 @@ class _SearchInputState extends State<SearchInput> {
     );
   }
 }
+
 
 class HomeScreen extends StatefulWidget {
   final Buyer buyer;

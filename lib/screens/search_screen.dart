@@ -1,3 +1,4 @@
+import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/screens/shop_info.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,7 +8,7 @@ import 'package:campus_catalogue/constants/typography.dart';
 class SearchInput extends StatefulWidget {
   final Buyer buyer;
   const SearchInput({super.key, required this.buyer});
-
+  
   @override
   State<SearchInput> createState() => _SearchInputState();
 }
@@ -15,7 +16,7 @@ class SearchInput extends StatefulWidget {
 class _SearchInputState extends State<SearchInput> {
   final searchController = TextEditingController();
   List<String> searchTerms = [];
-  List shopSearchResult = [];
+  List<dynamic> shopSearchResult = [];
 
   @override
   void dispose() {
@@ -23,35 +24,54 @@ class _SearchInputState extends State<SearchInput> {
     super.dispose();
   }
 
-  Future<List> getSearchResult(String searchTerm) async {
+  Future<List<dynamic>> getSearchResult(String searchTerm) async {
     final searchResult = await FirebaseFirestore.instance
         .collection("cache")
         .doc(searchTerm)
         .get();
-    return searchResult['list'] ?? [];
+
+    if (searchResult.exists) {
+      return searchResult['list'] ?? [];
+    } else {
+      return [];
+    }
   }
 
   void searchSubmit(BuildContext context) async {
-    searchTerms = searchController.text.split(' ');
-    List shops = [];
+  searchTerms = searchController.text.split(' ');
+  Set<dynamic> shops = {};
 
-    for (String term in searchTerms) {
-      var tmp = await getSearchResult(term);
-      shops.addAll(tmp);
+  for (String term in searchTerms) {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection("shop")
+        .where("shop_name", isGreaterThanOrEqualTo: term)
+        .where("shop_name", isLessThanOrEqualTo: term + '\uf8ff') 
+        .get();
+
+    for (var shopDoc in querySnapshot.docs) {
+      shops.add(shopDoc.data()); 
     }
+  }
 
+  if (shops.isNotEmpty) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => SearchScreen(
-          title: "Explore IITG",
-          shopResults: shops,
+          shopResults: shops.toList(),
           isSearch: true,
+          title: "Explore IITG",
           buyer: widget.buyer,
         ),
       ),
     );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Không tìm thấy kết quả nào.')),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -74,17 +94,14 @@ class _SearchInputState extends State<SearchInput> {
                     filled: true,
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                          width: 1, color: AppColors.backgroundOrange),
+                      borderSide: const BorderSide(width: 1, color: AppColors.backgroundOrange),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(
-                          width: 1, color: AppColors.backgroundOrange),
+                      borderSide: const BorderSide(width: 1, color: AppColors.backgroundOrange),
                     ),
                     hintText: 'Search',
-                    hintStyle:
-                        const TextStyle(color: Colors.grey, fontSize: 18),
+                    hintStyle: const TextStyle(color: Colors.grey, fontSize: 18),
                     suffixIcon: const Icon(
                       Icons.search,
                       color: AppColors.secondary,
@@ -168,11 +185,6 @@ class ShopCard extends StatelessWidget {
                                 fontSize: 12, fontWeight: FontWeight.w400)),
                       ],
                     ),
-                    Row(
-                      children: [
-                        const Icon(Icons.door_back_door_rounded, size: 18),
-                      ],
-                    ),
                     Container(
                       width: 40,
                       padding: const EdgeInsets.all(2),
@@ -248,7 +260,7 @@ class ShopHeader extends StatelessWidget {
 class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
-    List openShops = widget.shopResults;
+    List openShopsAndFoods = widget.shopResults;
     List closedShops = [];
 
     return Scaffold(
@@ -264,7 +276,7 @@ class _SearchScreenState extends State<SearchScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          "Explore IITG",
+          widget.title,
           style: AppTypography.textMd.copyWith(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -276,30 +288,30 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           children: [
             SearchInput(buyer: widget.buyer),
-            ShopHeader(name: "Currently open shops", buyer: widget.buyer),
-            for (var shop in openShops)
+            ShopHeader(name: "Currently open shops/foods", buyer: widget.buyer),
+            for (var shopOrFood in openShopsAndFoods)
               GestureDetector(
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => ShopPage(
-                      name: shop["shop_name"],
+                      name: shopOrFood["shop_name"] ?? 'Unknown Shop',
                       rating: "0",
-                      location: shop["location"],
-                      menu: shop["menu"],
-                      ownerName: shop["owner_name"],
-                      upiID: shop["upi_id"],
+                      location: shopOrFood["location"] ?? 'Unknown Location',
+                      menu: shopOrFood["menu"] ?? [],
+                      ownerName: shopOrFood["owner_name"] ?? 'Unknown Owner',
+                      upiID: shopOrFood["upi_id"] ?? 'Unknown UPI',
                       buyer: widget.buyer,
                     ),
                   ),
                 ),
                 child: ShopCard(
-                  name: shop["shop_name"],
+                  name: shopOrFood["shop_name"] ?? 'Unknown Shop',
                   rating: "0",
-                  location: shop["location"],
-                  menu: shop["menu"],
-                  ownerName: shop["owner_name"],
-                  upiID: shop["upi_id"],
+                  location: shopOrFood["location"] ?? 'Unknown Location',
+                  menu: shopOrFood["menu"] ?? [],
+                  ownerName: shopOrFood["owner_name"] ?? 'Unknown Owner',
+                  upiID: shopOrFood["upi_id"] ?? 'Unknown UPI',
                   buyer: widget.buyer,
                 ),
               ),

@@ -117,7 +117,7 @@ class ShopCard extends StatelessWidget {
           children: [
             // Sử dụng CachedNetworkImage để hiển thị ảnh từ Firebase
             ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
               child: Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
@@ -292,7 +292,7 @@ class _LocationCardWrapperState extends State<LocationCardWrapper> {
 class LocationCard extends StatelessWidget {
   final String name;
   final String imgURL;
-  LocationCard({super.key, required this.name, required this.imgURL});
+  const LocationCard({super.key, required this.name, required this.imgURL});
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -325,7 +325,7 @@ class LocationCard extends StatelessWidget {
 
 class SearchInput extends StatefulWidget {
   final Buyer buyer;
-  SearchInput({super.key, required this.buyer});
+  const SearchInput({super.key, required this.buyer});
   @override
   State<SearchInput> createState() => _SearchInputState();
 }
@@ -421,7 +421,7 @@ class _SearchInputState extends State<SearchInput> {
 
 class HomeScreen extends StatefulWidget {
   final Buyer buyer;
-  HomeScreen({Key? key, required this.buyer}) : super(key: key);
+  const HomeScreen({super.key, required this.buyer});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();

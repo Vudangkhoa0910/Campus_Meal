@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 
 class NtfUserPage extends StatefulWidget {
   const NtfUserPage({super.key});
@@ -8,55 +9,41 @@ class NtfUserPage extends StatefulWidget {
 }
 
 class NtfUserPageState extends State<NtfUserPage> {
-  // Dữ liệu giả để mô phỏng thông báo
-  final List<Map<String, String>> notifications = [
-    {
-      "title": "Voucher giảm giá 20%",
-      "description": "Sử dụng mã: SAVE20 cho đơn hàng tiếp theo.",
-      "date": "01/10/2024",
-    },
-    {
-      "title": "Sự kiện ẩm thực",
-      "description": "Tham gia sự kiện ẩm thực vào thứ 7 này!",
-      "date": "02/10/2024",
-    },
-    {
-      "title": "Đơn hàng của bạn đã được xác nhận",
-      "description": "Đơn hàng #1234 sẽ được giao trong 30 phút.",
-      "date": "01/10/2024",
-    },
-    {
-      "title": "Thông tin mới về ứng dụng",
-      "description": "Cập nhật phiên bản mới với nhiều tính năng hấp dẫn.",
-      "date": "30/09/2024",
-    },
-    {
-      "title": "Khuyến mãi đặc biệt",
-      "description": "Giảm giá 15% cho đơn hàng từ 200.000đ.",
-      "date": "03/10/2024",
-    },
-    {
-      "title": "Hỗ trợ khách hàng",
-      "description": "Bạn có thể liên hệ với chúng tôi qua số hotline.",
-      "date": "29/09/2024",
-    },
-    {
-      "title": "Cập nhật món ăn mới",
-      "description": "Chúng tôi đã thêm món sushi mới vào menu.",
-      "date": "28/09/2024",
-    },
-  ];
+  // Lấy thông báo từ Firestore
+  Future<List<Map<String, dynamic>>> getNotifications() async {
+    final notificationsSnapshot = await FirebaseFirestore.instance
+        .collection('notifications')
+        .get(); // Lấy tất cả thông báo
+
+    return notificationsSnapshot.docs.map((doc) => doc.data()).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.builder(
-        itemCount: notifications.length,
-        itemBuilder: (context, index) {
-          return NotificationCard(
-            title: notifications[index]["title"]!,
-            description: notifications[index]["description"]!,
-            date: notifications[index]["date"]!,
+      backgroundColor: Colors.white,
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: getNotifications(), // Gọi hàm lấy dữ liệu
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No notifications available'));
+          }
+
+          final notifications = snapshot.data!;
+
+          return ListView.builder(
+            itemCount: notifications.length,
+            itemBuilder: (context, index) {
+              return NotificationCard(
+                title: notifications[index]["title"] ?? 'No Title',
+                description: notifications[index]["description"] ?? 'No Description',
+                date: notifications[index]["date"] ?? 'Unknown Date',
+              );
+            },
           );
         },
       ),
@@ -97,7 +84,6 @@ class NotificationCard extends StatelessWidget {
             ),
             const SizedBox(width: 10), // Khoảng cách giữa biểu tượng và tiêu đề
             Expanded(
-              // Để tiêu đề và mô tả chiếm toàn bộ không gian còn lại
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

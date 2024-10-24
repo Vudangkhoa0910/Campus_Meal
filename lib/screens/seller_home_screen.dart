@@ -11,6 +11,7 @@ import 'package:campus_catalogue/screens/userType_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class OrderWrapper extends StatelessWidget {
   final List<dynamic> orders;
@@ -96,18 +97,50 @@ class HomePageState extends State<HomePage> {
   }
 
   // List<Map<String, dynamic>> menu = [];
-  void initializeMenu() {
+void initializeMenu() async {
     setState(() {
-      menu = List<Map<String, dynamic>>.from(widget.shop.menu.map((item) => {
-            "name": item["name"],
-            "price": item["price"],
-            "vegetarian": item["vegetarian"],
-            "description": item["description"],
-            "category": item["category"],
-            "img": item['img']
-          }));
-      isLoading = false;
+      isLoading = true;
     });
+
+    try {
+      // Truy vấn Firestore dựa trên shop_id
+      QuerySnapshot shopSnapshot = await FirebaseFirestore.instance
+          .collection('shop')
+          .where('shop_id', isEqualTo: widget.shop.shopID)
+          .get();
+
+      if (shopSnapshot.docs.isNotEmpty) {
+        // Lấy document đầu tiên (giả sử mỗi shop_id là duy nhất)
+        DocumentSnapshot shopDoc = shopSnapshot.docs.first;
+        Map<String, dynamic> shopData = shopDoc.data() as Map<String, dynamic>;
+
+        List<dynamic> firestoreMenu = shopData['menu'] ?? [];
+
+        setState(() {
+          menu = List<Map<String, dynamic>>.from(firestoreMenu.map((item) => {
+                "name": item["name"],
+                "price": item["price"],
+                "vegetarian": item["vegetarian"],
+                "description": item["description"],
+                "category": item["category"],
+                "img": item['img']
+              }));
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        // Trường hợp không tìm thấy shop
+        print("Shop không tồn tại");
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      // Xử lý lỗi truy xuất Firestore
+      print("Lỗi khi truy xuất menu từ Firestore: $e");
+    }
   }
 
   @override
@@ -869,7 +902,7 @@ class _InfoPageState extends State<InfoPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: Image.asset(
-                    "assets/iconprofile.png",
+                    "assets/Ảnh.jpg",
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -1018,194 +1051,363 @@ class SellerHomeScreen extends StatefulWidget {
 class _SellerHomeScreenState extends State<SellerHomeScreen> {
   final DatabaseService service = DatabaseService();
 
-  double? screenWidth;
-  double? screenHeight;
-  bool _isEditable = false;
+  int _selectedIndex = 0;
+  late List<Widget> _widgetOptions;
 
-  Future<List<dynamic>> getOrders() async {
-    final ordersSnapshot = await FirebaseFirestore.instance
-        .collection("orders")
-        .where("shop_id", isEqualTo: widget.shop.shopID)
-        .limit(10)
-        .get();
-
-    return ordersSnapshot.docs.map((doc) => doc.data()).toList();
+  @override
+  void initState() {
+    super.initState();
+    _widgetOptions = [
+      HomePage(shop: widget.shop),
+      HistoryPage(shop: widget.shop),
+      ntfPage(), // Hiển thị thông báo
+      InfoPage(shop: widget.shop),
+    ];
   }
 
-  int _selectedIndex = 0;
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  List<Widget> _widgetOptions = [];
-
-  @override
-  void initState() {
-    super.initState();
-
-    _widgetOptions = [
-      HomePage(shop: widget.shop),
-      HistoryPage(shop: widget.shop),
-      ntfPage(),
-      InfoPage(
-        shop: widget.shop,
-      ),
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Truy cập MediaQuery trực tiếp trong build
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.white,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined, color: Colors.black),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.history, color: Colors.black),
-              label: 'History',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications, color: Colors.black),
-              label: 'Notifications',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle_outlined, color: Colors.black),
-              label: 'Profile',
-            ),
-          ],
-          currentIndex:
-              _selectedIndex, // _selectedIndex should be managed if needed
-          selectedItemColor: Colors.black,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-        ),
-        body: _widgetOptions.elementAt(_selectedIndex));
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined, color: Colors.black),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history, color: Colors.black),
+            label: 'History',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications, color: Colors.black),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle_outlined, color: Colors.black),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.black,
+        onTap: _onItemTapped,
+      ),
+      body: _widgetOptions.elementAt(_selectedIndex),
+    );
   }
 
   Widget ntfPage() {
-    final List<Map<String, String>> notifications = [
-      {
-        "title": "Voucher giảm giá 20%",
-        "description": "Sử dụng mã: SAVE20 cho đơn hàng tiếp theo.",
-        "date": "01/10/2024",
-      },
-      {
-        "title": "Sự kiện ẩm thực",
-        "description": "Tham gia sự kiện ẩm thực vào thứ 7 này!",
-        "date": "02/10/2024",
-      },
-      {
-        "title": "Đơn hàng của bạn đã được xác nhận",
-        "description": "Đơn hàng #1234 sẽ được giao trong 30 phút.",
-        "date": "01/10/2024",
-      },
-      {
-        "title": "Thông tin mới về ứng dụng",
-        "description": "Cập nhật phiên bản mới với nhiều tính năng hấp dẫn.",
-        "date": "30/09/2024",
-      },
-      {
-        "title": "Khuyến mãi đặc biệt",
-        "description": "Giảm giá 15% cho đơn hàng từ 200.000đ.",
-        "date": "03/10/2024",
-      },
-      {
-        "title": "Hỗ trợ khách hàng",
-        "description": "Bạn có thể liên hệ với chúng tôi qua số hotline.",
-        "date": "29/09/2024",
-      },
-      {
-        "title": "Cập nhật món ăn mới",
-        "description": "Chúng tôi đã thêm món sushi mới vào menu.",
-        "date": "28/09/2024",
-      },
-    ];
-    return Scaffold(
-      body: ListView.builder(
-        itemCount: notifications.length,
-        itemBuilder: (context, index) {
-          return ntfcard(
-            notifications[index]["title"]!,
-            notifications[index]["description"]!,
-            notifications[index]["date"]!,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget ntfcard(String title, String description, String date) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      color: Colors.amber[50],
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.check_circle, // Biểu tượng tích xanh
-              color: Colors.green,
-              size: 24, // Kích thước biểu tượng
-            ),
-            const SizedBox(width: 10), // Khoảng cách giữa biểu tượng và tiêu đề
-            Expanded(
-              // Để tiêu đề và mô tả chiếm toàn bộ không gian còn lại
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 255, 145, 0),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Text(
-                      date,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text(
+        'Notifications',
+        style: TextStyle(
+          fontWeight: FontWeight.bold, // Đặt chữ in đậm
         ),
       ),
-    );
-  }
+      actions: [
+        IconButton(
+          icon: Icon(Icons.add), // Nút "Add" để tạo thông báo mới
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => createNotificationForm()), // Điều hướng đến form tạo thông báo
+            );
+          },
+        ),
+      ],
+    ),
+    body: Column(
+      children: [
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('notifications')
+                .where('shop_id', isEqualTo: widget.shop.shopID) // Lọc thông báo theo shop
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(child: Text('No notifications available'));
+              }
+              final notifications = snapshot.data!.docs;
+
+              return ListView.builder(
+                itemCount: notifications.length,
+                itemBuilder: (context, index) {
+                  final data = notifications[index].data() as Map<String, dynamic>;
+                  return ntfcard(
+                    data['title'] ?? 'No Title',
+                    data['description'] ?? 'No Description',
+                    data['date'] ?? 'Unknown Date',
+                    onEdit: () {
+                      // Điều hướng đến trang chỉnh sửa thông báo
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditNotificationForm(
+                            notificationId: notifications[index].id,
+                            initialTitle: data['title'],
+                            initialDescription: data['description'],
+                          ),
+                        ),
+                      );
+                    },
+                    onDelete: () {
+                      // Xóa thông báo
+                      FirebaseFirestore.instance
+                          .collection('notifications')
+                          .doc(notifications[index].id)
+                          .delete();
+                    },
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        // Phần hiển thị thông báo giả từ khách hàng
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Received Notifications',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: fakeNotifications.length,
+            itemBuilder: (context, index) {
+              final fakeData = fakeNotifications[index];
+              return ntfcard(
+                fakeData['title'] ?? 'No Title',
+                fakeData['description'] ?? 'No Description',
+                fakeData['date'] ?? 'Unknown Date',
+              );
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+  
 }
+
+// Danh sách thông báo giả từ khách hàng
+final List<Map<String, String>> fakeNotifications = [
+  {
+    "title": "Đơn hàng từ Khách hàng Khoa",
+    "description": "Khách hàng A đã đặt hàng với mã: #1001.",
+    "date": "01/10/2024",
+  },
+  {
+    "title": "Đơn hàng từ Khách hàng Nam",
+    "description": "Khách hàng B đã đặt hàng với mã: #1002.",
+    "date": "02/10/2024",
+  },
+  {
+    "title": "Đơn hàng từ Khách hàng Tuấn",
+    "description": "Khách hàng C đã đặt hàng với mã: #1003.",
+    "date": "01/10/2024",
+  },
+];
+
+  // Hiển thị card thông báo
+Widget ntfcard(
+  String title,
+  String description,
+  String date, {
+  VoidCallback? onEdit,
+  VoidCallback? onDelete,
+}) {
+  return Card(
+    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+    elevation: 3,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+    ),
+    color: Colors.amber[50],
+    child: Padding(
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.check_circle,
+            color: Colors.green,
+            size: 24,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 255, 145, 0),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    date,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Nút chỉnh sửa nếu có
+          if (onEdit != null)
+            IconButton(
+              icon: Icon(Icons.edit, color: Colors.blue),
+              onPressed: onEdit,
+            ),
+          // Nút xóa nếu có
+          if (onDelete != null)
+            IconButton(
+              icon: Icon(Icons.delete, color: Colors.red),
+              onPressed: () {
+                // Hiện hộp thoại xác nhận trước khi xóa
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('Xác nhận xóa'),
+                      content: Text('Bạn có chắc chắn muốn xóa thông báo này không?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Đóng hộp thoại
+                          },
+                          child: Text('Hủy'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            if (onDelete != null) onDelete(); // Gọi hàm xóa
+                            Navigator.of(context).pop(); // Đóng hộp thoại
+                          },
+                          child: Text('Xóa'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+        ],
+      ),
+    ),
+  );
+}
+
+
+  // Form tạo thông báo mới
+Widget createNotificationForm() {
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
+  return Scaffold(
+    appBar: AppBar(
+      title: Text("Create Notification"),
+      backgroundColor: const Color.fromARGB(255, 254, 181, 122),
+    ),
+    body: Container(
+      color: Colors.white, // Màu nền chính
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: SingleChildScrollView( // Cho phép cuộn nếu cần thiết
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    labelText: "Title",
+                    labelStyle: TextStyle(color: Colors.black54), // Màu chữ label
+                    border: OutlineInputBorder(), // Viền ô nhập
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.amber, width: 2.0), // Màu viền khi có tiêu điểm
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(
+                    labelText: "Description",
+                    labelStyle: TextStyle(color: Colors.black54), // Màu chữ label
+                    border: OutlineInputBorder(), // Viền ô nhập
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.amber, width: 2.0), // Màu viền khi có tiêu điểm
+                    ),
+                  ),
+                  maxLines: 4, // Cho phép nhiều dòng
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    createNotification(_titleController.text, _descriptionController.text);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 207, 236, 125),
+                    padding: EdgeInsets.symmetric(vertical: 15), // Padding cho nút
+                  ),
+                  child: Text("Create", style: TextStyle(fontSize: 16)), // Kích thước chữ lớn hơn
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+// Hàm tạo thông báo và lưu vào Firestore
+void createNotification(String title, String description) async {
+  CollectionReference notifications = FirebaseFirestore.instance.collection('notifications');
+
+  await notifications.add({
+    'title': title,
+    'description': description,
+    'date': DateFormat('dd/MM/yyyy').format(DateTime.now()), // Lưu ngày tạo
+    'shop_id': widget.shop.shopID, // Gán shop ID cho thông báo
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Notification created successfully!')),
+  );
+
+  Navigator.pop(context); // Quay lại sau khi tạo
+}
+}
+
 
 class OrderTile extends StatelessWidget {
   final String buyerPhone;
@@ -1301,6 +1503,108 @@ class OrderTile extends StatelessWidget {
           fontSize: 12,
         ),
       ),
+    );
+  }
+}
+
+class EditNotificationForm extends StatefulWidget {
+  final String notificationId;
+  final String initialTitle;
+  final String initialDescription;
+
+  const EditNotificationForm({
+    Key? key,
+    required this.notificationId,
+    required this.initialTitle,
+    required this.initialDescription,
+  }) : super(key: key);
+
+  @override
+  _EditNotificationFormState createState() => _EditNotificationFormState();
+}
+
+class _EditNotificationFormState extends State<EditNotificationForm> {
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController.text = widget.initialTitle;
+    _descriptionController.text = widget.initialDescription;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Edit Notification"),
+        backgroundColor:  const Color.fromARGB(255, 254, 181, 122),
+      ),
+      body: Container(
+        color: Colors.white, // Màu nền chính
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Center(
+            child: SingleChildScrollView( // Cho phép cuộn nếu cần thiết
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: "Title",
+                      labelStyle: TextStyle(color: Colors.black54), // Màu chữ label
+                      border: OutlineInputBorder(), // Viền ô nhập
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.amber, width: 2.0), // Màu viền khi có tiêu điểm
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: _descriptionController,
+                    decoration: InputDecoration(
+                      labelText: "Description",
+                      labelStyle: TextStyle(color: Colors.black54), // Màu chữ label
+                      border: OutlineInputBorder(), // Viền ô nhập
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.amber, width: 2.0), // Màu viền khi có tiêu điểm
+                      ),
+                    ),
+                    maxLines: 4, // Cho phép nhiều dòng
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      updateNotification(widget.notificationId, _titleController.text, _descriptionController.text);
+                      Navigator.pop(context); // Quay lại trang trước
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 207, 236, 125), // Màu nền của nút
+                      padding: EdgeInsets.symmetric(vertical: 15), // Padding cho nút
+                    ),
+                    child: Text("Update", style: TextStyle(fontSize: 16)), // Kích thước chữ lớn hơn
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Hàm cập nhật thông báo trong Firestore
+  void updateNotification(String id, String title, String description) async {
+    await FirebaseFirestore.instance.collection('notifications').doc(id).update({
+      'title': title,
+      'description': description,
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Notification updated successfully!')),
     );
   }
 }

@@ -53,16 +53,18 @@ class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              margin: EdgeInsets.all(20),
-              padding: EdgeInsets.all(15),
-              height: 120,
+              margin: const EdgeInsets.only(top: 15, left: 20, right: 20),
+              padding: const EdgeInsets.all(15),
+              height: 130,
               decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black),
+                  border:
+                      Border.all(color: AppColors.backgroundOrange, width: 2),
                   borderRadius: const BorderRadius.all(Radius.circular(20))),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -73,37 +75,49 @@ class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.account_circle,
-                            size: 15,
+                            size: 20,
                           ),
-                          Text(widget.buyer.userName,
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(widget.buyer.userName.toUpperCase(),
                               style: AppTypography.textMd.copyWith(
-                                  fontSize: 15, fontWeight: FontWeight.w700)),
+                                  fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
                       Row(
                         children: [
-                          Icon(Icons.phone_android, size: 15),
-                          Text(widget.buyer.phone,
+                          const Icon(Icons.phone_android, size: 20),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(widget.buyer.phone.toUpperCase(),
                               style: AppTypography.textMd.copyWith(
-                                  fontSize: 15, fontWeight: FontWeight.w700)),
+                                  fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
                       Row(
                         children: [
-                          Icon(Icons.email, size: 15),
-                          Text(widget.buyer.email,
+                          const Icon(Icons.email, size: 20),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(widget.buyer.email.toUpperCase(),
                               style: AppTypography.textMd.copyWith(
-                                  fontSize: 15, fontWeight: FontWeight.w700)),
+                                  fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
                       Row(
                         children: [
-                          Icon(Icons.location_on, size: 15),
-                          Text(widget.buyer.address,
+                          const Icon(Icons.location_on, size: 20),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(widget.buyer.address.toUpperCase(),
                               style: AppTypography.textMd.copyWith(
-                                  fontSize: 15, fontWeight: FontWeight.w700)),
+                                  fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
                     ],
@@ -112,7 +126,7 @@ class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.only(top: 15, left: 20, right: 20),
               child: Text(
                 "All Orders",
                 style: AppTypography.textMd
@@ -121,7 +135,7 @@ class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
             ),
             for (var item in card)
               Container(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 5),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 5),
                 child: Container(
                     decoration: BoxDecoration(
                         color: const Color(0xFFFFF2E0),
@@ -171,7 +185,7 @@ class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
                               ],
                             ),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           Container(
                             height: 120,
                             width: 120,

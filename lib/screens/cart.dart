@@ -4,11 +4,12 @@ import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/screens/payment_info.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Cart extends StatefulWidget {
   final Buyer buyer;
-  Cart({Key? key, required this.buyer}) : super(key: key);
+  const Cart({super.key, required this.buyer});
 
   @override
   CartState createState() => CartState();
@@ -29,10 +30,38 @@ class CartState extends State<Cart> with RouteAware {
     });
   }
 
+  void addDiscount(int discount) async {
+    FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    // Truy vấn để lấy các tài liệu có 'buyer_name' khớp với widget.buyer.userName
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('buy')
+        .where('buyer_name', isEqualTo: widget.buyer.userName)
+        .get();
+
+    // Kiểm tra nếu có tài liệu khớp
+    if (querySnapshot.docs.isNotEmpty) {
+      // Lặp qua các tài liệu khớp và cập nhật
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        await _firestore
+            .collection('buy')
+            .doc(doc.id) // Sử dụng id của tài liệu để cập nhật
+            .update({
+          'discount': discount, // Cập nhật giá trị discount
+        }).catchError((e) {
+          print("Error updating discount: $e");
+        });
+      }
+    } else {
+      print('No documents found');
+    }
+  }
+
   List<Map<String, dynamic>> items = [];
   List<num> quantities = [];
   num totalPrice = 0;
   String selectedVoucher = '';
+  int discount = 1;
   TextEditingController voucherController =
       TextEditingController(); // Controller for voucher input
 
@@ -41,22 +70,26 @@ class CartState extends State<Cart> with RouteAware {
     {
       'label': '10% OFF',
       'icon': Icons.percent,
-      'description': 'Save 10% on your order'
+      'description': 'Save 10% on your order',
+      'num': 10
     },
     {
       'label': '20% OFF',
-      'icon': Icons.local_offer,
-      'description': 'Get 20% discount on your total'
+      'icon': Icons.percent,
+      'description': 'Get 20% discount on your total',
+      'num': 20
     },
     {
-      'label': 'Free Shipping',
-      'icon': Icons.local_shipping,
-      'description': 'Enjoy free shipping on your order'
+      'label': '30% OFF',
+      'icon': Icons.percent,
+      'description': 'Enjoy free shipping on your order',
+      'num': 30,
     },
     {
-      'label': 'Buy 1 Get 1 Free',
-      'icon': Icons.redeem,
-      'description': 'Get another item for free!'
+      'label': '50% OFF',
+      'icon': Icons.percent,
+      'description': 'Get another item for free!',
+      'num': 50,
     },
   ];
 
@@ -71,19 +104,17 @@ class CartState extends State<Cart> with RouteAware {
     final data = await DatabaseService()
         .getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
 
-    if (data != null) {
-      for (var order in data) {
-        items.add({
-          'name': order['name'],
-          'price': order['price'],
-          'imgUrl': order['imgUrl'], // Lấy hình ảnh từ Firebase
-        });
-        quantities.add(1); // Mặc định là 1 cho mỗi sản phẩm
-      }
+    for (var order in data) {
+      items.add({
+        'name': order['name'],
+        'price': order['price'],
+        'imgUrl': order['imgUrl'], // Lấy hình ảnh từ Firebase
+      });
+      quantities.add(1); // Mặc định là 1 cho mỗi sản phẩm
+    }
 
-      if (mounted) {
-        setState(() {}); // Cập nhật trạng thái
-      }
+    if (mounted) {
+      setState(() {}); // Cập nhật trạng thái
     }
   }
 
@@ -182,6 +213,10 @@ class CartState extends State<Cart> with RouteAware {
                           onChanged: (value) {
                             setState(() {
                               selectedVoucher = value ?? '';
+                              var selected = vouchers.firstWhere(
+                                  (voucher) => voucher['label'] == value);
+                              discount = selected['num'] ?? 1;
+                              addDiscount(discount);
                               voucherController
                                   .clear(); // Clear manual entry if dropdown is selected
                             });
@@ -254,15 +289,15 @@ class ItemCard extends StatefulWidget {
   final Function(int) onQuantityChanged;
   final Function() onRemove; // Thêm hàm xóa
 
-  ItemCard({
-    Key? key,
+  const ItemCard({
+    super.key,
     required this.name,
     required this.price,
     required this.imgUrl,
     required this.count,
     required this.onQuantityChanged,
     required this.onRemove, // Thêm hàm xóa
-  }) : super(key: key);
+  });
 
   @override
   State<ItemCard> createState() => _ItemCardState();

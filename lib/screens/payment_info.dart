@@ -138,16 +138,18 @@ class _PaymentInfoState extends State<PaymentInfo> {
     // }
 
     total = 0.0; // Đặt lại giá trị của total trước khi tính lại
-    // for (int i = 0; i < items.length; i++) {
-    //   total += items[i]['count'] * items[i]['price'];
-    // }
+    double discountedPrice = 0;
     for (int i = 0; i < items.length; i++) {
       double itemPrice = items[i]['count'] * items[i]['price'];
 
-      // Áp dụng discount
-      double discountedPrice = itemPrice - (itemPrice * discount / 10);
+      if (discount == 1) {
+        discountedPrice = itemPrice;
+      } else {
+        // Áp dụng discount
+        discountedPrice = itemPrice - (itemPrice * discount / 10);
+      }
 
-      total += discountedPrice;
+      total += discountedPrice; // Cộng giá trị đã tính vào total
     }
   }
 
@@ -165,7 +167,9 @@ class _PaymentInfoState extends State<PaymentInfo> {
     );
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: Builder(builder: (BuildContext context) {
           return IconButton(
               onPressed: () {
@@ -186,15 +190,16 @@ class _PaymentInfoState extends State<PaymentInfo> {
       ),
       body: Column(
         children: [
-          SizedBox(
-            height: 250.h,
-            width: 350.w,
-            child: Image.asset("assets/KhoaCyber.png"),
-          ),
+          // SizedBox(
+          //   height: 250.h,
+          //   width: 350.w,
+          //   child: Image.asset("assets/KhoaCyber.png"),
+          // ),
           Padding(
-            padding: EdgeInsets.all(15.r),
+            padding: EdgeInsets.all(10.r),
             child: Container(
-              height: 330.h,
+              margin: EdgeInsets.all(20),
+              height: 500.h,
               width: 280.w,
               decoration: BoxDecoration(
                 border: Border.all(
@@ -210,7 +215,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
                     padding: EdgeInsets.all(8.r),
                     child: Container(
                       padding: EdgeInsets.all(5.r),
-                      height: 100.h,
+                      height: 150.h,
                       decoration: BoxDecoration(
                         border: Border.all(
                           width: 1.5.w,
@@ -227,15 +232,15 @@ class _PaymentInfoState extends State<PaymentInfo> {
                                 8.r), // Adding border radius
                             child: Image.network(
                               items[index]["imgUrl"],
-                              width: 50.w,
-                              height: 70.h,
+                              width: 70.w,
+                              height: 100.h,
                               fit: BoxFit.cover,
                             ),
                           ),
                           // Displaying the product name and price details
                           Expanded(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10.w),
+                              padding: EdgeInsets.all(15),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -247,21 +252,21 @@ class _PaymentInfoState extends State<PaymentInfo> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  SizedBox(height: 5.h),
+                                  // SizedBox(height: 5),
                                   Text(
                                     "Quantity : ${items[index]["count"]}",
                                     style: TextStyle(
                                       color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontSize: 15.sp,
+                                      fontSize: 20.sp,
                                       fontWeight: FontWeight.w400,
                                     ),
                                   ),
-                                  SizedBox(height: 5.h),
+                                  // SizedBox(height: 5),
                                   Text(
                                     "Total : ${items[index]["price"]}",
                                     style: TextStyle(
                                       color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontSize: 15.sp,
+                                      fontSize: 20.sp,
                                       fontWeight: FontWeight.w400,
                                     ),
                                   ),
@@ -285,13 +290,13 @@ class _PaymentInfoState extends State<PaymentInfo> {
                 Text("Total : ",
                     style: TextStyle(
                       color: const Color(0xffF57C51),
-                      fontSize: 20.sp,
+                      fontSize: 30.sp,
                       fontWeight: FontWeight.bold,
                     )),
                 Text("$total",
                     style: TextStyle(
                       color: const Color.fromARGB(255, 0, 0, 0),
-                      fontSize: 20.sp,
+                      fontSize: 30.sp,
                       fontWeight: FontWeight.bold,
                     ))
               ],
@@ -304,6 +309,47 @@ class _PaymentInfoState extends State<PaymentInfo> {
               setState(() {
                 deleteBuy();
               });
+
+              // Hiển thị dialog sau khi nhấn Pay
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    backgroundColor: Colors.amber[100],
+                    title: const Text(
+                      "Payment Successful",
+                      style: TextStyle(
+                        color: const Color(0xffF57C51),
+                      ),
+                    ),
+                    content: SizedBox(
+                      height: 350.h,
+                      width: 350.w,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset("assets/KhoaCyber.png"),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Thank you for your payment!",
+                            style: TextStyle(
+                              color: const Color(0xffF57C51),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // actions: [
+                    //   TextButton(
+                    //     onPressed: () {
+                    //       Navigator.of(context).pop(); // Đóng dialog
+                    //     },
+                    //     child: const Text("OK"),
+                    //   ),
+                    // ],
+                  );
+                },
+              );
             },
             child: Container(
               width: 200.w,

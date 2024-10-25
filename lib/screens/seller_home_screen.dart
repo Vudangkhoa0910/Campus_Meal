@@ -11,6 +11,7 @@ import 'package:campus_catalogue/screens/userType_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
 
 class OrderWrapper extends StatelessWidget {
@@ -465,7 +466,9 @@ class _HistoryPageState extends State<HistoryPage> {
             data['order_name'] ?? 'Unknown',
             data['price']?.toString() ?? '0',
             data['date'] ?? 'Unknown',
-            data['img'] ?? 'Unknown', // Đảm bảo 'img' tồn tại trong Firestore
+            data['img'] ?? 'Unknown',
+            data['rating'] ?? 0.0,
+            data['review'] ?? '',
           ];
         }).toList();
         isLoading = false;
@@ -477,6 +480,34 @@ class _HistoryPageState extends State<HistoryPage> {
       });
       print('Error fetching orders: $e');
     }
+  }
+
+  void _showReviewDialog(BuildContext context, String review) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Review',
+            style: TextStyle(
+              color: AppColors.backgroundOrange,
+            ),
+          ),
+          content: Text(review),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Close',
+                style: TextStyle(
+                  color: AppColors.backgroundOrange,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -674,10 +705,46 @@ class _HistoryPageState extends State<HistoryPage> {
                                                           fontWeight:
                                                               FontWeight.w400),
                                                 ),
+                                                Row(
+                                                  children: [
+                                                    CircleAvatar(
+                                                      radius:
+                                                          15, // Điều chỉnh bán kính để phù hợp với kích thước icon
+                                                      backgroundColor: const Color(
+                                                          0xFFFFF2E0), // Màu nền
+                                                      child: IconButton(
+                                                        icon: Icon(
+                                                          Icons.comment,
+                                                          size:
+                                                              15, // Kích thước biểu tượng
+                                                          color: Colors
+                                                              .grey, // Màu biểu tượng
+                                                        ),
+                                                        onPressed: () =>
+                                                            _showReviewDialog(
+                                                                context,
+                                                                order[6]),
+                                                      ),
+                                                    ),
+                                                    RatingBarIndicator(
+                                                      rating:
+                                                          order[5].toDouble(),
+                                                      itemBuilder:
+                                                          (context, _) => Icon(
+                                                        Icons.star,
+                                                        color: Colors.amber,
+                                                      ),
+                                                      itemCount: 5,
+                                                      itemSize: 20.0,
+                                                    ),
+                                                  ],
+                                                )
                                               ],
                                             ),
                                           ),
-                                          const Spacer(),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
                                           Container(
                                             height: 120,
                                             width: 120,

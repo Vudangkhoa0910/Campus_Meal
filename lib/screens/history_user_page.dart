@@ -3,6 +3,7 @@ import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class HistoryPageUser extends StatefulWidget {
   Buyer buyer;
@@ -42,12 +43,141 @@ class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
             data['price']?.toString() ?? '0',
             data['date'] ?? 'Unknown',
             data['img'] ?? 'Unknown',
+            doc.id,
+            data['rating'] ?? 0.0,
+            data['review'] ?? '',
           ];
         }).toList();
       });
     } catch (e) {
       print('Error fetching orders: $e');
     }
+  }
+
+  void _showRatingDialog(BuildContext context, String orderId) {
+    TextEditingController reviewController = TextEditingController();
+    double rating = 0.0; // Giá trị mặc định cho rating
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Add Review',
+            style: TextStyle(
+              color: AppColors.backgroundOrange,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Thay TextField bằng RatingBar
+              RatingBar.builder(
+                initialRating: rating,
+                minRating: 1,
+                maxRating: 5,
+                direction: Axis.horizontal,
+                allowHalfRating: true,
+                itemCount: 5,
+                itemBuilder: (context, _) => Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                onRatingUpdate: (newRating) {
+                  rating = newRating;
+                },
+              ),
+              TextField(
+                controller: reviewController,
+                maxLines: 2, // Giới hạn số dòng tối đa là 5
+                decoration: InputDecoration(
+                  labelText: 'Review',
+                  labelStyle: TextStyle(
+                    color: AppColors.backgroundOrange,
+                  ), // Đặt màu cho hintText
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng dialog
+              },
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: AppColors.backgroundOrange,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                // Gọi hàm để cập nhật Firebase
+                _updateReviewInFirebase(
+                  orderId,
+                  rating.toInt(), // Sử dụng rating từ RatingBar
+                  reviewController.text,
+                );
+                Navigator.of(context).pop(); // Đóng dialog
+              },
+              child: Text(
+                'Submit',
+                style: TextStyle(
+                  color: AppColors.backgroundOrange,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _updateReviewInFirebase(
+      String orderId, int rating, String review) async {
+    print(orderId);
+    try {
+      // Cập nhật đơn hàng với thông tin đánh giá
+      await FirebaseFirestore.instance
+          .collection('orders')
+          .doc(orderId)
+          .update({
+        'rating': rating,
+        'review': review,
+      });
+      print('Review updated successfully!');
+    } catch (e) {
+      print('Error updating review: $e');
+    }
+  }
+
+  void _showReviewDialog(BuildContext context, String review) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Review',
+            style: TextStyle(
+              color: AppColors.backgroundOrange,
+            ),
+          ),
+          content: Text(review),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Close',
+                style: TextStyle(
+                  color: AppColors.backgroundOrange,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -182,31 +312,84 @@ class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400),
                                 ),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                item[6] == 0.0
+                                    ? IconButton(
+                                        onPressed: () {
+                                          _showRatingDialog(context, item[5]);
+                                        },
+                                        icon: Icon(
+                                          Icons.message,
+                                          color: Colors
+                                              .white, // Màu biểu tượng trắng
+                                        ),
+                                        style: IconButton.styleFrom(
+                                          backgroundColor: AppColors
+                                              .backgroundOrange, // Màu nền cam
+                                          shape:
+                                              CircleBorder(), // Hình dạng nút là hình tròn
+                                        ),
+                                      )
+                                    : Row(
+                                        children: [
+                                          CircleAvatar(
+                                            radius:
+                                                15, // Điều chỉnh bán kính để phù hợp với kích thước icon
+                                            backgroundColor:
+                                                const Color(0xFFFFF2E0),
+                                            child: IconButton(
+                                              icon: Icon(Icons.comment,
+                                                  size:
+                                                      15, // Kích thước biểu tượng
+                                                  color: Colors.grey),
+                                              onPressed: () =>
+                                                  _showReviewDialog(
+                                                      context, item[7]),
+                                            ),
+                                          ),
+                                          RatingBarIndicator(
+                                            rating: item[6].toDouble(),
+                                            itemBuilder: (context, _) => Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                            ),
+                                            itemCount: 5,
+                                            itemSize: 20.0,
+                                          ),
+                                        ],
+                                      ),
                               ],
                             ),
                           ),
-                          const Spacer(),
-                          Container(
-                            height: 120,
-                            width: 120,
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: AppColors.backgroundOrange,
-                                    width: 1.5),
-                                borderRadius: BorderRadius.circular(20)),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
-                                item[4],
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Image.asset(
-                                    'assets/iconshop.jpg', // Đường dẫn đến hình ảnh thay thế
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  );
-                                },
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Container(
+                              height: 120,
+                              width: 120,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: AppColors.backgroundOrange,
+                                      width: 1.5),
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.network(
+                                  item[4],
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.asset(
+                                      'assets/iconshop.jpg', // Đường dẫn đến hình ảnh thay thế
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ),

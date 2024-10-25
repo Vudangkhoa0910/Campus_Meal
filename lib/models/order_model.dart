@@ -7,10 +7,13 @@ class OrderModel {
   String shopName;
   // String status;
   // num totalAmount;
+  num count;
   num price;
   String date;
   String orderName;
   String img;
+  double rating;
+  String review;
   // List items;
 
   OrderModel(
@@ -20,10 +23,13 @@ class OrderModel {
       required this.shopName,
       // required this.status,
       // required this.totalAmount,
+      required this.count,
       required this.price,
       required this.date,
       required this.orderName,
-      required this.img
+      required this.img,
+      this.rating = 0.0,
+      this.review = ''
       // required this.items
       });
 
@@ -35,10 +41,13 @@ class OrderModel {
       'shop_name': shopName,
       // 'status': status,
       // 'total_amount': totalAmount,
+      'count': count,
       'price': price,
       'date': date,
       'order_name': orderName,
       'img': img,
+      'rating': rating,
+      'review': review
       // 'items': items
     };
   }
@@ -50,10 +59,13 @@ class OrderModel {
         shopName = sellerMap["shop_name"],
         // status = sellerMap["status"],
         // totalAmount = sellerMap["total_amount"],
+        count = sellerMap["count"],
         price = sellerMap["price"],
         date = sellerMap["date"],
         orderName = sellerMap["order_name"],
-        img = sellerMap["img"];
+        img = sellerMap["img"],
+        rating = sellerMap["rating"],
+        review = sellerMap["review"];
   // items = sellerMap["items"];
 
   OrderModel.fromDocumentSnapshot(DocumentSnapshot<Map<String, dynamic>> doc)
@@ -63,9 +75,12 @@ class OrderModel {
         shopName = doc.data()!["shop_name"],
         // status = doc.data()!['status'],
         // totalAmount = doc.data()!['total_amount'],
+        count = doc.data()!["count"],
         price = doc.data()!['price'],
         date = doc.data()!['date'],
         orderName = doc.data()!['order_name'],
-        img = doc.data()!['img'];
+        img = doc.data()!['img'],
+        rating = doc.data()!['rating'],
+        review = doc.data()!['review'];
   // items = doc.data()!["items"];
 }

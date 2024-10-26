@@ -7,10 +7,11 @@ import 'package:campus_catalogue/models/order_model.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ItemCard extends StatelessWidget {
+class ItemCard extends StatefulWidget {
   final String shopName;
   final String name;
   final num price;
@@ -30,6 +31,11 @@ class ItemCard extends StatelessWidget {
     required this.buyer,
   });
 
+  @override
+  State<ItemCard> createState() => _ItemCardState();
+}
+
+class _ItemCardState extends State<ItemCard> {
   Future<void> addOrder(String buyerPhone, String buyerName, String shopName,
       num price, String date, String orderName, String img) async {
     CollectionReference orders =
@@ -56,18 +62,20 @@ class ItemCard extends StatelessWidget {
   }
 
   // Future<void> addBuy(String buyerName, List<OrderModel> orders) async {
-  //   CollectionReference buy = FirebaseFirestore.instance.collection('buy');
+  bool _isEditable = false;
 
-  //   // Tạo một đối tượng Buy và thêm nó vào Firestore
-  //   Buy newBuy = Buy(buyerName: buyerName, orders: orders);
+  bool _isUpdating = false;
 
-  //   return buy.add(newBuy.toMap()).then((value) {
-  //     print("Buy Added");
-  //   }).catchError((error) {
-  //     print("Failed to add buy: $error");
-  //   });
-  // }
+  String _updateMessage = '';
+
+  bool _showMessage = false;
+
   Future<void> addBuy(String buyerName, List<OrderModel> orders) async {
+    setState(() {
+      _isUpdating = true;
+      _updateMessage = '';
+      _showMessage = false;
+    });
     CollectionReference buy = FirebaseFirestore.instance.collection('buy');
 
     // Lấy dữ liệu cũ từ Firestore
@@ -99,13 +107,37 @@ class ItemCard extends StatelessWidget {
     // Nếu không có trùng lặp, thêm tài liệu mới vào Firestore
     if (!exists) {
       Buy newBuy = Buy(buyerName: buyerName, orders: orders);
-      return buy.add(newBuy.toMap()).then((value) {
+      return buy.add(newBuy.toMap()).then((value)
+          // buy
+          //     .doc(FirebaseAuth.instance.currentUser!.uid)
+          //     .set(newBuy.toMap())
+          //     .then((value) {
+          {
+        setState(() {
+          _updateMessage = 'Buy successfully!';
+          _isEditable = false;
+          _showMessage = true;
+        });
+        Future.delayed(const Duration(seconds: 5), () {
+          setState(() {
+            _showMessage = false; // Ẩn thông báo
+          });
+        });
         print("Buy Added");
       }).catchError((error) {
         print("Failed to add buy: $error");
       });
     } else {
       print("Buy with the same order already exists. Not added.");
+      setState(() {
+        _updateMessage = "Error: Buy already exists";
+        _showMessage = true;
+      });
+      Future.delayed(const Duration(seconds: 5), () {
+        setState(() {
+          _showMessage = false; // Ẩn thông báo
+        });
+      });
     }
   }
 
@@ -117,117 +149,143 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 5),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Container(
-          decoration: BoxDecoration(
-              color: const Color(0xFFFFF2E0),
-              borderRadius: BorderRadius.circular(10)),
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  // Sửa để tránh lỗi overflow
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // if (vegetarian)
-                      //   Text(
-                      //     "VEG",
-                      //     style: AppTypography.textSm.copyWith(
-                      //         color: Color.fromARGB(255, 0, 196, 0),
-                      //         fontSize: 14),
-                      //   )
-                      // else
-                      // Text("NON VEG",
-                      //     style: AppTypography.textSm.copyWith(
-                      //         color: Color.fromARGB(255, 197, 0, 0),
-                      //         fontSize: 14)),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
-                        child: Text("Price: ${price}",
-                            style: AppTypography.textSm.copyWith(fontSize: 14)),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF2E0),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Price: ${widget.price}",
+                      style: AppTypography.textSm.copyWith(
+                        fontSize: 14,
+                        color: Colors.grey[800],
                       ),
-                      Text(
-                        "Name: ${name}",
-                        style: AppTypography.textMd.copyWith(
-                            fontSize: 14, fontWeight: FontWeight.w400),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      "Name: ${widget.name}",
+                      style: AppTypography.textMd.copyWith(
+                        fontSize: 14,
+                        // fontWeight: FontWeight.w600,
+                        color: Colors.grey[800],
                       ),
-                      Text(
-                        "Description: ${description}",
-                        style: AppTypography.textSm.copyWith(
-                            fontSize: 14, fontWeight: FontWeight.w400),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      "Description: ${widget.description}",
+                      style: AppTypography.textSm.copyWith(
+                        fontSize: 14,
+                        color: Colors.grey[800],
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          addBuy(
-                            buyer.userName,
-                            [
-                              // Thay đổi ở đây để truyền danh sách các OrderModel
-                              OrderModel(
-                                buyerPhone: buyer.phone,
-                                buyerName: buyer.userName,
-                                shopName: shopName,
-                                count: 1,
-                                price: price,
-                                date: formatDate(DateTime.now()),
-                                orderName: name,
-                                img: img,
-                              ),
-                            ],
-                          );
-                          // addOrder(buyer.phone, buyer.userName, shopName, price,
-                          //     formatDate(DateTime.now()), name, img);
-                        },
-                        child: Container(
-                          width: 200,
-                          height: 30,
-                          decoration: BoxDecoration(
-                              color: Color.fromRGBO(238, 118, 0, 1),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(20))),
-                          child: Center(
-                            child: Text(
-                              "ADD ",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: () {
+                        addBuy(
+                          widget.buyer.userName,
+                          [
+                            OrderModel(
+                              buyerPhone: widget.buyer.phone,
+                              buyerName: widget.buyer.userName,
+                              shopName: widget.shopName,
+                              count: 1,
+                              price: widget.price,
+                              date: formatDate(DateTime.now()),
+                              orderName: widget.name,
+                              img: widget.img,
+                            ),
+                          ],
+                        );
+                      },
+                      child: Container(
+                        width: 200,
+                        height: 35,
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(238, 118, 0, 1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            "ADD",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Spacer(),
-                Container(
-                  height: 120,
-                  width: 120,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: AppColors.backgroundOrange, width: 1.5),
-                      borderRadius: BorderRadius.circular(20)),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.network(
-                      img,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset(
-                          'assets/iconshop.jpg', // Đường dẫn đến hình ảnh thay thế
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        );
-                      },
                     ),
+                    const SizedBox(height: 10),
+                    if (_showMessage && _updateMessage.isNotEmpty)
+                      Container(
+                        margin: const EdgeInsets.only(top: 10),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: _updateMessage.contains('Error')
+                              ? Colors.redAccent
+                              : Colors.green,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          _updateMessage,
+                          style: const TextStyle(color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 15),
+              Container(
+                height: 100,
+                width: 100,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: AppColors.backgroundOrange,
+                    width: 1.5,
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.network(
+                    widget.img,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/iconshop.jpg',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      );
+                    },
                   ),
                 ),
-              ],
-            ),
-          )),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -289,11 +347,12 @@ class _ShopPageState extends State<ShopPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              margin: EdgeInsets.all(20),
-              padding: EdgeInsets.all(20),
+              margin: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               height: 120,
               decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black),
+                  border:
+                      Border.all(color: AppColors.backgroundOrange, width: 2),
                   borderRadius: const BorderRadius.all(Radius.circular(20))),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -304,51 +363,61 @@ class _ShopPageState extends State<ShopPage> {
                     children: [
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.pin_drop_rounded,
-                            size: 15,
+                            size: 20,
+                          ),
+                          SizedBox(
+                            width: 10,
                           ),
                           Text(widget.location,
                               style: AppTypography.textMd.copyWith(
-                                  fontSize: 12, fontWeight: FontWeight.w700)),
+                                  fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
                       Row(
                         children: [
-                          Icon(Icons.timelapse_rounded, size: 15),
-                          Text("9 AM TO 10 PM",
+                          const Icon(Icons.timelapse_rounded, size: 20),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                              "${widget.shop?.openingTime?.isNotEmpty == true ? widget.shop!.openingTime : '9'} AM TO ${widget.shop?.closingTime?.isNotEmpty == true ? widget.shop!.closingTime : '10'} PM",
                               style: AppTypography.textMd.copyWith(
-                                  fontSize: 12, fontWeight: FontWeight.w700)),
+                                  fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
                       Row(
                         children: [
-                          Icon(Icons.shopping_cart, size: 15),
+                          const Icon(Icons.shopping_cart, size: 20),
+                          SizedBox(
+                            width: 10,
+                          ),
                           Text("${widget.menu.length} ITEMS AVAILABLE",
                               style: AppTypography.textMd.copyWith(
-                                  fontSize: 12, fontWeight: FontWeight.w700)),
+                                  fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
-                      Container(
-                          width: 30,
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: AppColors.signIn),
-                          child: Row(
-                            children: [
-                              Text(
-                                widget
-                                    .rating, // Thay giá trị cố định bằng rating từ widget
-                                style: AppTypography.textSm.copyWith(
-                                    fontSize: 15, fontWeight: FontWeight.w700),
-                              ),
-                              const Icon(
-                                Icons.star,
-                                size: 15,
-                              )
-                            ],
-                          ))
+                      // Container(
+                      //     width: 30,
+                      //     padding: const EdgeInsets.all(2),
+                      //     decoration: BoxDecoration(
+                      //         borderRadius: BorderRadius.circular(5),
+                      //         color: AppColors.signIn),
+                      //     child: Row(
+                      //       children: [
+                      //         Text(
+                      //           widget
+                      //               .rating, // Thay giá trị cố định bằng rating từ widget
+                      //           style: AppTypography.textSm.copyWith(
+                      //               fontSize: 15, fontWeight: FontWeight.w700),
+                      //         ),
+                      //         const Icon(
+                      //           Icons.star,
+                      //           size: 15,
+                      //         )
+                      //       ],
+                      //     ))
                     ],
                   ),
                 ],

@@ -3,19 +3,23 @@ import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/screens/login.dart';
 import 'package:campus_catalogue/screens/shop_chat.dart';
+import 'package:campus_catalogue/screens/userType_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ProfileUsePage extends StatefulWidget {
-  final Buyer buyer; // Giữ biến buyer là final
+  Buyer buyer;
   ProfileUsePage({super.key, required this.buyer});
 
   @override
-  State<ProfileUsePage> createState() => _ProfileUsePageState();
+  State<ProfileUsePage> createState() => ProfileUsePageState();
 }
 
-class _ProfileUsePageState extends State<ProfileUsePage> {
+class ProfileUsePageState extends State<ProfileUsePage> {
   bool _isEditable = false;
+  bool _isUpdating = false;
+  String _updateMessage = '';
+  bool _showMessage = false;
 
   late TextEditingController userNameController;
   late TextEditingController phoneNumberController;
@@ -42,14 +46,23 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
   }
 
   Future<void> updateBuyer() async {
+    setState(() {
+      _isUpdating = true;
+      _updateMessage = '';
+      _showMessage = false;
+    });
+
     try {
+      // Tìm kiếm document dựa trên điều kiện
       final buyerQuery = FirebaseFirestore.instance
           .collection('Buyer')
           .where('user_id', isEqualTo: widget.buyer.user_id);
 
+      // Lấy snapshot của document
       final querySnapshot = await buyerQuery.get();
 
       if (querySnapshot.docs.isNotEmpty) {
+        // Giả sử bạn muốn cập nhật document đầu tiên tìm thấy
         final buyerRef = querySnapshot.docs.first.reference;
 
         await buyerRef.update({
@@ -58,39 +71,48 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
           'email': emailController.text,
           'address': addressController.text
         });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Thông tin đã được lưu thành công!"),
-            backgroundColor: Colors.green,
-          ),
-        );
         setState(() {
-          _isEditable = false; 
+          _updateMessage = 'Buyer information updated successfully!';
+          _isEditable = false;
+          _showMessage = true;
+        });
+        Future.delayed(const Duration(seconds: 5), () {
+          setState(() {
+            _showMessage = false; // Ẩn thông báo
+          });
         });
       } else {
-        print("No buyer found");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Không tìm thấy người mua"),
-            backgroundColor: Colors.red,
-          ),
-        );
+        setState(() {
+          _updateMessage = "No buyer found with the specified Buyer ID.";
+          _showMessage = true;
+        });
+        Future.delayed(const Duration(seconds: 5), () {
+          setState(() {
+            _showMessage = false; // Ẩn thông báo
+          });
+        });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Lỗi khi lưu thông tin: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      setState(() {
+        _updateMessage = 'Error updating shop: $e';
+        _showMessage = true;
+      });
+      print('Error updating buyer: $e');
+    } finally {
+      setState(() {
+        _isUpdating = false;
+      });
     }
   }
 
   void logOut() {
+    // Xử lý đăng xuất tại đây, ví dụ: xóa thông tin đăng nhập, xóa token, v.v.
+    // Sau đó chuyển đến màn hình đăng nhập
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(
+          builder: (context) =>
+              const LoginScreen()), // Đảm bảo LoginIn được import
     );
   }
 
@@ -114,10 +136,10 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
                   ),
                 ),
                 Container(
-                  height: MediaQuery.of(context).size.height - 120,
+                  height: 500,
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(20),
                       bottomRight: Radius.circular(20),
                     ),
@@ -127,128 +149,136 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
               ],
             ),
             Positioned(
-              top: 15,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Text(
-                  "Campus Meal",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.topCenter,
+              top: 60,
+              left: 120,
               child: Container(
-                margin: const EdgeInsets.only(top: 50),
-                height: 150,
-                width: 150,
+                height: 120,
+                width: 120,
                 decoration: BoxDecoration(
                   border: Border.all(
-                      color: Color.fromRGBO(122, 103, 238, 1), width: 3),
-                  borderRadius: BorderRadius.circular(100),
+                      color: const Color.fromRGBO(122, 103, 238, 1), width: 3),
+                  borderRadius: const BorderRadius.all(Radius.circular(100)),
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: Image.asset(
-                    "assets/Ảnh.jpg",
+                    "assets/iconprofile.png",
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 220),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    inputText(userNameController, "User Name"),
-                    inputText(phoneNumberController, "Phone Number"),
-                    inputText(emailController, "Email"),
-                    inputText(addressController, "Address"),
-                    const SizedBox(height: 10),
-                    GestureDetector(
-                      onTap: () {
-                        updateBuyer();
-                      },
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 2 / 3,
-                        height: 35,
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(238, 118, 0, 1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Update",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
+            Positioned(
+              bottom: 170,
+              left: 55,
+              child: Column(
+                children: [
+                  inputText(userNameController, "User Name"),
+                  inputText(phoneNumberController, "Phone Number"),
+                  inputText(emailController, "Email"),
+                  inputText(addressController, "Address")
+                ],
+              ),
+            ),
+            Positioned(
+              bottom: 115,
+              left: 80,
+              child: GestureDetector(
+                onTap: () {
+                  updateBuyer();
+                },
+                child: Container(
+                  width: 200,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                      color: Color.fromRGBO(238, 118, 0, 1),
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: const Center(
+                    child: Text(
+                      "UPDATE",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 10),
-                    GestureDetector(
-                      onTap: () {
-                        // Pass the buyer object when navigating to ShopSelectionScreen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ShopSelectionScreen(buyer: widget.buyer), // Truyền buyer vào đây
-                          ),
-                        );
-                      },
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 2 / 3,
-                        height: 35,
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Chat",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    GestureDetector(
-                      onTap: logOut,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 2 / 3,
-                        height: 35,
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Log Out",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
+            Positioned(
+              bottom: 65,
+              left: 80,
+              child: GestureDetector(
+                onTap: () {
+                  logOut();
+                },
+                child: Container(
+                  width: 200,
+                  height: 40,
+                  decoration: const BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                  child: const Center(
+                    child: Text(
+                      "LOG OUT",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 15,
+              left: 80,
+              child: GestureDetector(
+                onTap: () {
+                  // Pass the buyer object when navigating to ShopSelectionScreen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ShopSelectionScreen(
+                          buyer: widget.buyer), // Truyền buyer vào đây
+                    ),
+                  );
+                },
+                child: Container(
+                  width: 200,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "Chat",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (_showMessage && _updateMessage.isNotEmpty)
+              Positioned(
+                bottom: 120,
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: _updateMessage.contains('Error')
+                        ? Colors.redAccent
+                        : Colors.green,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    _updateMessage,
+                    style: const TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -258,28 +288,29 @@ class _ProfileUsePageState extends State<ProfileUsePage> {
   Widget inputText(TextEditingController controller, String hintText) {
     return Padding(
       padding: const EdgeInsets.all(5),
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width * 2 / 3,
         child: TextFormField(
           controller: controller,
           decoration: InputDecoration(
-            enabledBorder: OutlineInputBorder(
+            enabledBorder: const OutlineInputBorder(
               borderSide:
                   BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
             hintText: hintText,
-            focusedBorder: OutlineInputBorder(
+            focusedBorder: const OutlineInputBorder(
               borderSide:
                   BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
-              borderRadius: BorderRadius.all(Radius.circular(10)),
+              borderRadius: BorderRadius.all(
+                  Radius.circular(10)), // Không có viền khi có tiêu điểm
             ),
             suffixIcon: IconButton(
               icon: Icon(
                 Icons.edit,
                 color: _isEditable
                     ? Colors.grey[400]
-                    : Color.fromRGBO(238, 118, 0, 1),
+                    : const Color.fromRGBO(238, 118, 0, 1),
               ),
               onPressed: () {
                 setState(() {

@@ -876,8 +876,13 @@ class _InfoPageState extends State<InfoPage> {
         });
       } else {
         setState(() {
-          _updateMessage = "No shop found with the specified Shop ID.";
+          _updateMessage = "Error : No shop found .";
           _showMessage = true;
+        });
+        Future.delayed(const Duration(seconds: 5), () {
+          setState(() {
+            _showMessage = false; // Ẩn thông báo
+          });
         });
       }
     } catch (e) {

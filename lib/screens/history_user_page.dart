@@ -150,6 +150,9 @@ class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
     } catch (e) {
       print('Error updating review: $e');
     }
+    setState(() {
+      fetchOrders();
+    });
   }
 
   void _showReviewDialog(BuildContext context, String review) {

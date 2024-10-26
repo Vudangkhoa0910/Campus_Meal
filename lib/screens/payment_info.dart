@@ -63,24 +63,34 @@ class _PaymentInfoState extends State<PaymentInfo> {
     // Lấy instance của FirebaseFirestore
     FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-    // Lấy instance của FirebaseAuth
-    FirebaseAuth _auth = FirebaseAuth.instance;
-
     // Lấy document từ Firestore
     QuerySnapshot querySnapshot = await _firestore
         .collection('buy')
         .where('buyer_name', isEqualTo: widget.buyer.userName)
         .get();
 
-    // Lấy giá trị của 'discount' từ document
+    // Kiểm tra nếu có tài liệu nào trong querySnapshot
     if (querySnapshot.docs.isNotEmpty) {
       // Lấy DocumentSnapshot đầu tiên
       DocumentSnapshot documentSnapshot = querySnapshot.docs.first;
 
-      // Xử lý documentSnapshot
-      print(documentSnapshot.data());
+      // Lấy dữ liệu từ documentSnapshot
+      final data = documentSnapshot.data() as Map<String, dynamic>?;
+
+      // Kiểm tra dữ liệu và lấy giá trị 'discount'
+      if (data != null && data.containsKey('discount')) {
+        discount = data['discount'] ??
+            1; // Cập nhật giá trị discount, mặc định là 0 nếu không tìm thấy
+        print('Discount value: $discount');
+      } else {
+        // Nếu không tìm thấy discount trong dữ liệu
+        discount = 1; // Đặt discount về 0
+        print('Discount not found in the document. Setting discount to 0.');
+      }
     } else {
-      print('No documents found');
+      // Nếu không có tài liệu nào được tìm thấy
+      discount = 1; // Đặt discount về 0
+      print('No documents found. Setting discount to 0.');
     }
   }
 
@@ -146,7 +156,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
         discountedPrice = itemPrice;
       } else {
         // Áp dụng discount
-        discountedPrice = itemPrice - (itemPrice * discount / 10);
+        discountedPrice = itemPrice - (itemPrice * discount / 100);
       }
 
       total += discountedPrice; // Cộng giá trị đã tính vào total
@@ -353,7 +363,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
             },
             child: Container(
               width: 200.w,
-              height: 50.h,
+              height: 70.h,
               decoration: BoxDecoration(
                 color: const Color(0xffF57C51),
                 borderRadius: BorderRadius.all(Radius.circular(10.r)),
@@ -363,7 +373,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
                   "Pay",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16.sp,
+                    fontSize: 30.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

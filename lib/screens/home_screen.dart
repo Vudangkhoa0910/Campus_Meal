@@ -1,10 +1,9 @@
 import 'dart:developer';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/models/order_model.dart';
-import 'package:campus_catalogue/screens/api_chat.dart';
+import 'package:campus_catalogue/screens/api_chart.dart';
 import 'package:campus_catalogue/screens/cart.dart';
 import 'package:campus_catalogue/screens/history_user_page.dart';
-import 'package:campus_catalogue/screens/map_screen.dart';
 import 'package:campus_catalogue/screens/ntf_user_page.dart';
 import 'package:campus_catalogue/screens/profile_use_page.dart';
 import 'package:campus_catalogue/screens/search_screen.dart';
@@ -72,7 +71,7 @@ class ShopCardWrapper extends StatelessWidget {
                               ))),
                   child: ShopCard(
                       name: shops[index]["shop_name"],
-                      rating: "0",
+                      // rating: 0.0,
                       location: shops[index]["location"],
                       menu: shops[index]["menu"],
                       ownerName: shops[index]["owner_name"],
@@ -85,48 +84,76 @@ class ShopCardWrapper extends StatelessWidget {
   }
 }
 
-class ShopCard extends StatelessWidget {
+class ShopCard extends StatefulWidget {
   final String name;
-  final String rating;
   final String location;
   final List menu;
   final String ownerName;
   final String upiID;
   final bool status;
-  final String imageUrl; // Thêm trường imageUrl
+  final String imageUrl;
 
-  const ShopCard(
-      {super.key,
-      required this.name,
-      required this.rating,
-      required this.location,
-      required this.menu,
-      required this.ownerName,
-      required this.upiID,
-      required this.status,
-      required this.imageUrl}); // Thêm imageUrl trong constructor
+  const ShopCard({
+    super.key,
+    required this.name,
+    required this.location,
+    required this.menu,
+    required this.ownerName,
+    required this.upiID,
+    required this.status,
+    required this.imageUrl,
+  });
+
+  @override
+  State<ShopCard> createState() => _ShopCardState();
+}
+
+class _ShopCardState extends State<ShopCard> {
+  Future<double> getRating(String shopName) async {
+    double totalRating = 0;
+    int index = 0;
+
+    QuerySnapshot snap = await FirebaseFirestore.instance
+        .collection('orders')
+        .where('shop_name', isEqualTo: shopName)
+        .get();
+
+    if (snap.docs.isNotEmpty) {
+      for (var doc in snap.docs) {
+        var ratingData = doc['rating'];
+        double rating = (ratingData is num) ? ratingData.toDouble() : 0;
+
+        if (rating > 0) {
+          totalRating += rating;
+          index++;
+        }
+      }
+    }
+
+    return index > 0 ? totalRating / index : 0;
+  }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 125,
-      width: MediaQuery.of(context).size.width * 0.5,
+      width: MediaQuery.of(context).size.width * 0.6,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         color: const Color(0xFFFFF2E0),
         child: Stack(
           children: [
-            // Sử dụng CachedNetworkImage để hiển thị ảnh từ Firebase
+            // Display image from Firebase
             ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(10)),
               child: Image.network(
-                imageUrl,
+                widget.imageUrl,
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
                 errorBuilder: (context, error, stackTrace) {
                   return Image.asset(
-                    'assets/iconshop.jpg', // Đường dẫn đến hình ảnh thay thế
+                    'assets/iconshop.jpg',
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
@@ -137,7 +164,7 @@ class ShopCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5), // Đặt overlay mờ
+                color: Colors.black.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
@@ -149,40 +176,85 @@ class ShopCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                        name,
+                        widget.name,
                         style: AppTypography.textMd.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
                       Text(
-                        location,
+                        widget.location,
                         style: AppTypography.textSm.copyWith(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                        ),
                       ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(3),
-                      color: const Color(0xFFFFFEF6),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          rating,
+                  FutureBuilder<double>(
+                    future: getRating(widget.name),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Text(
+                          "Loading...",
                           style: AppTypography.textSm.copyWith(
-                              fontSize: 10, fontWeight: FontWeight.w700),
-                        ),
-                        const Icon(
-                          Icons.star,
-                          size: 10,
-                        ),
-                      ],
-                    ),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text(
+                          "Error",
+                          style: AppTypography.textSm.copyWith(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        );
+                      } else {
+                        double rating = snapshot.data ?? 0;
+                        int fullStars = rating.floor();
+                        bool hasHalfStar = (rating - fullStars) >= 0.5;
+
+                        return Row(
+                          children: [
+                            // Display full stars
+                            for (int i = 0; i < fullStars; i++)
+                              const Icon(
+                                Icons.star,
+                                size: 12,
+                                color: Colors.yellow,
+                              ),
+                            // Display half star if needed
+                            if (hasHalfStar)
+                              const Icon(
+                                Icons.star_half,
+                                size: 12,
+                                color: Colors.yellow,
+                              ),
+                            // Display empty stars
+                            for (int i = 0;
+                                i < (5 - fullStars - (hasHalfStar ? 1 : 0));
+                                i++)
+                              const Icon(
+                                Icons.star_border,
+                                size: 12,
+                                color: Colors.grey,
+                              ),
+                            const SizedBox(width: 4),
+                            Text(
+                              rating.toStringAsFixed(1),
+                              style: AppTypography.textSm.copyWith(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFFFFA500),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                    },
                   ),
                 ],
               ),
@@ -327,7 +399,7 @@ class LocationCard extends StatelessWidget {
 class SearchInput extends StatefulWidget {
   final Buyer buyer;
   const SearchInput({super.key, required this.buyer});
-  
+
   @override
   State<SearchInput> createState() => _SearchInputState();
 }
@@ -359,41 +431,40 @@ class _SearchInputState extends State<SearchInput> {
   }
 
   void searchSubmit(BuildContext context) async {
-  searchTerms = searchController.text.split(' ');
-  Set<dynamic> shops = {};
+    searchTerms = searchController.text.split(' ');
+    Set<dynamic> shops = {};
 
-  for (String term in searchTerms) {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection("shop")
-        .where("shop_name", isGreaterThanOrEqualTo: term)
-        .where("shop_name", isLessThanOrEqualTo: term + '\uf8ff') 
-        .get();
+    for (String term in searchTerms) {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("shop")
+          .where("shop_name", isGreaterThanOrEqualTo: term)
+          .where("shop_name", isLessThanOrEqualTo: term + '\uf8ff')
+          .get();
 
-    for (var shopDoc in querySnapshot.docs) {
-      shops.add(shopDoc.data()); 
+      for (var shopDoc in querySnapshot.docs) {
+        shops.add(shopDoc.data());
+      }
+    }
+
+    if (shops.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SearchScreen(
+            shopResults: shops.toList(),
+            isSearch: true,
+            title: "Explore IITG",
+            buyer: widget.buyer,
+          ),
+        ),
+      );
+    } else {
+      // Hiển thị thông báo nếu không tìm thấy kết quả nào
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không tìm thấy kết quả nào.')),
+      );
     }
   }
-
-  if (shops.isNotEmpty) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchScreen(
-          shopResults: shops.toList(),
-          isSearch: true,
-          title: "Explore IITG",
-          buyer: widget.buyer,
-        ),
-      ),
-    );
-  } else {
-    // Hiển thị thông báo nếu không tìm thấy kết quả nào
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Không tìm thấy kết quả nào.')),
-    );
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -416,14 +487,17 @@ class _SearchInputState extends State<SearchInput> {
                     filled: true,
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(width: 1, color: AppColors.backgroundOrange),
+                      borderSide: const BorderSide(
+                          width: 1, color: AppColors.backgroundOrange),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(width: 1, color: AppColors.backgroundOrange),
+                      borderSide: const BorderSide(
+                          width: 1, color: AppColors.backgroundOrange),
                     ),
                     hintText: 'Search',
-                    hintStyle: const TextStyle(color: Colors.grey, fontSize: 18),
+                    hintStyle:
+                        const TextStyle(color: Colors.grey, fontSize: 18),
                     suffixIcon: const Icon(
                       Icons.search,
                       color: AppColors.secondary,
@@ -440,7 +514,6 @@ class _SearchInputState extends State<SearchInput> {
   }
 }
 
-
 class HomeScreen extends StatefulWidget {
   final Buyer buyer;
   const HomeScreen({super.key, required this.buyer});
@@ -451,8 +524,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  bool _isExpanded = false;
-  
   final List<String> _titles = [
     "Explore IITG",
     "Cart",
@@ -493,14 +564,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-    void _openMap() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MapScreen(),
-      ),
-    );
-  }
+  // void _openMap() {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => MapScreen(),
+  //     ),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -584,62 +655,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           // Positioned chat icon in the bottom-right corner
           Positioned(
-            bottom: 10,
-            right: 10,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  decoration: BoxDecoration(
-                    color: Colors.white, // Background color of the block
-                    borderRadius: BorderRadius.circular(20), // Rounded corners
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  padding: _isExpanded ? const EdgeInsets.all(5.0) : EdgeInsets.zero,
-                  height: _isExpanded ? 120 : 0, // Adjust the height based on state
-                  width: _isExpanded ? 60 : 0, // Adjust the width based on state
-                  child: _isExpanded
-                      ? Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FloatingActionButton(
-                              onPressed: _openMap,
-                              backgroundColor: const Color.fromARGB(255, 255, 139, 44),
-                              child: const Icon(Icons.map, color: Colors.white),
-                              mini: true, // Small version of the button
-                            ),
-                            const SizedBox(height: 10), // Spacing between buttons
-                            FloatingActionButton(
-                              onPressed: _openChatWindow,
-                              backgroundColor: const Color.fromARGB(255, 255, 139, 44),
-                              child: const Icon(Icons.chat, color: Colors.white),
-                              mini: true,
-                            ),
-                          ],
-                        )
-                      : const SizedBox.shrink(),
-                ),
-                const SizedBox(height: 10), // Space between container and toggle button
-                FloatingActionButton(
-                  onPressed: () {
-                    setState(() {
-                      _isExpanded = !_isExpanded;
-                    });
-                  },
-                  backgroundColor: const Color.fromARGB(255, 255, 139, 44),
-                  child: Icon(
-                    _isExpanded ? Icons.close : Icons.add,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
+            bottom: 15,
+            right: 15,
+            child: FloatingActionButton(
+              onPressed: _openChatWindow,
+              backgroundColor: const Color.fromARGB(255, 255, 139, 44),
+              child: const Icon(Icons.chat, color: Colors.white),
             ),
           ),
         ],

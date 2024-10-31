@@ -6,6 +6,8 @@ import 'package:campus_catalogue/screens/shop_chat.dart';
 import 'package:campus_catalogue/screens/userType_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProfileUsePage extends StatefulWidget {
   Buyer buyer;
@@ -20,6 +22,7 @@ class ProfileUsePageState extends State<ProfileUsePage> {
   bool _isUpdating = false;
   String _updateMessage = '';
   bool _showMessage = false;
+  Map<String, dynamic>? weatherData;
 
   late TextEditingController userNameController;
   late TextEditingController phoneNumberController;
@@ -34,6 +37,7 @@ class ProfileUsePageState extends State<ProfileUsePage> {
     phoneNumberController = TextEditingController(text: widget.buyer.phone);
     emailController = TextEditingController(text: widget.buyer.email);
     addressController = TextEditingController(text: widget.buyer.address);
+    fetchWeather();
   }
 
   @override
@@ -44,6 +48,26 @@ class ProfileUsePageState extends State<ProfileUsePage> {
     addressController.dispose();
     super.dispose();
   }
+
+  Future<void> fetchWeather() async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          'https://api.openweathermap.org/data/2.5/weather?q=Hanoi&appid=e0ea7c2430957c0b90c7a6375a5f8cba&units=metric',
+        ),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          weatherData = json.decode(response.body);
+        });
+      } else {
+        throw Exception('Failed to load weather data');
+      }
+    } catch (e) {
+      print('Error fetching weather data: $e');
+    }
+  }
+
 
   Future<void> updateBuyer() async {
     setState(() {
@@ -116,201 +140,251 @@ class ProfileUsePageState extends State<ProfileUsePage> {
     );
   }
 
+  IconData _getWeatherIcon(String main) {
+  switch (main.toLowerCase()) {
+    case 'clear':
+      return Icons.wb_sunny;
+    case 'clouds':
+      return Icons.cloud;
+    case 'rain':
+      return Icons.umbrella;
+    case 'snow':
+      return Icons.ac_unit;
+    case 'thunderstorm':
+      return Icons.flash_on;
+    default:
+      return Icons.wb_cloudy;
+  }
+}
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                Container(
-                  height: 120,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                    color: Colors.amber[900],
-                  ),
-                ),
-                Container(
-                  height: 500,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              top: 60,
-              left: 120,
-              child: Container(
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SingleChildScrollView(
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              Container(
                 height: 120,
-                width: 120,
+                width: double.infinity,
                 decoration: BoxDecoration(
-                  border: Border.all(
-                      color: const Color.fromRGBO(122, 103, 238, 1), width: 3),
-                  borderRadius: const BorderRadius.all(Radius.circular(100)),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: Image.asset(
-                    "assets/iconprofile.png",
-                    fit: BoxFit.cover,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
                   ),
+                  color: Colors.amber[900],
+                ),
+              ),
+              Container(
+                height: MediaQuery.of(context).size.height - 120,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              margin: const EdgeInsets.only(top: 5),
+              child: Column(
+                children: [
+                  Text(
+                    "CAMPUS MEAL",
+                    style: TextStyle(
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (weatherData != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _getWeatherIcon(weatherData!['weather'][0]['main']),
+                          color: const Color.fromARGB(255, 58, 179, 234),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Hà Nội: ${weatherData!['main']['temp']}°C, ',
+                          style: const TextStyle(
+                              fontSize: 16.5, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 0)),
+                        ),
+                        Text(
+                          weatherData!['weather'][0]['description'],
+                          style: const TextStyle(fontSize: 16.5, color: Color.fromARGB(255, 0, 0, 0)),
+                        ),
+                      ],
+                    )
+                  else
+                    const CircularProgressIndicator(),
+                ],
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              margin: const EdgeInsets.only(top: 50),
+              height: 150,
+              width: 150,
+              decoration: BoxDecoration(
+                border: Border.all(
+                    color: Color.fromRGBO(122, 103, 238, 1), width: 3),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: Image.asset(
+                  "assets/Ảnh.jpg",
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-            Positioned(
-              bottom: 170,
-              left: 55,
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 205),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   inputText(userNameController, "User Name"),
                   inputText(phoneNumberController, "Phone Number"),
                   inputText(emailController, "Email"),
-                  inputText(addressController, "Address")
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 115,
-              left: 80,
-              child: GestureDetector(
-                onTap: () {
-                  updateBuyer();
-                },
-                child: Container(
-                  width: 200,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                      color: Color.fromRGBO(238, 118, 0, 1),
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-                  child: const Center(
-                    child: Text(
-                      "UPDATE",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 65,
-              left: 80,
-              child: GestureDetector(
-                onTap: () {
-                  logOut();
-                },
-                child: Container(
-                  width: 200,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.all(Radius.circular(10))),
-                  child: const Center(
-                    child: Text(
-                      "LOG OUT",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 15,
-              left: 80,
-              child: GestureDetector(
-                onTap: () {
-                  // Pass the buyer object when navigating to ShopSelectionScreen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ShopSelectionScreen(
-                          buyer: widget.buyer), // Truyền buyer vào đây
-                    ),
-                  );
-                },
-                child: Container(
-                  width: 200,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Chat",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                  inputText(addressController, "Address"),
+                  const SizedBox(height: 5),
+                  GestureDetector(
+                    onTap: updateBuyer,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 2 / 3,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(238, 118, 0, 1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Update",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ShopSelectionScreen(buyer: widget.buyer),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 2 / 3,
+                      height: 35,
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Chat",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: logOut,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * 2 / 3,
+                      height: 35,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Log Out",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (_showMessage && _updateMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: _updateMessage.contains('Error')
+                              ? Colors.redAccent
+                              : Colors.green,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          _updateMessage,
+                          style: const TextStyle(color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
-            if (_showMessage && _updateMessage.isNotEmpty)
-              Positioned(
-                bottom: 120,
-                left: 20,
-                right: 20,
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: _updateMessage.contains('Error')
-                        ? Colors.redAccent
-                        : Colors.green,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    _updateMessage,
-                    style: const TextStyle(color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget inputText(TextEditingController controller, String hintText) {
     return Padding(
       padding: const EdgeInsets.all(5),
-      child: SizedBox(
+      child: Container(
         width: MediaQuery.of(context).size.width * 2 / 3,
         child: TextFormField(
           controller: controller,
           decoration: InputDecoration(
-            enabledBorder: const OutlineInputBorder(
+            enabledBorder: OutlineInputBorder(
               borderSide:
                   BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
             hintText: hintText,
-            focusedBorder: const OutlineInputBorder(
+            focusedBorder: OutlineInputBorder(
               borderSide:
                   BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
-              borderRadius: BorderRadius.all(
-                  Radius.circular(10)), // Không có viền khi có tiêu điểm
+              borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
             suffixIcon: IconButton(
               icon: Icon(
                 Icons.edit,
                 color: _isEditable
                     ? Colors.grey[400]
-                    : const Color.fromRGBO(238, 118, 0, 1),
+                    : Color.fromRGBO(238, 118, 0, 1),
               ),
               onPressed: () {
                 setState(() {

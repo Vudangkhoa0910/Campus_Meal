@@ -141,7 +141,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
     }
   }
 
-  // Phương thức tính tổng
+   // Phương thức tính tổng
   void calculateTotal() {
     // if (count.length != fee.length) {
     //   throw Exception('Hai danh sách count và fee phải có độ dài bằng nhau.');
@@ -162,7 +162,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
       total += discountedPrice; // Cộng giá trị đã tính vào total
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     calculateTotal();
@@ -314,72 +314,115 @@ class _PaymentInfoState extends State<PaymentInfo> {
           ),
           const Spacer(),
           GestureDetector(
-            onTap: () {
-              saveInvoice();
-              setState(() {
-                deleteBuy();
-              });
+  onTap: () {
+    saveInvoice();
+    setState(() {
+      deleteBuy();
+    });
 
-              // Hiển thị dialog sau khi nhấn Pay
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    backgroundColor: Colors.amber[100],
-                    title: const Text(
-                      "Payment Successful",
-                      style: TextStyle(
-                        color: const Color(0xffF57C51),
-                      ),
-                    ),
-                    content: SizedBox(
-                      height: 350.h,
-                      width: 350.w,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset("assets/KhoaCyber.png"),
-                          const SizedBox(height: 20),
-                          const Text(
-                            "Thank you for your payment!",
-                            style: TextStyle(
-                              color: const Color(0xffF57C51),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // actions: [
-                    //   TextButton(
-                    //     onPressed: () {
-                    //       Navigator.of(context).pop(); // Đóng dialog
-                    //     },
-                    //     child: const Text("OK"),
-                    //   ),
-                    // ],
-                  );
-                },
-              );
-            },
-            child: Container(
-              width: 200.w,
-              height: 70.h,
-              decoration: BoxDecoration(
-                color: const Color(0xffF57C51),
-                borderRadius: BorderRadius.all(Radius.circular(10.r)),
-              ),
-              child: Center(
-                child: Text(
-                  "Pay",
+    // Hiển thị dialog "processing" trước
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Không cho phép tắt khi bấm ra ngoài
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.amber[100],
+          title: const Center(
+          child: Text(
+            "Please Payment",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Color(0xffF57C51),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+          content: SizedBox(
+            height: 400.h,
+            width: 350.w,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset("assets/KhoaCyber.png"),
+                const SizedBox(height: 20),
+                const Text(
+                  "Processing...",
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30.sp,
+                    color: Color(0xffF57C51),
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+                const SizedBox(height: 20),
+                const CircularProgressIndicator(
+                  color: Color(0xffF57C51),
+                ),
+              ],
             ),
           ),
+        );
+      },
+    );
+
+    // Sau 5 giây hiển thị dialog "Payment Successful"
+    Future.delayed(const Duration(seconds: 5), () {
+      Navigator.of(context).pop(); // Đóng dialog "processing"
+      
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.amber[100],
+            title: const Text(
+              "Payment Successful",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xffF57C51),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SizedBox(
+              height: 350.h,
+              width: 350.w,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset("assets/KhoaCyber.png"),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Thank you for your payment!",
+                    style: TextStyle(
+                      color: Color(0xffF57C51),
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
+  },
+  child: Container(
+    width: 200.w,
+    height: 50.h,
+    decoration: BoxDecoration(
+      color: const Color(0xffF57C51),
+      borderRadius: BorderRadius.all(Radius.circular(10.r)),
+    ),
+    child: Center(
+      child: Text(
+        "Pay",
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16.sp,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
+  ),
+),
           const Spacer(),
         ],
       ),

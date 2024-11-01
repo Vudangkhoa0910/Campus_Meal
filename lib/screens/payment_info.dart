@@ -40,23 +40,27 @@ class _PaymentInfoState extends State<PaymentInfo> {
     getDiscount();
   }
 
-  void _initRetrieval() async {
-    final data = await DatabaseService()
-        .getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
+  void _initRetrieval() {
+    // Lắng nghe Stream từ getOrders và cập nhật items khi có dữ liệu mới
+    DatabaseService().getOrders(widget.buyer.userName).listen((data) {
+      items.clear(); // Xóa danh sách cũ để cập nhật lại với dữ liệu mới
+      quantities.clear(); // Xóa danh sách số lượng cũ
 
-    for (var order in data) {
-      items.add({
-        'name': order['name'],
-        'price': order['price'],
-        'imgUrl': order['imgUrl'],
-        'count': order['count'] // Lấy hình ảnh từ Firebase
-      });
-      quantities.add(1); // Mặc định là 1 cho mỗi sản phẩm
-    }
+      for (var order in data) {
+        items.add({
+          'name': order['name'],
+          'price': order['price'],
+          'imgUrl': order['imgUrl'],
+          'count': order['count'],
+        });
+        quantities.add(1); // Mặc định số lượng là 1 cho mỗi sản phẩm
+      }
 
-    if (mounted) {
-      setState(() {}); // Cập nhật trạng thái
-    }
+      // Cập nhật giao diện sau khi thay đổi dữ liệu
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   Future<void> getDiscount() async {
@@ -96,30 +100,44 @@ class _PaymentInfoState extends State<PaymentInfo> {
 
   Future<void> saveInvoice() async {
     try {
-      final data = await DatabaseService()
-          .getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
-      // Duyệt qua từng sản phẩm trong danh sách
-      for (var item in data) {
-        await FirebaseFirestore.instance.collection('orders').add({
-          'buyer_name': item['buyer_name'],
-          'buyer_phone': item['buyer_phone'],
-          'date': item['date'],
-          'img': item['imgUrl'],
-          'order_name': item['name'],
-          'price': item['price'],
-          'shop_name': item['shop_name'],
-          'count': item['count']
-        });
+      // Truy vấn trực tiếp từ Firestore collection 'buy' theo 'buyer_name'
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('buy')
+          .where('buyer_name', isEqualTo: widget.buyer.userName)
+          .get();
+
+      // Duyệt qua các tài liệu và xử lý từng đơn hàng bên trong 'orders'
+      for (var buyDoc in snapshot.docs) {
+        List<dynamic> ordersList = buyDoc['orders'];
+
+        for (var order in ordersList) {
+          await FirebaseFirestore.instance.collection('orders').add({
+            'buyer_name': order['buyer_name'],
+            'buyer_phone': order['buyer_phone'],
+            'date': order['date'],
+            'img': order['img'],
+            'order_name': order['order_name'],
+            'price': order['price'],
+            'shop_name': order['shop_name'],
+            'count': order['count'],
+            'rating': 0.0,
+          });
+        }
       }
-      // Thông báo lưu thành công
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Hóa đơn đã được lưu thành công!')),
-      );
+
+      // Hiển thị thông báo lưu thành công
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Hóa đơn đã được lưu thành công!')),
+        );
+      }
     } catch (e) {
-      // Xử lý lỗi nếu có
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi khi lưu hóa đơn: $e')),
-      );
+      // Xử lý lỗi và hiển thị thông báo lỗi
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi khi lưu hóa đơn: $e')),
+        );
+      }
     }
   }
 
@@ -141,7 +159,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
     }
   }
 
-   // Phương thức tính tổng
+  // Phương thức tính tổng
   void calculateTotal() {
     // if (count.length != fee.length) {
     //   throw Exception('Hai danh sách count và fee phải có độ dài bằng nhau.');
@@ -162,7 +180,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
       total += discountedPrice; // Cộng giá trị đã tính vào total
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     calculateTotal();
@@ -314,115 +332,116 @@ class _PaymentInfoState extends State<PaymentInfo> {
           ),
           const Spacer(),
           GestureDetector(
-  onTap: () {
-    saveInvoice();
-    setState(() {
-      deleteBuy();
-    });
+            onTap: () {
+              saveInvoice();
+              setState(() {
+                deleteBuy();
+              });
 
-    // Hiển thị dialog "processing" trước
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Không cho phép tắt khi bấm ra ngoài
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.amber[100],
-          title: const Center(
-          child: Text(
-            "Please Payment",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Color(0xffF57C51),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-          content: SizedBox(
-            height: 400.h,
-            width: 350.w,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset("assets/KhoaCyber.png"),
-                const SizedBox(height: 20),
-                const Text(
-                  "Processing...",
+              // Hiển thị dialog sau khi nhấn Pay
+              showDialog(
+                context: context,
+                barrierDismissible:
+                    false, // Không cho phép tắt khi bấm ra ngoài
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    backgroundColor: Colors.amber[100],
+                    title: const Center(
+                      child: Text(
+                        "Please Payment",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xffF57C51),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    content: SizedBox(
+                      height: 450.h,
+                      width: 350.w,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset("assets/KhoaCyber.png"),
+                          const SizedBox(height: 20),
+                          const Text(
+                            "Processing...",
+                            style: TextStyle(
+                              color: Color(0xffF57C51),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const CircularProgressIndicator(
+                            color: Color(0xffF57C51),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+
+              // Sau 5 giây hiển thị dialog "Payment Successful"
+              Future.delayed(const Duration(seconds: 5), () {
+                Navigator.of(context).pop(); // Đóng dialog "processing"
+
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.amber[100],
+                      title: const Text(
+                        "Payment Successful",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color(0xffF57C51),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      content: SizedBox(
+                        height: 400.h,
+                        width: 350.w,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Image.asset("assets/KhoaCyber.png"),
+                            const SizedBox(height: 20),
+                            const Text(
+                              "Thank you for your payment!",
+                              style: TextStyle(
+                                color: Color(0xffF57C51),
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              });
+            },
+            child: Container(
+              width: 200.w,
+              height: 90.h,
+              decoration: BoxDecoration(
+                color: const Color(0xffF57C51),
+                borderRadius: BorderRadius.all(Radius.circular(10.r)),
+              ),
+              child: Center(
+                child: Text(
+                  "Pay",
                   style: TextStyle(
-                    color: Color(0xffF57C51),
-                    fontSize: 18,
+                    color: Colors.white,
+                    fontSize: 30.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 20),
-                const CircularProgressIndicator(
-                  color: Color(0xffF57C51),
-                ),
-              ],
+              ),
             ),
           ),
-        );
-      },
-    );
-
-    // Sau 5 giây hiển thị dialog "Payment Successful"
-    Future.delayed(const Duration(seconds: 5), () {
-      Navigator.of(context).pop(); // Đóng dialog "processing"
-      
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: Colors.amber[100],
-            title: const Text(
-              "Payment Successful",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xffF57C51),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: SizedBox(
-              height: 350.h,
-              width: 350.w,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset("assets/KhoaCyber.png"),
-                  const SizedBox(height: 20),
-                  const Text(
-                    "Thank you for your payment!",
-                    style: TextStyle(
-                      color: Color(0xffF57C51),
-                      fontSize: 18,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    });
-  },
-  child: Container(
-    width: 200.w,
-    height: 50.h,
-    decoration: BoxDecoration(
-      color: const Color(0xffF57C51),
-      borderRadius: BorderRadius.all(Radius.circular(10.r)),
-    ),
-    child: Center(
-      child: Text(
-        "Pay",
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 16.sp,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
-  ),
-),
           const Spacer(),
         ],
       ),

@@ -73,17 +73,39 @@ class CartState extends State<Cart> with RouteAware {
     });
   }
 
-  void removeItem(int index) async {
+    void removeItem(int index) async {
+    // Kiểm tra chỉ số có hợp lệ không
+    if (index < 0 || index >= items.length) {
+      print('Chỉ số không hợp lệ: $index');
+      return;
+    }
+
     final itemName = items[index]['name'];
 
-    // Xóa item khỏi Firebase
-    await DatabaseService().deleteOrder(widget.buyer.userName, itemName);
+    try {
+      // Xóa item khỏi Firebase
+      await DatabaseService().deleteOrder(widget.buyer.userName, itemName);
 
-    // Cập nhật lại danh sách items và quantities
-    setState(() {
-      items.removeAt(index);
-      quantities.removeAt(index);
-    });
+      // Cập nhật lại danh sách items và quantities
+      setState(() {
+        items.removeAt(index);
+        quantities.removeAt(index);
+      });
+
+      // Hiển thị thông báo thành công
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Mục đã được xóa thành công!')),
+        );
+      }
+    } catch (e) {
+      // Xử lý lỗi và hiển thị thông báo lỗi
+      // if (context.mounted) {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(content: Text('Lỗi khi xóa mục: $e')),
+      //   );
+      // }
+    }
   }
 
   void addDiscount(int discount) async {

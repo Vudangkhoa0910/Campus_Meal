@@ -13,6 +13,8 @@ import 'package:campus_catalogue/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class OrderWrapper extends StatelessWidget {
   final List<dynamic> orders;
@@ -376,7 +378,7 @@ class HomePageState extends State<HomePage> {
         height: 100, // Đảm bảo chiều cao cho ListView
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           itemCount: items.length,
           itemBuilder: (BuildContext context, int index) {
             return GestureDetector(
@@ -809,6 +811,7 @@ class _InfoPageState extends State<InfoPage> {
   bool _isUpdating = false;
   String _updateMessage = '';
   bool _showMessage = false;
+  Map<String, dynamic>? weatherData;
 
   @override
   void initState() {
@@ -822,6 +825,7 @@ class _InfoPageState extends State<InfoPage> {
     closingTimeController =
         TextEditingController(text: widget.shop.closingTime);
     upiIdController = TextEditingController(text: widget.shop.upiId);
+    fetchWeather();
   }
 
   @override
@@ -833,6 +837,25 @@ class _InfoPageState extends State<InfoPage> {
     closingTimeController.dispose();
     upiIdController.dispose();
     super.dispose();
+  }
+
+   Future<void> fetchWeather() async {
+    try {
+      final response = await http.get(
+        Uri.parse(
+          'https://api.openweathermap.org/data/2.5/weather?q=Hanoi&appid=e0ea7c2430957c0b90c7a6375a5f8cba&units=metric',
+        ),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          weatherData = json.decode(response.body);
+        });
+      } else {
+        throw Exception('Failed to load weather data');
+      }
+    } catch (e) {
+      print('Error fetching weather data: $e');
+    }
   }
 
   Future<void> updateShop() async {
@@ -897,6 +920,23 @@ class _InfoPageState extends State<InfoPage> {
       });
     }
   }
+
+  IconData _getWeatherIcon(String main) {
+  switch (main.toLowerCase()) {
+    case 'clear':
+      return Icons.wb_sunny;
+    case 'clouds':
+      return Icons.cloud;
+    case 'rain':
+      return Icons.umbrella;
+    case 'snow':
+      return Icons.ac_unit;
+    case 'thunderstorm':
+      return Icons.flash_on;
+    default:
+      return Icons.wb_cloudy;
+  }
+}
 
   void logOut() {
     // Xử lý đăng xuất tại đây, ví dụ: xóa thông tin đăng nhập, xóa token, v.v.
@@ -996,27 +1036,67 @@ class _InfoPageState extends State<InfoPage> {
                 ),
               ],
             ),
-            Positioned(
-              top: 60,
-              left: MediaQuery.of(context).size.width / 2 -
-                  60, // Căn giữa hình ảnh
-              child: Container(
-                height: 120,
-                width: 120,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                      color: const Color.fromRGBO(122, 103, 238, 1), width: 3),
-                  borderRadius: const BorderRadius.all(Radius.circular(100)),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: Image.asset(
-                    "assets/iconprofile.png",
-                    fit: BoxFit.cover,
+            Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              margin: const EdgeInsets.only(top: 5),
+              child: Column(
+                children: [
+                  Text(
+                    "CAMPUS MEAL",
+                    style: TextStyle(
+                      fontSize: 16.5,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
+                  if (weatherData != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _getWeatherIcon(weatherData!['weather'][0]['main']),
+                          color: const Color.fromARGB(255, 58, 179, 234),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Hà Nội: ${weatherData!['main']['temp']}°C, ',
+                          style: const TextStyle(
+                              fontSize: 16.5, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 0)),
+                        ),
+                        Text(
+                          weatherData!['weather'][0]['description'],
+                          style: const TextStyle(fontSize: 16.5, color: Color.fromARGB(255, 0, 0, 0)),
+                        ),
+                      ],
+                    )
+                  else
+                    const CircularProgressIndicator(),
+                ],
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              margin: const EdgeInsets.only(top: 50),
+              height: 130,
+              width: 130,
+              decoration: BoxDecoration(
+                border: Border.all(
+                    color: Color.fromRGBO(122, 103, 238, 1), width: 3),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: Image.asset(
+                  "assets/Ảnh.jpg",
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
+          ),
             Positioned(
               bottom: 45,
               left: (MediaQuery.of(context).size.width - 250) /
@@ -1122,25 +1202,23 @@ class _InfoPageState extends State<InfoPage> {
               ),
             ),
             if (_showMessage && _updateMessage.isNotEmpty)
-              Positioned(
-                bottom: 60,
-                left: 20,
-                right: 20,
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: _updateMessage.contains('Error')
-                        ? Colors.redAccent
-                        : Colors.green,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    _updateMessage,
-                    style: const TextStyle(color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
+            Positioned(
+              bottom: 570, // Điều chỉnh lên một chút để không đè lên chữ
+              left: 20,
+              right: 20,
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: _updateMessage.contains('Error') ? Colors.redAccent : Colors.green,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  _updateMessage,
+                  style: const TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
                 ),
               ),
+            ),
           ],
         ),
       ),
@@ -1241,120 +1319,117 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
   }
 
   Widget ntfPage() {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text("Notifications",
-            style: AppTypography.textMd.copyWith(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppColors.backgroundOrange)),
-        backgroundColor: AppColors.backgroundYellow,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
+  return Scaffold(
+    backgroundColor: Colors.white,
+    appBar: AppBar(
+      title: Text("Notifications",
+          style: AppTypography.textMd.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.backgroundOrange)),
+      backgroundColor: AppColors.backgroundYellow,
+      leading: IconButton(
+        icon: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: AppColors.backgroundOrange,
+        ),
+        onPressed: () => Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const UserType())),
+      ),
+      elevation: 0,
+      centerTitle: true,
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.add,
             color: AppColors.backgroundOrange,
           ),
-          onPressed: () => Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const UserType())),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => createNotificationForm()),
+            );
+          },
         ),
-        elevation: 0,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.add,
-              color: AppColors.backgroundOrange,
-            ), // Nút "Add" để tạo thông báo mới
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        createNotificationForm()), // Điều hướng đến form tạo thông báo
+      ],
+    ),
+    body: Column(
+      children: [
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('notifications')
+                .where('shop_id', isEqualTo: widget.shop.shopID)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(child: Text('No notifications available'));
+              }
+              final notifications = snapshot.data!.docs;
+
+              return ListView.builder(
+                itemCount: notifications.length,
+                itemBuilder: (context, index) {
+                  final data =
+                      notifications[index].data() as Map<String, dynamic>;
+                  return ntfcard(
+                    data['title'] ?? 'No Title',
+                    data['description'] ?? 'No Description',
+                    data['date'] ?? 'Unknown Date',
+                    isNew: data['isNew'] ?? false, // Lấy giá trị isNew
+                    onEdit: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditNotificationForm(
+                            notificationId: notifications[index].id,
+                            initialTitle: data['title'],
+                            initialDescription: data['description'],
+                          ),
+                        ),
+                      );
+                    },
+                    onDelete: () {
+                      FirebaseFirestore.instance
+                          .collection('notifications')
+                          .doc(notifications[index].id)
+                          .delete();
+                    },
+                  );
+                },
               );
             },
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('notifications')
-                  .where('shop_id',
-                      isEqualTo: widget.shop.shopID) // Lọc thông báo theo shop
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text('No notifications available'));
-                }
-                final notifications = snapshot.data!.docs;
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Received Notifications',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: fakeNotifications.length,
+            itemBuilder: (context, index) {
+              final fakeData = fakeNotifications[index];
+              return ntfcard(
+                fakeData['title'] ?? 'No Title',
+                fakeData['description'] ?? 'No Description',
+                fakeData['date'] ?? 'Unknown Date',
+              );
+            },
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
-                return ListView.builder(
-                  itemCount: notifications.length,
-                  itemBuilder: (context, index) {
-                    final data =
-                        notifications[index].data() as Map<String, dynamic>;
-                    return ntfcard(
-                      data['title'] ?? 'No Title',
-                      data['description'] ?? 'No Description',
-                      data['date'] ?? 'Unknown Date',
-                      onEdit: () {
-                        // Điều hướng đến trang chỉnh sửa thông báo
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditNotificationForm(
-                              notificationId: notifications[index].id,
-                              initialTitle: data['title'],
-                              initialDescription: data['description'],
-                            ),
-                          ),
-                        );
-                      },
-                      onDelete: () {
-                        // Xóa thông báo
-                        FirebaseFirestore.instance
-                            .collection('notifications')
-                            .doc(notifications[index].id)
-                            .delete();
-                      },
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          // Phần hiển thị thông báo giả từ khách hàng
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Received Notifications',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: fakeNotifications.length,
-              itemBuilder: (context, index) {
-                final fakeData = fakeNotifications[index];
-                return ntfcard(
-                  fakeData['title'] ?? 'No Title',
-                  fakeData['description'] ?? 'No Description',
-                  fakeData['date'] ?? 'Unknown Date',
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
 // Danh sách thông báo giả từ khách hàng
   final List<Map<String, String>> fakeNotifications = [
@@ -1377,108 +1452,131 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
   // Hiển thị card thông báo
   Widget ntfcard(
-    String title,
-    String description,
-    String date, {
-    VoidCallback? onEdit,
-    VoidCallback? onDelete,
-  }) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      color: Colors.amber[50],
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 24,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 255, 145, 0),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    description,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Text(
-                      date,
+  String title,
+  String description,
+  String date, {
+  bool isNew = false, // Tham số để xác định xem thông báo có mới hay không
+  VoidCallback? onEdit,
+  VoidCallback? onDelete,
+}) {
+  return Card(
+    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+    elevation: 3,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+    ),
+    color: Colors.amber[50],
+    child: Padding(
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.check_circle,
+            color: Colors.green,
+            size: 24,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      title,
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 255, 145, 0),
                       ),
                     ),
+                    if (isNew) // Kiểm tra xem có là thông báo mới không
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: const Text(
+                          'NEW',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 5),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    date,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            // Nút chỉnh sửa nếu có
-            if (onEdit != null)
-              IconButton(
-                icon: Icon(Icons.edit, color: Colors.blue),
-                onPressed: onEdit,
-              ),
-            // Nút xóa nếu có
-            if (onDelete != null)
-              IconButton(
-                icon: Icon(Icons.delete, color: Colors.red),
-                onPressed: () {
-                  // Hiện hộp thoại xác nhận trước khi xóa
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: Text('Xác nhận xóa'),
-                        content: Text(
-                            'Bạn có chắc chắn muốn xóa thông báo này không?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Đóng hộp thoại
-                            },
-                            child: Text('Hủy'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              if (onDelete != null) onDelete(); // Gọi hàm xóa
-                              Navigator.of(context).pop(); // Đóng hộp thoại
-                            },
-                            child: Text('Xóa'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-          ],
-        ),
+          ),
+          // Nút chỉnh sửa nếu có
+          if (onEdit != null)
+            IconButton(
+              icon: Icon(Icons.edit, color: Colors.blue),
+              onPressed: onEdit,
+            ),
+          // Nút xóa nếu có
+          if (onDelete != null)
+            IconButton(
+              icon: Icon(Icons.delete, color: Colors.red),
+              onPressed: () {
+                // Hiện hộp thoại xác nhận trước khi xóa
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('Xác nhận xóa'),
+                      content: Text(
+                          'Bạn có chắc chắn muốn xóa thông báo này không?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Đóng hộp thoại
+                          },
+                          child: Text('Hủy'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            if (onDelete != null) onDelete(); // Gọi hàm xóa
+                            Navigator.of(context).pop(); // Đóng hộp thoại
+                          },
+                          child: Text('Xóa'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   // Form tạo thông báo mới
   Widget createNotificationForm() {
@@ -1565,6 +1663,7 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
       'description': description,
       'date': DateFormat('dd/MM/yyyy').format(DateTime.now()), // Lưu ngày tạo
       'shop_id': widget.shop.shopID, // Gán shop ID cho thông báo
+      'isNew': true,
     });
 
     ScaffoldMessenger.of(context).showSnackBar(

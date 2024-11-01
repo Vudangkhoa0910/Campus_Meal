@@ -79,18 +79,15 @@ class DatabaseService {
         .toList();
   }
 
-  Future<List<Map<String, dynamic>>> getOrders(String buyerName) async {
-    List<Map<String, dynamic>> orders = [];
+  Stream<List<Map<String, dynamic>>> getOrders(String buyerName) {
+    return _db
+        .collection('buy')
+        .where('buyer_name', isEqualTo: buyerName)
+        .snapshots() // Lấy dữ liệu theo dạng Stream
+        .map((snapshot) {
+      List<Map<String, dynamic>> orders = [];
 
-    try {
-      // Giả sử bạn lấy tất cả tài liệu trong bộ sưu tập "buy"
-      QuerySnapshot buySnapshot = await _db
-          .collection('buy')
-          .where('buyer_name', isEqualTo: buyerName)
-          .get();
-
-      for (var buyDoc in buySnapshot.docs) {
-        // Giả sử "orders" là một mảng trong tài liệu
+      for (var buyDoc in snapshot.docs) {
         List<dynamic> ordersList = buyDoc['orders'];
 
         for (var order in ordersList) {
@@ -106,11 +103,8 @@ class DatabaseService {
           });
         }
       }
-    } catch (e) {
-      print("Error fetching orders: $e");
-    }
-
-    return orders;
+      return orders;
+    });
   }
 
   Future<void> updateOrdersQuantities(List<Map<String, dynamic>> items,

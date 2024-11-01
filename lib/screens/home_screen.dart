@@ -2,10 +2,10 @@ import 'dart:developer';
 import 'dart:async';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/models/order_model.dart';
-import 'package:campus_catalogue/screens/api_chat.dart';
+import 'package:campus_catalogue/screens/api_chart.dart';
 import 'package:campus_catalogue/screens/cart.dart';
 import 'package:campus_catalogue/screens/history_user_page.dart';
-import 'package:campus_catalogue/screens/map_screen.dart';
+// import 'package:campus_catalogue/screens/map_screen.dart';
 import 'package:campus_catalogue/screens/ntf_user_page.dart';
 import 'package:campus_catalogue/screens/profile_use_page.dart';
 import 'package:campus_catalogue/screens/search_screen.dart';
@@ -108,6 +108,7 @@ class ShopCard extends StatefulWidget {
   @override
   State<ShopCard> createState() => _ShopCardState();
 }
+
 class _ShopCardState extends State<ShopCard> {
   Future<double> getRating(String shopName) async {
     double totalRating = 0;
@@ -304,7 +305,7 @@ class _RunningBorderEffectState extends State<RunningBorderEffect>
             border: Border.all(
               color: Colors.transparent,
               width: 0.005, // Extremely thin border widthcolors
-            ), 
+            ),
             gradient: SweepGradient(
               startAngle: 0.0,
               endAngle: 6.28, // Approx 2π radians
@@ -322,7 +323,7 @@ class _RunningBorderEffectState extends State<RunningBorderEffect>
               ].map((stop) => (stop % 1.0)).toList(),
             ),
           ),
-            child: child,
+          child: child,
         );
       },
       child: widget.child,
@@ -380,7 +381,8 @@ class _LocationCardWrapperState extends State<LocationCardWrapper> {
                 alignment: Alignment.topLeft,
                 child: Wrap(spacing: 8.8, runSpacing: 6.5, children: [
                   GestureDetector(
-                    onTap: () => getShopsFromLocation("Hostel Canteen", context),
+                    onTap: () =>
+                        getShopsFromLocation("Hostel Canteen", context),
                     child: RunningBorderEffect(
                       child: LocationCard(
                         name: "Hostel Canteens",
@@ -392,47 +394,43 @@ class _LocationCardWrapperState extends State<LocationCardWrapper> {
                     onTap: () =>
                         getShopsFromLocation("Hostel Juice Centre", context),
                     child: RunningBorderEffect(
-                    child: LocationCard(
-                        name: "Hostel Juice Phenikaa",
-                        imgURL: "assets/core_canteens.png"
-                        ),
+                      child: LocationCard(
+                          name: "Hostel Juice Phenikaa",
+                          imgURL: "assets/core_canteens.png"),
                     ),
                   ),
                   GestureDetector(
                     onTap: () =>
                         getShopsFromLocation("Market Complex", context),
                     child: RunningBorderEffect(
-                    child: LocationCard(
-                        name: "Market Complex Phenikaa",
-                        imgURL: "assets/market_complex.png"
-                        ),
+                      child: LocationCard(
+                          name: "Market Complex Phenikaa",
+                          imgURL: "assets/market_complex.png"),
                     ),
                   ),
                   GestureDetector(
                     onTap: () => getShopsFromLocation("Khokha Market", context),
                     child: RunningBorderEffect(
-                    child: LocationCard(
-                        name: "Khokha Market Phenikaa",
-                        imgURL: "assets/khokha_stalls.png"
-                        ),
+                      child: LocationCard(
+                          name: "Khokha Market Phenikaa",
+                          imgURL: "assets/khokha_stalls.png"),
                     ),
                   ),
                   GestureDetector(
                     onTap: () => getShopsFromLocation("Food Court", context),
                     child: RunningBorderEffect(
-                    child: LocationCard(
-                        name: "Food Court Phenikaa", imgURL: "assets/food_court.png"
-                        ),
+                      child: LocationCard(
+                          name: "Food Court Phenikaa",
+                          imgURL: "assets/food_court.png"),
                     ),
                   ),
                   GestureDetector(
                     onTap: () =>
                         getShopsFromLocation("Swimming Pool Area", context),
                     child: RunningBorderEffect(
-                    child: LocationCard(
-                        name: "Swimming Pool Phe",
-                        imgURL: "assets/food_van.png"
-                        ),
+                      child: LocationCard(
+                          name: "Swimming Pool Phe",
+                          imgURL: "assets/food_van.png"),
                     ),
                   ),
                 ]),
@@ -480,7 +478,7 @@ class LocationCard extends StatelessWidget {
 class SearchInput extends StatefulWidget {
   final Buyer buyer;
   const SearchInput({super.key, required this.buyer});
-  
+
   @override
   State<SearchInput> createState() => _SearchInputState();
 }
@@ -512,41 +510,40 @@ class _SearchInputState extends State<SearchInput> {
   }
 
   void searchSubmit(BuildContext context) async {
-  searchTerms = searchController.text.split(' ');
-  Set<dynamic> shops = {};
+    searchTerms = searchController.text.split(' ');
+    Set<dynamic> shops = {};
 
-  for (String term in searchTerms) {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection("shop")
-        .where("shop_name", isGreaterThanOrEqualTo: term)
-        .where("shop_name", isLessThanOrEqualTo: term + '\uf8ff') 
-        .get();
+    for (String term in searchTerms) {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("shop")
+          .where("shop_name", isGreaterThanOrEqualTo: term)
+          .where("shop_name", isLessThanOrEqualTo: term + '\uf8ff')
+          .get();
 
-    for (var shopDoc in querySnapshot.docs) {
-      shops.add(shopDoc.data()); 
+      for (var shopDoc in querySnapshot.docs) {
+        shops.add(shopDoc.data());
+      }
+    }
+
+    if (shops.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SearchScreen(
+            shopResults: shops.toList(),
+            isSearch: true,
+            title: "Explore IITG",
+            buyer: widget.buyer,
+          ),
+        ),
+      );
+    } else {
+      // Hiển thị thông báo nếu không tìm thấy kết quả nào
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không tìm thấy kết quả nào.')),
+      );
     }
   }
-
-  if (shops.isNotEmpty) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchScreen(
-          shopResults: shops.toList(),
-          isSearch: true,
-          title: "Explore IITG",
-          buyer: widget.buyer,
-        ),
-      ),
-    );
-  } else {
-    // Hiển thị thông báo nếu không tìm thấy kết quả nào
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Không tìm thấy kết quả nào.')),
-    );
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -569,14 +566,17 @@ class _SearchInputState extends State<SearchInput> {
                     filled: true,
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(width: 2.5, color: Color.fromARGB(255, 255, 146, 57)),
+                      borderSide: const BorderSide(
+                          width: 2.5, color: Color.fromARGB(255, 255, 146, 57)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(width: 2.5, color: Color.fromARGB(255, 255, 146, 57)),
+                      borderSide: const BorderSide(
+                          width: 2.5, color: Color.fromARGB(255, 255, 146, 57)),
                     ),
                     hintText: 'Search',
-                    hintStyle: const TextStyle(color: Colors.grey, fontSize: 18),
+                    hintStyle:
+                        const TextStyle(color: Colors.grey, fontSize: 18),
                     suffixIcon: const Icon(
                       Icons.search,
                       color: AppColors.secondary,
@@ -594,7 +594,8 @@ class _SearchInputState extends State<SearchInput> {
 }
 
 class AutoScrollShopList extends StatefulWidget {
-  final List shops; // Map {name, imgURL, rating, location, menu, ownerName, upiID}
+  final List
+      shops; // Map {name, imgURL, rating, location, menu, ownerName, upiID}
   final Buyer buyer;
 
   const AutoScrollShopList({
@@ -642,7 +643,7 @@ class _AutoScrollShopListState extends State<AutoScrollShopList> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 200, 
+      height: 200,
       width: 400,
       child: PageView.builder(
         controller: _pageController,
@@ -691,7 +692,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _isExpanded = false;
-  
+
   final List<String> _titles = [
     "Explore IITG",
     "Cart",
@@ -732,13 +733,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-    void _openMap() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => MapScreen(),
-      ),
-    );
+  void _openMap() {
+    // Navigator.push(
+    //   // context,
+    //   // MaterialPageRoute(
+    //   //   builder: (context) => MapScreen(),
+    //   // ),
+    // );
   }
 
   @override
@@ -774,47 +775,49 @@ class _HomeScreenState extends State<HomeScreen> {
             index: _selectedIndex,
             children: [
               SingleChildScrollView(
-  child: Column(
-    children: [
-      SearchInput(buyer: widget.buyer),
-      LocationCardWrapper(buyer: widget.buyer),
-      const ShopHeader(name: "Campus Favourites"),
-      FutureBuilder<List<dynamic>>(
-        future: getCampusFavouriteShops(),
-        builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
-          if (snapshot.hasData) {
-            final campusFavs = snapshot.data!;
-            return AutoScrollShopList(
-              shops: campusFavs,
-              buyer: widget.buyer,
-            ); // Thay thế ShopCardWrapper
-          } else {
-            return const CircularProgressIndicator(
-                color: AppColors.backgroundOrange);
-          }
-        },
-      ),
-      const ShopHeader(name: "Recommended"),
-      FutureBuilder<List<dynamic>>(
-        future: getCampusFavouriteShops(),
-        builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
-          if (snapshot.hasData) {
-            // Đảo ngược thứ tự danh sách
-            final campusFavs = snapshot.data!.reversed.toList();
-            return AutoScrollShopList(
-              shops: campusFavs,
-              buyer: widget.buyer,
-            ); // Thay thế ShopCardWrapper
-          } else {
-            return const CircularProgressIndicator(
-              color: AppColors.backgroundOrange,
-            );
-          }
-        },
-      ),
-    ],
-  ),
-),
+                child: Column(
+                  children: [
+                    SearchInput(buyer: widget.buyer),
+                    LocationCardWrapper(buyer: widget.buyer),
+                    const ShopHeader(name: "Campus Favourites"),
+                    FutureBuilder<List<dynamic>>(
+                      future: getCampusFavouriteShops(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<List<dynamic>> snapshot) {
+                        if (snapshot.hasData) {
+                          final campusFavs = snapshot.data!;
+                          return AutoScrollShopList(
+                            shops: campusFavs,
+                            buyer: widget.buyer,
+                          ); // Thay thế ShopCardWrapper
+                        } else {
+                          return const CircularProgressIndicator(
+                              color: AppColors.backgroundOrange);
+                        }
+                      },
+                    ),
+                    const ShopHeader(name: "Recommended"),
+                    FutureBuilder<List<dynamic>>(
+                      future: getCampusFavouriteShops(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<List<dynamic>> snapshot) {
+                        if (snapshot.hasData) {
+                          // Đảo ngược thứ tự danh sách
+                          final campusFavs = snapshot.data!.reversed.toList();
+                          return AutoScrollShopList(
+                            shops: campusFavs,
+                            buyer: widget.buyer,
+                          ); // Thay thế ShopCardWrapper
+                        } else {
+                          return const CircularProgressIndicator(
+                            color: AppColors.backgroundOrange,
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
               Cart(key: _cartKey, buyer: widget.buyer),
               HistoryPageUser(key: _historyKey, buyer: widget.buyer),
               NtfUserPage(key: _notificationsKey),
@@ -841,25 +844,31 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  padding: _isExpanded ? const EdgeInsets.all(5.0) : EdgeInsets.zero,
+                  padding:
+                      _isExpanded ? const EdgeInsets.all(5.0) : EdgeInsets.zero,
                   height: _isExpanded ? 120 : 0,
                   width: _isExpanded ? 60 : 0,
                   child: _isExpanded
-                      ? SingleChildScrollView( // Thêm SingleChildScrollView
+                      ? SingleChildScrollView(
+                          // Thêm SingleChildScrollView
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               FloatingActionButton(
                                 onPressed: _openMap,
-                                backgroundColor: const Color.fromARGB(255, 255, 139, 44),
-                                child: const Icon(Icons.map, color: Colors.white),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 255, 139, 44),
+                                child:
+                                    const Icon(Icons.map, color: Colors.white),
                                 mini: true,
                               ),
                               const SizedBox(height: 10),
                               FloatingActionButton(
                                 onPressed: _openChatWindow,
-                                backgroundColor: const Color.fromARGB(255, 255, 139, 44),
-                                child: const Icon(Icons.chat, color: Colors.white),
+                                backgroundColor:
+                                    const Color.fromARGB(255, 255, 139, 44),
+                                child:
+                                    const Icon(Icons.chat, color: Colors.white),
                                 mini: true,
                               ),
                             ],
@@ -867,14 +876,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         )
                       : const SizedBox.shrink(),
                 ),
-                const SizedBox(height: 10), // Space between container and toggle button
+                const SizedBox(
+                    height: 10), // Space between container and toggle button
                 FloatingActionButton(
                   onPressed: () {
                     setState(() {
                       _isExpanded = !_isExpanded;
                     });
                   },
-                  backgroundColor: const Color.fromRGBO(255, 125, 19, 1).withOpacity(0.9), // Thay 0.5 bằng giá trị mờ bạn muốn
+                  backgroundColor: const Color.fromRGBO(255, 125, 19, 1)
+                      .withOpacity(0.9), // Thay 0.5 bằng giá trị mờ bạn muốn
                   child: Icon(
                     _isExpanded ? Icons.close : Icons.add,
                     color: Colors.white,
@@ -922,7 +933,7 @@ class _HomeScreenState extends State<HomeScreen> {
               // Tùy chọn: Reload trang Home nếu cần
               break;
             case 1:
-              _cartKey.currentState?.reloadData();
+              // _cartKey.currentState?.reloadData();
               break;
             case 2:
               _historyKey.currentState?.reloadData();

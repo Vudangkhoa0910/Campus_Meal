@@ -2,6 +2,7 @@ import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/screens/payment_info.dart';
+import 'package:campus_catalogue/screens/shop_info.dart';
 import 'package:campus_catalogue/services/database_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/material.dart';
 
 class Cart extends StatefulWidget {
   final Buyer buyer;
+
   const Cart({super.key, required this.buyer});
 
   @override
@@ -16,56 +18,13 @@ class Cart extends StatefulWidget {
 }
 
 class CartState extends State<Cart> with RouteAware {
-  void reloadData() {
-    _initRetrieval();
-  }
-
-  void removeItem(int index) async {
-    final itemName = items[index]['name']; // Lấy tên item để xóa từ Firebase
-    await DatabaseService()
-        .deleteOrder(widget.buyer.userName, itemName); // Gọi phương thức xóa
-    setState(() {
-      items.removeAt(index);
-      quantities.removeAt(index);
-    });
-  }
-
-  void addDiscount(int discount) async {
-    FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-    // Truy vấn để lấy các tài liệu có 'buyer_name' khớp với widget.buyer.userName
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('buy')
-        .where('buyer_name', isEqualTo: widget.buyer.userName)
-        .get();
-
-    // Kiểm tra nếu có tài liệu khớp
-    if (querySnapshot.docs.isNotEmpty) {
-      // Lặp qua các tài liệu khớp và cập nhật
-      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        await _firestore
-            .collection('buy')
-            .doc(doc.id) // Sử dụng id của tài liệu để cập nhật
-            .update({
-          'discount': discount, // Cập nhật giá trị discount
-        }).catchError((e) {
-          print("Error updating discount: $e");
-        });
-      }
-    } else {
-      print('No documents found');
-    }
-  }
-
   List<Map<String, dynamic>> items = [];
-  List<num> quantities = [];
+  List<int> quantities = [];
   num totalPrice = 0;
   String selectedVoucher = '';
-  int discount = 1;
-  TextEditingController voucherController =
-      TextEditingController(); // Controller for voucher input
+  int discount = 0;
+  TextEditingController voucherController = TextEditingController();
 
-  // List of voucher options
   final List<Map<String, dynamic>> vouchers = [
     {
       'label': '10% OFF',
@@ -83,42 +42,71 @@ class CartState extends State<Cart> with RouteAware {
       'label': '30% OFF',
       'icon': Icons.percent,
       'description': 'Enjoy free shipping on your order',
-      'num': 30,
+      'num': 30
     },
     {
       'label': '50% OFF',
       'icon': Icons.percent,
       'description': 'Get another item for free!',
-      'num': 50,
+      'num': 50
     },
   ];
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _initRetrieval(); // Initialize and retrieve cart data
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _initRetrieval();
+  }
 
-  // Khởi tạo dữ liệu từ Firebase
-  void _initRetrieval() async {
-    final data = await DatabaseService()
-        .getOrders(widget.buyer.userName); // Lấy dữ liệu từ Firebase
-
-    for (var order in data) {
-      items.add({
-        'name': order['name'],
-        'price': order['price'],
-        'imgUrl': order['imgUrl'], // Lấy hình ảnh từ Firebase
+  void _initRetrieval() {
+    DatabaseService().getOrders(widget.buyer.userName).listen((data) {
+      setState(() {
+        items = data
+            .map((order) => {
+                  'name': order['name'],
+                  'price': order['price'],
+                  'imgUrl': order['imgUrl'],
+                })
+            .toList();
+        quantities = List<int>.filled(items.length, 1);
       });
-      quantities.add(1); // Mặc định là 1 cho mỗi sản phẩm
-    }
+    });
+  }
 
-    if (mounted) {
-      setState(() {}); // Cập nhật trạng thái
+  void removeItem(int index) async {
+    final itemName = items[index]['name'];
+
+    // Xóa item khỏi Firebase
+    await DatabaseService().deleteOrder(widget.buyer.userName, itemName);
+
+    // Cập nhật lại danh sách items và quantities
+    setState(() {
+      items.removeAt(index);
+      quantities.removeAt(index);
+    });
+  }
+
+  void addDiscount(int discount) async {
+    FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('buy')
+        .where('buyer_name', isEqualTo: widget.buyer.userName)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        await _firestore.collection('buy').doc(doc.id).update({
+          'discount': discount,
+        }).catchError((e) {
+          print("Error updating discount: $e");
+        });
+      }
+    } else {
+      print('No documents found');
     }
   }
 
-  // Update quantities of items based on user input
   void _updateQuantities() {
     for (var i = 0; i < items.length; i++) {
       final text = quantities[i].toString();
@@ -136,27 +124,53 @@ class CartState extends State<Cart> with RouteAware {
           children: [
             SizedBox(
               height: 200,
-              child: ListView.separated(
-                itemBuilder: (context, index) {
-                  return ItemCard(
-                    name: items[index]['name'],
-                    price: items[index]['price'],
-                    imgUrl: items[index]['imgUrl'],
-                    count: quantities[index],
-                    onQuantityChanged: (newCount) {
-                      quantities[index] = newCount;
+              child: StreamBuilder<List<Map<String, dynamic>>>(
+                stream: DatabaseService().getOrders(widget.buyer.userName),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(
+                        child: Text('Có lỗi xảy ra: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No orders found'));
+                  }
+
+                  final data = snapshot.data!;
+
+                  if (quantities.length != data.length) {
+                    quantities = List<int>.filled(data.length, 1);
+                  }
+
+                  return ListView.separated(
+                    itemBuilder: (context, index) {
+                      final order = data[index];
+                      final imgUrl = order['imgUrl'] ?? '';
+
+                      return ItemCard(
+                        name: order['name'],
+                        price: order['price'],
+                        imgUrl:
+                            imgUrl.isNotEmpty ? imgUrl : 'default_image_url',
+                        count: quantities[index],
+                        onQuantityChanged: (newCount) {
+                          setState(() {
+                            quantities[index] = newCount;
+                          });
+                        },
+                        onRemove: () {
+                          removeItem(index);
+                        },
+                      );
                     },
-                    onRemove: () => removeItem(index),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 10),
+                    itemCount: data.length,
                   );
                 },
-                separatorBuilder: (context, index) => const SizedBox(
-                  height: 10,
-                ),
-                itemCount: items.isNotEmpty ? items.length : 0,
               ),
             ),
             const Spacer(),
-            // Voucher section starts here
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -168,10 +182,7 @@ class CartState extends State<Cart> with RouteAware {
                 children: [
                   const Text(
                     'Voucher Discount',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -191,8 +202,7 @@ class CartState extends State<Cart> with RouteAware {
                       DecoratedBox(
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.orange, width: 2),
-                          borderRadius:
-                              BorderRadius.circular(8), // Bo viền góc tròn
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: DropdownButton<String>(
                           value:
@@ -215,10 +225,8 @@ class CartState extends State<Cart> with RouteAware {
                               selectedVoucher = value ?? '';
                               var selected = vouchers.firstWhere(
                                   (voucher) => voucher['label'] == value);
-                              discount = selected['num'] ?? 1;
-                              addDiscount(discount);
-                              voucherController
-                                  .clear(); // Clear manual entry if dropdown is selected
+                              discount = selected['num'] ?? 0;
+                              voucherController.clear();
                             });
                           },
                         ),
@@ -228,21 +236,18 @@ class CartState extends State<Cart> with RouteAware {
                 ],
               ),
             ),
-            const SizedBox(
-                height: 10), // Add space between voucher and pay button
+            const SizedBox(height: 10),
             GestureDetector(
               onTap: () async {
-                _updateQuantities(); // Update quantities from user input
+                addDiscount(discount);
+                _updateQuantities();
                 await DatabaseService().updateOrdersQuantities(
                     items, quantities, widget.buyer.userName);
 
-                // Navigate to PaymentInfo screen
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PaymentInfo(
-                      buyer: widget.buyer,
-                    ),
+                    builder: (context) => PaymentInfo(buyer: widget.buyer),
                   ),
                 );
               },
@@ -261,9 +266,9 @@ class CartState extends State<Cart> with RouteAware {
                         child: Center(
                           child: Text(
                             "Pay",
-                            style: AppTypography.textMd.copyWith(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -272,7 +277,7 @@ class CartState extends State<Cart> with RouteAware {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

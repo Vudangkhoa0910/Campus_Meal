@@ -5,6 +5,7 @@ import 'package:campus_catalogue/models/order_model.dart';
 import 'package:campus_catalogue/screens/api_chart.dart';
 import 'package:campus_catalogue/screens/cart.dart';
 import 'package:campus_catalogue/screens/history_user_page.dart';
+import 'package:campus_catalogue/screens/map_screen.dart';
 // import 'package:campus_catalogue/screens/map_screen.dart';
 import 'package:campus_catalogue/screens/ntf_user_page.dart';
 import 'package:campus_catalogue/screens/profile_use_page.dart';
@@ -15,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
+import 'package:flutter/cupertino.dart';
 
 class ShopHeader extends StatelessWidget {
   final String name;
@@ -692,6 +694,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _isExpanded = false;
+  final PageController _pageController = PageController();
 
   final List<String> _titles = [
     "Explore IITG",
@@ -716,17 +719,16 @@ class _HomeScreenState extends State<HomeScreen> {
         .orderBy("rating", descending: true)
         .limit(10)
         .get();
-    return shops.docs; // Có thể trả về thẳng docs thay vì thêm vào list tmp.
+    return shops.docs;
   }
 
-  // Method to open the chat window
   void _openChatWindow() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
         return FractionallySizedBox(
-          heightFactor: 0.8, // Adjust the height as needed
+          heightFactor: 0.8,
           child: FoodChatScreen(),
         );
       },
@@ -734,12 +736,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openMap() {
-    // Navigator.push(
-    //   // context,
-    //   // MaterialPageRoute(
-    //   //   builder: (context) => MapScreen(),
-    //   // ),
-    // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MapScreen(),
+      ),
+    );
   }
 
   @override
@@ -761,18 +763,24 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppColors.backgroundYellow,
         elevation: 0,
         centerTitle: true,
-        title: Text(_titles[_selectedIndex],
-            style: AppTypography.textMd.copyWith(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppColors.backgroundOrange)),
+        title: Text(
+          _titles[_selectedIndex],
+          style: AppTypography.textMd.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.backgroundOrange),
+        ),
       ),
       backgroundColor: AppColors.backgroundYellow,
       body: Stack(
         children: [
-          // Main content of the screen
-          IndexedStack(
-            index: _selectedIndex,
+          PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
             children: [
               SingleChildScrollView(
                 child: Column(
@@ -789,7 +797,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           return AutoScrollShopList(
                             shops: campusFavs,
                             buyer: widget.buyer,
-                          ); // Thay thế ShopCardWrapper
+                          );
                         } else {
                           return const CircularProgressIndicator(
                               color: AppColors.backgroundOrange);
@@ -802,12 +810,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       builder: (BuildContext context,
                           AsyncSnapshot<List<dynamic>> snapshot) {
                         if (snapshot.hasData) {
-                          // Đảo ngược thứ tự danh sách
                           final campusFavs = snapshot.data!.reversed.toList();
                           return AutoScrollShopList(
                             shops: campusFavs,
                             buyer: widget.buyer,
-                          ); // Thay thế ShopCardWrapper
+                          );
                         } else {
                           return const CircularProgressIndicator(
                             color: AppColors.backgroundOrange,
@@ -824,7 +831,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ProfileUsePage(key: _profileKey, buyer: widget.buyer),
             ],
           ),
-          // Positioned chat icon in the bottom-right corner
           Positioned(
             bottom: 6,
             right: 3,
@@ -850,7 +856,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: _isExpanded ? 60 : 0,
                   child: _isExpanded
                       ? SingleChildScrollView(
-                          // Thêm SingleChildScrollView
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -876,16 +881,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         )
                       : const SizedBox.shrink(),
                 ),
-                const SizedBox(
-                    height: 10), // Space between container and toggle button
+                const SizedBox(height: 10),
                 FloatingActionButton(
                   onPressed: () {
                     setState(() {
                       _isExpanded = !_isExpanded;
                     });
                   },
-                  backgroundColor: const Color.fromRGBO(255, 125, 19, 1)
-                      .withOpacity(0.9), // Thay 0.5 bằng giá trị mờ bạn muốn
+                  backgroundColor:
+                      const Color.fromRGBO(255, 125, 19, 1).withOpacity(0.9),
                   child: Icon(
                     _isExpanded ? Icons.close : Icons.add,
                     color: Colors.white,
@@ -896,11 +900,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
+      bottomNavigationBar: CupertinoTabBar(
         backgroundColor: Colors.white,
-        selectedItemColor: AppColors.backgroundOrange,
-        unselectedItemColor: Colors.grey,
+        activeColor: AppColors.backgroundOrange,
+        inactiveColor: Colors.grey,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -928,23 +931,11 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _selectedIndex = index;
           });
-          switch (index) {
-            case 0:
-              // Tùy chọn: Reload trang Home nếu cần
-              break;
-            case 1:
-              // _cartKey.currentState?.reloadData();
-              break;
-            case 2:
-              _historyKey.currentState?.reloadData();
-              break;
-            case 3:
-              //
-              break;
-            case 4:
-              //
-              break;
-          }
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
         },
       ),
     );

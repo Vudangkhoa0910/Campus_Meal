@@ -70,42 +70,19 @@ class CartState extends State<Cart> with RouteAware {
             .toList();
         quantities = List<int>.filled(items.length, 1);
       });
+      print(items);
     });
   }
 
-    void removeItem(int index) async {
-    // Kiểm tra chỉ số có hợp lệ không
-    if (index < 0 || index >= items.length) {
-      print('Chỉ số không hợp lệ: $index');
-      return;
-    }
+  void removeItem(String itemName) async {
+    // Xóa item khỏi Firebase
+    await DatabaseService().deleteOrder(widget.buyer.userName, itemName);
 
-    final itemName = items[index]['name'];
-
-    try {
-      // Xóa item khỏi Firebase
-      await DatabaseService().deleteOrder(widget.buyer.userName, itemName);
-
-      // Cập nhật lại danh sách items và quantities
-      setState(() {
-        items.removeAt(index);
-        quantities.removeAt(index);
-      });
-
-      // Hiển thị thông báo thành công
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Mục đã được xóa thành công!')),
-        );
-      }
-    } catch (e) {
-      // Xử lý lỗi và hiển thị thông báo lỗi
-      // if (context.mounted) {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(content: Text('Lỗi khi xóa mục: $e')),
-      //   );
-      // }
-    }
+    // Gọi setState để cập nhật lại giao diện
+    setState(() {
+      // Không cần xóa items và quantities thủ công ở đây
+      // Vì StreamBuilder sẽ tự cập nhật lại khi Firestore thay đổi
+    });
   }
 
   void addDiscount(int discount) async {
@@ -160,6 +137,8 @@ class CartState extends State<Cart> with RouteAware {
 
                   final data = snapshot.data!;
 
+                  // Cập nhật danh sách items và quantities từ dữ liệu mới nhất
+                  items = List.from(data);
                   if (quantities.length != data.length) {
                     quantities = List<int>.filled(data.length, 1);
                   }
@@ -181,7 +160,7 @@ class CartState extends State<Cart> with RouteAware {
                           });
                         },
                         onRemove: () {
-                          removeItem(index);
+                          removeItem(order['name']);
                         },
                       );
                     },

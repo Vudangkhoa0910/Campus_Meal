@@ -1237,10 +1237,12 @@ class SellerHomeScreen extends StatefulWidget {
 
 class _SellerHomeScreenState extends State<SellerHomeScreen> {
   final DatabaseService service = DatabaseService();
-
   double? screenWidth;
   double? screenHeight;
   final bool _isEditable = false;
+
+  final PageController _pageController = PageController();
+  int _selectedIndex = 0;
 
   Future<List<dynamic>> getOrders() async {
     final ordersSnapshot = await FirebaseFirestore.instance
@@ -1252,13 +1254,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     return ordersSnapshot.docs.map((doc) => doc.data()).toList();
   }
 
-  int _selectedIndex = 0;
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   List<Widget> _widgetOptions = [];
 
   @override
@@ -1268,22 +1263,26 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
       HomePage(shop: widget.shop),
       HistoryPage(shop: widget.shop),
       ntfPage(),
-      InfoPage(
-        shop: widget.shop,
-      ),
+      InfoPage(shop: widget.shop),
     ];
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    _pageController.jumpToPage(index);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Truy cập MediaQuery trực tiếp trong build
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: Colors.white, // Ghi đè màu nền trắng
+          canvasColor: Colors.white,
         ),
         child: BottomNavigationBar(
           items: const [
@@ -1307,14 +1306,18 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.black,
           unselectedItemColor: Colors.grey,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
+          onTap: _onItemTapped,
         ),
       ),
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        children: _widgetOptions,
+      ),
     );
   }
 

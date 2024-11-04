@@ -5,7 +5,8 @@ import 'package:campus_catalogue/models/order_model.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
 import 'package:campus_catalogue/screens/login.dart';
 import 'package:campus_catalogue/screens/add_menu.dart';
-import 'package:campus_catalogue/screens/qr_code_scanner.dart';
+import 'package:campus_catalogue/screens/Scanner/qr_code_scanner.dart';
+import 'package:campus_catalogue/screens/Scanner/scanner.dart';
 import 'package:campus_catalogue/screens/sele_buyer.dart';
 import 'package:campus_catalogue/screens/update_menu.dart';
 import 'package:campus_catalogue/screens/userType_screen.dart';
@@ -207,7 +208,7 @@ class HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Icon(
-                    Icons.store, 
+                    Icons.store,
                     size: 24,
                     color: AppColors.backgroundOrange,
                   ),
@@ -228,11 +229,11 @@ class HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Icon(
-                    Icons.menu, 
-                    size: 24, 
-                    color: AppColors.backgroundOrange, 
+                    Icons.menu,
+                    size: 24,
+                    color: AppColors.backgroundOrange,
                   ),
-                  const SizedBox(width: 8), 
+                  const SizedBox(width: 8),
                   Text(
                     "Menu",
                     style: AppTypography.textMd.copyWith(
@@ -244,111 +245,114 @@ class HomePageState extends State<HomePage> {
               const SizedBox(height: 13),
               for (var item in menu)
                 Container(
-  padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
-  child: Container(
-    decoration: BoxDecoration(
-      color: const Color(0xFFFFF2E0),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Container(
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(20)),
-        border: Border.all(
-          width: 2.3,
-          color: const Color.fromARGB(255, 0, 0, 0),
-        ),
-      ),
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start, // Đưa lên trên
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, bottom: 5),
-                  child: Text(
-                    "Name: ${item['name']}",
-                    style: AppTypography.textMd.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.backgroundOrange,
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF2E0),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 5),
-                  child: Text(
-                    "Price: Rs. ${item['price']}",
-                    style: AppTypography.textMd.copyWith(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green[800],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "Description: ${item['description']}",
-                          style: AppTypography.textSm.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FontStyle.italic,
-                            color: Colors.black87,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(20)),
+                        border: Border.all(
+                          width: 2.3,
+                          color: const Color.fromARGB(255, 0, 0, 0),
                         ),
                       ),
-                    ],
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.start, // Đưa lên trên
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 10, bottom: 5),
+                                  child: Text(
+                                    "Name: ${item['name']}",
+                                    style: AppTypography.textMd.copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.backgroundOrange,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 5),
+                                  child: Text(
+                                    "Price: Rs. ${item['price']}",
+                                    style: AppTypography.textMd.copyWith(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green[800],
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "Description: ${item['description']}",
+                                          style: AppTypography.textSm.copyWith(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle: FontStyle.italic,
+                                            color: Colors.black87,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Divider(
+                                  color: AppColors.backgroundOrange
+                                      .withOpacity(0.5),
+                                  thickness: 1.5,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 15),
+                          Container(
+                            height: 110,
+                            width: 110,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color.fromARGB(255, 0, 0, 0),
+                                width: 1.0,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.network(
+                                item['img'],
+                                fit: BoxFit.fill,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.asset(
+                                    'assets/iconshop.jpg',
+                                    fit: BoxFit.fill,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                Divider(
-                  color: AppColors.backgroundOrange.withOpacity(0.5),
-                  thickness: 1.5,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 15),
-          Container(
-            height: 110,
-            width: 110,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: const Color.fromARGB(255, 0, 0, 0),
-                width: 1.0,
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.network(
-                item['img'],
-                fit: BoxFit.fill,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.asset(
-                    'assets/iconshop.jpg',
-                    fit: BoxFit.fill,
-                    width: double.infinity,
-                    height: double.infinity,
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  ),
-),
-
             ],
           ),
         ),
@@ -357,72 +361,71 @@ class HomePageState extends State<HomePage> {
   }
 
   Widget _buildIncomeCard() {
-  return Container(
-    padding: const EdgeInsets.all(10),
-    decoration: BoxDecoration(
-      color: AppColors.backgroundYellow,
-      borderRadius: BorderRadius.circular(12), 
-      border: Border.all(width: 3, color: AppColors.backgroundOrange),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1), 
-          offset: Offset(0, 2),
-          blurRadius: 6,
-        ),
-      ],
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween, 
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Total Income",
-              style: AppTypography.textMd.copyWith(
-                fontSize: 16, 
-                fontWeight: FontWeight.bold, 
-                color: Colors.black, 
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundYellow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(width: 3, color: AppColors.backgroundOrange),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            offset: Offset(0, 2),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Total Income",
+                style: AppTypography.textMd.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "Rs. ${totalIncome.toString()}",
-              style: AppTypography.textMd.copyWith(
-                fontSize: 20, 
-                fontWeight: FontWeight.bold,
-                color: AppColors.backgroundOrange,
+              const SizedBox(height: 4),
+              Text(
+                "Rs. ${totalIncome.toString()}",
+                style: AppTypography.textMd.copyWith(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.backgroundOrange,
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              "UPI ID",
-              style: AppTypography.textMd.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.black, 
+            ],
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                "UPI ID",
+                style: AppTypography.textMd.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              widget.shop.upiId,
-              style: AppTypography.textMd.copyWith(
-                fontSize: 14,
-                color: AppColors.backgroundOrange, 
+              const SizedBox(height: 4),
+              Text(
+                widget.shop.upiId,
+                style: AppTypography.textMd.copyWith(
+                  fontSize: 14,
+                  color: AppColors.backgroundOrange,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildUpdateMenuButton(BuildContext context) {
     final List<String> items = ["Update Menu", "Add Menu"];
@@ -893,7 +896,7 @@ class _InfoPageState extends State<InfoPage> {
     super.dispose();
   }
 
-   Future<void> fetchWeather() async {
+  Future<void> fetchWeather() async {
     try {
       final response = await http.get(
         Uri.parse(
@@ -976,21 +979,21 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   IconData _getWeatherIcon(String main) {
-  switch (main.toLowerCase()) {
-    case 'clear':
-      return Icons.wb_sunny;
-    case 'clouds':
-      return Icons.cloud;
-    case 'rain':
-      return Icons.umbrella;
-    case 'snow':
-      return Icons.ac_unit;
-    case 'thunderstorm':
-      return Icons.flash_on;
-    default:
-      return Icons.wb_cloudy;
+    switch (main.toLowerCase()) {
+      case 'clear':
+        return Icons.wb_sunny;
+      case 'clouds':
+        return Icons.cloud;
+      case 'rain':
+        return Icons.umbrella;
+      case 'snow':
+        return Icons.ac_unit;
+      case 'thunderstorm':
+        return Icons.flash_on;
+      default:
+        return Icons.wb_cloudy;
+    }
   }
-}
 
   void logOut() {
     // Xử lý đăng xuất tại đây, ví dụ: xóa thông tin đăng nhập, xóa token, v.v.
@@ -1090,67 +1093,67 @@ class _InfoPageState extends State<InfoPage> {
                 ),
               ],
             ),
+            //   Align(
+            //   alignment: Alignment.topCenter,
+            //   child: Container(
+            //     margin: const EdgeInsets.only(top: 5),
+            //     child: Column(
+            //       children: [
+            //         Text(
+            //           "CAMPUS MEAL",
+            //           style: TextStyle(
+            //             fontSize: 16.5,
+            //             fontWeight: FontWeight.bold,
+            //             color: Colors.white,
+            //           ),
+            //         ),
+            //         // if (weatherData != null)
+            //         //   Row(
+            //         //     mainAxisAlignment: MainAxisAlignment.center,
+            //         //     children: [
+            //         //       Icon(
+            //         //         _getWeatherIcon(weatherData!['weather'][0]['main']),
+            //         //         color: const Color.fromARGB(255, 58, 179, 234),
+            //         //         size: 20,
+            //         //       ),
+            //         //       const SizedBox(width: 5),
+            //         //       // Text(
+            //         //       //   'Hà Nội: ${weatherData!['main']['temp']}°C, ',
+            //         //       //   style: const TextStyle(
+            //         //       //       fontSize: 16.5, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 0)),
+            //         //       // ),
+            //         //       // Text(
+            //         //       //   weatherData!['weather'][0]['description'],
+            //         //       //   style: const TextStyle(fontSize: 16.5, color: Color.fromARGB(255, 0, 0, 0)),
+            //         //       // ),
+            //         //     ],
+            //         //   )
+            //         // else
+            //         //   const CircularProgressIndicator(),
+            //       ],
+            //     ),
+            //   ),
+            // ),
             Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              margin: const EdgeInsets.only(top: 5),
-              child: Column(
-                children: [
-                  Text(
-                    "CAMPUS MEAL",
-                    style: TextStyle(
-                      fontSize: 16.5,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+              alignment: Alignment.topCenter,
+              child: Container(
+                margin: const EdgeInsets.only(top: 50),
+                height: 130,
+                width: 130,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Color.fromRGBO(122, 103, 238, 1), width: 3),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: Image.asset(
+                    "assets/iconprofile.png",
+                    fit: BoxFit.cover,
                   ),
-                  if (weatherData != null)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          _getWeatherIcon(weatherData!['weather'][0]['main']),
-                          color: const Color.fromARGB(255, 58, 179, 234),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          'Hà Nội: ${weatherData!['main']['temp']}°C, ',
-                          style: const TextStyle(
-                              fontSize: 16.5, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 0)),
-                        ),
-                        Text(
-                          weatherData!['weather'][0]['description'],
-                          style: const TextStyle(fontSize: 16.5, color: Color.fromARGB(255, 0, 0, 0)),
-                        ),
-                      ],
-                    )
-                  else
-                    const CircularProgressIndicator(),
-                ],
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              margin: const EdgeInsets.only(top: 50),
-              height: 130,
-              width: 130,
-              decoration: BoxDecoration(
-                border: Border.all(
-                    color: Color.fromRGBO(122, 103, 238, 1), width: 3),
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(100),
-                child: Image.asset(
-                  "assets/Ảnh.jpg",
-                  fit: BoxFit.cover,
                 ),
               ),
             ),
-          ),
             Positioned(
               bottom: 45,
               left: (MediaQuery.of(context).size.width - 250) /
@@ -1256,23 +1259,25 @@ class _InfoPageState extends State<InfoPage> {
               ),
             ),
             if (_showMessage && _updateMessage.isNotEmpty)
-            Positioned(
-              bottom: 570, // Điều chỉnh lên một chút để không đè lên chữ
-              left: 20,
-              right: 20,
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: _updateMessage.contains('Error') ? Colors.redAccent : Colors.green,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  _updateMessage,
-                  style: const TextStyle(color: Colors.white),
-                  textAlign: TextAlign.center,
+              Positioned(
+                bottom: 570, // Điều chỉnh lên một chút để không đè lên chữ
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: _updateMessage.contains('Error')
+                        ? Colors.redAccent
+                        : Colors.green,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    _updateMessage,
+                    style: const TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -1290,23 +1295,8 @@ class SellerHomeScreen extends StatefulWidget {
 }
 
 class _SellerHomeScreenState extends State<SellerHomeScreen> {
-  final DatabaseService service = DatabaseService();
-  double? screenWidth;
-  double? screenHeight;
-  final bool _isEditable = false;
-
   final PageController _pageController = PageController();
   int _selectedIndex = 0;
-
-  Future<List<dynamic>> getOrders() async {
-    final ordersSnapshot = await FirebaseFirestore.instance
-        .collection("orders")
-        .where("shop_id", isEqualTo: widget.shop.shopID)
-        .limit(10)
-        .get();
-
-    return ordersSnapshot.docs.map((doc) => doc.data()).toList();
-  }
 
   List<Widget> _widgetOptions = [];
 
@@ -1321,17 +1311,21 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     ];
   }
 
-void _onItemTapped(int index) {
-  print("Tapped on index: $index"); 
-  setState(() {
-    if (index == 3) {
-      _selectedIndex = 2; 
+  void _onItemTapped(int index) {
+    if (index == 2) {
+      // Khi nhấn nút QR, mở màn hình QRScanner
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Scanner()),
+      );
     } else {
-      _selectedIndex = index; 
+      // Cập nhật trang hiện tại cho các mục khác
+      setState(() {
+        _selectedIndex = index < 2 ? index : index - 1;
+      });
+      _pageController.jumpToPage(_selectedIndex);
     }
-  });
-  _pageController.jumpToPage(_selectedIndex); 
-}
+  }
 
   // @override
   // Widget build(BuildContext context) {
@@ -1380,7 +1374,7 @@ void _onItemTapped(int index) {
   //                 ),
   //               ],
   //             ),
-  //             label: '', 
+  //             label: '',
   //           );
   //         }),
   //         currentIndex: _selectedIndex,
@@ -1391,141 +1385,80 @@ void _onItemTapped(int index) {
   //           _onItemTapped(index);
   //           setState(() {});
   //         },
-  //         elevation: 0, 
-  //         selectedFontSize: 0.5, 
-  //         unselectedFontSize: 0.5, 
+  //         elevation: 0,
+  //         selectedFontSize: 0.5,
+  //         unselectedFontSize: 0.5,
   //       ),
   //     ),
   //   );
   // }
 
-Widget build(BuildContext context) {
-  return Scaffold(
-    body: PageView(
-      controller: _pageController,
-      onPageChanged: (index) {
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
-      children: _widgetOptions,
-    ),
-    bottomNavigationBar: Stack(
-      alignment: Alignment.center,
-      children: [
-        Theme(
-          data: Theme.of(context).copyWith(
-            canvasColor: AppColors.backgroundYellow,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        children: _widgetOptions,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+            icon: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.home_outlined,
+                  color: _selectedIndex == 0
+                      ? AppColors.backgroundOrange
+                      : Colors.grey,
+                ),
+                Text(
+                  'Home',
+                  style: TextStyle(
+                    color: _selectedIndex == 0
+                        ? AppColors.backgroundOrange
+                        : Colors.grey,
+                    fontWeight: _selectedIndex == 0
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+            label: '',
           ),
-          child: BottomNavigationBar(
-            items: [
-              BottomNavigationBarItem(
-                icon: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.home_outlined,
-                      color: _selectedIndex == 0 ? AppColors.backgroundOrange : Colors.grey,
-                    ),
-                    Text(
-                      'Home',
-                      style: TextStyle(
-                        color: _selectedIndex == 0 ? AppColors.backgroundOrange : Colors.grey,
-                        fontWeight: _selectedIndex == 0 ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ],
+          BottomNavigationBarItem(
+            icon: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.history,
+                  color: _selectedIndex == 1
+                      ? AppColors.backgroundOrange
+                      : Colors.grey,
                 ),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.history,
-                      color: _selectedIndex == 1 ? AppColors.backgroundOrange : Colors.grey,
-                    ),
-                    Text(
-                      'History',
-                      style: TextStyle(
-                        color: _selectedIndex == 1 ? AppColors.backgroundOrange : Colors.grey,
-                        fontWeight: _selectedIndex == 1 ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'History',
+                  style: TextStyle(
+                    color: _selectedIndex == 1
+                        ? AppColors.backgroundOrange
+                        : Colors.grey,
+                    fontWeight: _selectedIndex == 1
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
                 ),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: SizedBox(), 
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.notifications,
-                      color: _selectedIndex == 3 ? AppColors.backgroundOrange : Colors.grey,
-                    ),
-                    Text(
-                      'Notices',
-                      style: TextStyle(
-                        color: _selectedIndex == 3 ? AppColors.backgroundOrange : Colors.grey,
-                        fontWeight: _selectedIndex == 3 ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.account_circle_outlined,
-                      color: _selectedIndex == 4 ? AppColors.backgroundOrange : Colors.grey,
-                    ),
-                    Text(
-                      'Profile',
-                      style: TextStyle(
-                        color: _selectedIndex == 4 ? AppColors.backgroundOrange : Colors.grey,
-                        fontWeight: _selectedIndex == 4 ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ],
-                ),
-                label: '',
-              ),
-            ],
-            currentIndex: _selectedIndex,
-            selectedItemColor: AppColors.backgroundOrange,
-            unselectedItemColor: Colors.grey,
-            type: BottomNavigationBarType.fixed,
-            onTap: (index) {
-              _onItemTapped(index);
-              setState(() {});
-            },
-            elevation: 0,
-            selectedFontSize: 0.5,
-            unselectedFontSize: 0.5,
+              ],
+            ),
+            label: '',
           ),
-        ),
-        Positioned(
-          bottom: 25, 
-          child: GestureDetector(
-            onTap: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => QRScanner()),
-                );
-                if (result != null) {
-                  print('Mã quét: $result');
-                }
-            },
-            child: Container(
+          BottomNavigationBarItem(
+            icon: Container(
               decoration: BoxDecoration(
                 color: AppColors.backgroundOrange,
                 shape: BoxShape.circle,
@@ -1534,139 +1467,193 @@ Widget build(BuildContext context) {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 5,
                     blurRadius: 7,
-                    offset: Offset(0, 3), 
+                    offset: Offset(0, 3),
                   ),
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0), 
+                padding: const EdgeInsets.all(16.0),
                 child: Icon(
-                  Icons.qr_code_scanner, 
+                  Icons.qr_code_scanner,
                   color: Colors.white,
                   size: 28,
                 ),
               ),
             ),
+            label: '',
           ),
-        ),
-      ],
-    ),
-  );
-}
-
+          BottomNavigationBarItem(
+            icon: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.notifications,
+                  color: _selectedIndex == 2
+                      ? AppColors.backgroundOrange
+                      : Colors.grey,
+                ),
+                Text(
+                  'Notices',
+                  style: TextStyle(
+                    color: _selectedIndex == 2
+                        ? AppColors.backgroundOrange
+                        : Colors.grey,
+                    fontWeight: _selectedIndex == 2
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.account_circle_outlined,
+                  color: _selectedIndex == 3
+                      ? AppColors.backgroundOrange
+                      : Colors.grey,
+                ),
+                Text(
+                  'Profile',
+                  style: TextStyle(
+                    color: _selectedIndex == 3
+                        ? AppColors.backgroundOrange
+                        : Colors.grey,
+                    fontWeight: _selectedIndex == 3
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+            label: '',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: AppColors.backgroundOrange,
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        onTap: _onItemTapped,
+        elevation: 0,
+      ),
+    );
+  }
 
   Widget ntfPage() {
-  return Scaffold(
-    backgroundColor: Colors.white,
-    appBar: AppBar(
-      title: Text("Notifications",
-          style: AppTypography.textMd.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.backgroundOrange)),
-      backgroundColor: AppColors.backgroundYellow,
-      leading: IconButton(
-        icon: const Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: AppColors.backgroundOrange,
-        ),
-        onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const UserType())),
-      ),
-      elevation: 0,
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: Icon(
-            Icons.add,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text("Notifications",
+            style: AppTypography.textMd.copyWith(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: AppColors.backgroundOrange)),
+        backgroundColor: AppColors.backgroundYellow,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
             color: AppColors.backgroundOrange,
           ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => createNotificationForm()),
-            );
-          },
+          onPressed: () => Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const UserType())),
         ),
-      ],
-    ),
-    body: Column(
-      children: [
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('notifications')
-                .where('shop_id', isEqualTo: widget.shop.shopID)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              }
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(child: Text('No notifications available'));
-              }
-              final notifications = snapshot.data!.docs;
+        elevation: 0,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.add,
+              color: AppColors.backgroundOrange,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => createNotificationForm()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('notifications')
+                  .where('shop_id', isEqualTo: widget.shop.shopID)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text('No notifications available'));
+                }
+                final notifications = snapshot.data!.docs;
 
-              return ListView.builder(
-                itemCount: notifications.length,
-                itemBuilder: (context, index) {
-                  final data =
-                      notifications[index].data() as Map<String, dynamic>;
-                  return ntfcard(
-                    data['title'] ?? 'No Title',
-                    data['description'] ?? 'No Description',
-                    data['date'] ?? 'Unknown Date',
-                    isNew: data['isNew'] ?? false, // Lấy giá trị isNew
-                    onEdit: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EditNotificationForm(
-                            notificationId: notifications[index].id,
-                            initialTitle: data['title'],
-                            initialDescription: data['description'],
+                return ListView.builder(
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final data =
+                        notifications[index].data() as Map<String, dynamic>;
+                    return ntfcard(
+                      data['title'] ?? 'No Title',
+                      data['description'] ?? 'No Description',
+                      data['date'] ?? 'Unknown Date',
+                      isNew: data['isNew'] ?? false, // Lấy giá trị isNew
+                      onEdit: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditNotificationForm(
+                              notificationId: notifications[index].id,
+                              initialTitle: data['title'],
+                              initialDescription: data['description'],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    onDelete: () {
-                      FirebaseFirestore.instance
-                          .collection('notifications')
-                          .doc(notifications[index].id)
-                          .delete();
-                    },
-                  );
-                },
-              );
-            },
+                        );
+                      },
+                      onDelete: () {
+                        FirebaseFirestore.instance
+                            .collection('notifications')
+                            .doc(notifications[index].id)
+                            .delete();
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            'Received Notifications',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Received Notifications',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
           ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: fakeNotifications.length,
-            itemBuilder: (context, index) {
-              final fakeData = fakeNotifications[index];
-              return ntfcard(
-                fakeData['title'] ?? 'No Title',
-                fakeData['description'] ?? 'No Description',
-                fakeData['date'] ?? 'Unknown Date',
-              );
-            },
+          Expanded(
+            child: ListView.builder(
+              itemCount: fakeNotifications.length,
+              itemBuilder: (context, index) {
+                final fakeData = fakeNotifications[index];
+                return ntfcard(
+                  fakeData['title'] ?? 'No Title',
+                  fakeData['description'] ?? 'No Description',
+                  fakeData['date'] ?? 'Unknown Date',
+                );
+              },
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
-
+        ],
+      ),
+    );
+  }
 
 // Danh sách thông báo giả từ khách hàng
   final List<Map<String, String>> fakeNotifications = [
@@ -1689,131 +1676,131 @@ Widget build(BuildContext context) {
 
   // Hiển thị card thông báo
   Widget ntfcard(
-  String title,
-  String description,
-  String date, {
-  bool isNew = false, // Tham số để xác định xem thông báo có mới hay không
-  VoidCallback? onEdit,
-  VoidCallback? onDelete,
-}) {
-  return Card(
-    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-    elevation: 3,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
-    ),
-    color: Colors.amber[50],
-    child: Padding(
-      padding: const EdgeInsets.all(10),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.check_circle,
-            color: Colors.green,
-            size: 24,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 255, 145, 0),
-                      ),
-                    ),
-                    if (isNew) // Kiểm tra xem có là thông báo mới không
-                      Container(
-                        margin: const EdgeInsets.only(left: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(5),
+    String title,
+    String description,
+    String date, {
+    bool isNew = false, // Tham số để xác định xem thông báo có mới hay không
+    VoidCallback? onEdit,
+    VoidCallback? onDelete,
+  }) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      color: Colors.amber[50],
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.check_circle,
+              color: Colors.green,
+              size: 24,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 255, 145, 0),
                         ),
-                        child: const Text(
-                          'NEW',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                      ),
+                      if (isNew) // Kiểm tra xem có là thông báo mới không
+                        Container(
+                          margin: const EdgeInsets.only(left: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: const Text(
+                            'NEW',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
+                    ],
                   ),
-                ),
-                const SizedBox(height: 5),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Text(
-                    date,
+                  const SizedBox(height: 5),
+                  Text(
+                    description,
                     style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
+                      fontSize: 14,
+                      color: Colors.black54,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 5),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text(
+                      date,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          // Nút chỉnh sửa nếu có
-          if (onEdit != null)
-            IconButton(
-              icon: Icon(Icons.edit, color: Colors.blue),
-              onPressed: onEdit,
-            ),
-          // Nút xóa nếu có
-          if (onDelete != null)
-            IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
-              onPressed: () {
-                // Hiện hộp thoại xác nhận trước khi xóa
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text('Xác nhận xóa'),
-                      content: Text(
-                          'Bạn có chắc chắn muốn xóa thông báo này không?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop(); // Đóng hộp thoại
-                          },
-                          child: Text('Hủy'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            if (onDelete != null) onDelete(); // Gọi hàm xóa
-                            Navigator.of(context).pop(); // Đóng hộp thoại
-                          },
-                          child: Text('Xóa'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-        ],
+            // Nút chỉnh sửa nếu có
+            if (onEdit != null)
+              IconButton(
+                icon: Icon(Icons.edit, color: Colors.blue),
+                onPressed: onEdit,
+              ),
+            // Nút xóa nếu có
+            if (onDelete != null)
+              IconButton(
+                icon: Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  // Hiện hộp thoại xác nhận trước khi xóa
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text('Xác nhận xóa'),
+                        content: Text(
+                            'Bạn có chắc chắn muốn xóa thông báo này không?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Đóng hộp thoại
+                            },
+                            child: Text('Hủy'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              if (onDelete != null) onDelete(); // Gọi hàm xóa
+                              Navigator.of(context).pop(); // Đóng hộp thoại
+                            },
+                            child: Text('Xóa'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   // Form tạo thông báo mới
   Widget createNotificationForm() {

@@ -242,117 +242,117 @@ class HomePageState extends State<HomePage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 13),
+              const SizedBox(height: 7),
               for (var item in menu)
                 Container(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF2E0),
-                      borderRadius: BorderRadius.circular(10),
+                margin: EdgeInsets.symmetric(vertical: 4, horizontal: 3),
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.yellow[50],
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
                     ),
-                    child: Container(
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(20)),
-                        border: Border.all(
-                          width: 2.3,
-                          color: const Color.fromARGB(255, 0, 0, 0),
-                        ),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: const EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start, // Đưa lên trên
+                      child: Center(
+                        child: Icon(Icons.storefront, size: 48, color: Colors.orange),
+                      ),
+                    ),
+                    SizedBox(width: 11),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(top: 10, bottom: 5),
-                                  child: Text(
-                                    "Name: ${item['name']}",
-                                    style: AppTypography.textMd.copyWith(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.backgroundOrange,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 5),
-                                  child: Text(
-                                    "Price: Rs. ${item['price']}",
-                                    style: AppTypography.textMd.copyWith(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.green[800],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          "Description: ${item['description']}",
-                                          style: AppTypography.textSm.copyWith(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            fontStyle: FontStyle.italic,
-                                            color: Colors.black87,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Divider(
-                                  color: AppColors.backgroundOrange
-                                      .withOpacity(0.5),
-                                  thickness: 1.5,
-                                ),
-                              ],
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6, bottom: 3),
+                            child: Text(
+                              "Name: ${item['name']}",
+                              style: AppTypography.textMd.copyWith(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.backgroundOrange,
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 15),
-                          Container(
-                            height: 110,
-                            width: 110,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: const Color.fromARGB(255, 0, 0, 0),
-                                width: 1.0,
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
-                                item['img'],
-                                fit: BoxFit.fill,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Image.asset(
-                                    'assets/iconshop.jpg',
-                                    fit: BoxFit.fill,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  );
-                                },
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 3),
+                            child: Text(
+                              "Price: Rs. ${item['price']}",
+                              style: AppTypography.textMd.copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.green[800],
                               ),
                             ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Text(
+                              "Description: ${item['description']}",
+                              style: AppTypography.textSm.copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.normal,
+                                fontStyle: FontStyle.italic,
+                                color: Colors.black87,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                            ),
+                          ),
+                          Divider(
+                            color: AppColors.backgroundOrange.withOpacity(0.5),
+                            thickness: 1.5,
                           ),
                         ],
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    Center(
+                      child: Container(
+                        height: 100,
+                        width: 100,
+                        padding: EdgeInsets.all(2), 
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 0, 0, 0),
+                            width: 1.0,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Image.network(
+                            item['img'],
+                            fit: BoxFit.cover, 
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                'assets/iconshop.jpg',
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
             ],
           ),
         ),
@@ -1093,47 +1093,47 @@ class _InfoPageState extends State<InfoPage> {
                 ),
               ],
             ),
-            //   Align(
-            //   alignment: Alignment.topCenter,
-            //   child: Container(
-            //     margin: const EdgeInsets.only(top: 5),
-            //     child: Column(
-            //       children: [
-            //         Text(
-            //           "CAMPUS MEAL",
-            //           style: TextStyle(
-            //             fontSize: 16.5,
-            //             fontWeight: FontWeight.bold,
-            //             color: Colors.white,
-            //           ),
-            //         ),
-            //         // if (weatherData != null)
-            //         //   Row(
-            //         //     mainAxisAlignment: MainAxisAlignment.center,
-            //         //     children: [
-            //         //       Icon(
-            //         //         _getWeatherIcon(weatherData!['weather'][0]['main']),
-            //         //         color: const Color.fromARGB(255, 58, 179, 234),
-            //         //         size: 20,
-            //         //       ),
-            //         //       const SizedBox(width: 5),
-            //         //       // Text(
-            //         //       //   'Hà Nội: ${weatherData!['main']['temp']}°C, ',
-            //         //       //   style: const TextStyle(
-            //         //       //       fontSize: 16.5, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 0)),
-            //         //       // ),
-            //         //       // Text(
-            //         //       //   weatherData!['weather'][0]['description'],
-            //         //       //   style: const TextStyle(fontSize: 16.5, color: Color.fromARGB(255, 0, 0, 0)),
-            //         //       // ),
-            //         //     ],
-            //         //   )
-            //         // else
-            //         //   const CircularProgressIndicator(),
-            //       ],
-            //     ),
-            //   ),
-            // ),
+              Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                margin: const EdgeInsets.only(top: 5),
+                child: Column(
+                  children: [
+                    Text(
+                      "CAMPUS MEAL",
+                      style: TextStyle(
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    if (weatherData != null)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _getWeatherIcon(weatherData!['weather'][0]['main']),
+                            color: const Color.fromARGB(255, 58, 179, 234),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Hà Nội: ${weatherData!['main']['temp']}°C, ',
+                            style: const TextStyle(
+                                fontSize: 16.5, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 0)),
+                          ),
+                          Text(
+                            weatherData!['weather'][0]['description'],
+                            style: const TextStyle(fontSize: 16.5, color: Color.fromARGB(255, 0, 0, 0)),
+                          ),
+                        ],
+                      )
+                    else
+                      const CircularProgressIndicator(),
+                  ],
+                ),
+              ),
+            ),
             Align(
               alignment: Alignment.topCenter,
               child: Container(
@@ -1148,7 +1148,7 @@ class _InfoPageState extends State<InfoPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: Image.asset(
-                    "assets/iconprofile.png",
+                    "assets/Ảnh.jpg",
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -1327,225 +1327,173 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     }
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     body: PageView(
-  //       controller: _pageController,
-  //       onPageChanged: (index) {
-  //         setState(() {
-  //           _selectedIndex = index;
-  //         });
-  //       },
-  //       children: _widgetOptions,
-  //     ),
-  //     bottomNavigationBar: Theme(
-  //       data: Theme.of(context).copyWith(
-  //         canvasColor: AppColors.backgroundYellow,
-  //       ),
-  //       child: BottomNavigationBar(
-  //         items: List.generate(4, (index) {
-  //           return BottomNavigationBarItem(
-  //             icon: Column(
-  //               mainAxisSize: MainAxisSize.min,
-  //               children: [
-  //                 Icon(
-  //                   index == 0
-  //                       ? Icons.home_outlined
-  //                       : index == 1
-  //                           ? Icons.history
-  //                           : index == 2
-  //                               ? Icons.notifications
-  //                               : Icons.account_circle_outlined,
-  //                   color: _selectedIndex == index ? AppColors.backgroundOrange : Colors.grey,
-  //                 ),
-  //                 Text(
-  //                   index == 0
-  //                       ? 'Home'
-  //                       : index == 1
-  //                           ? 'History'
-  //                           : index == 2
-  //                               ? 'Notifications'
-  //                               : 'Profile',
-  //                   style: TextStyle(
-  //                     color: _selectedIndex == index ? AppColors.backgroundOrange : Colors.grey,
-  //                     fontWeight: _selectedIndex == index ? FontWeight.bold : FontWeight.normal,
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //             label: '',
-  //           );
-  //         }),
-  //         currentIndex: _selectedIndex,
-  //         selectedItemColor: AppColors.backgroundOrange,
-  //         unselectedItemColor: Colors.grey,
-  //         type: BottomNavigationBarType.fixed,
-  //         onTap: (index) {
-  //           _onItemTapped(index);
-  //           setState(() {});
-  //         },
-  //         elevation: 0,
-  //         selectedFontSize: 0.5,
-  //         unselectedFontSize: 0.5,
-  //       ),
-  //     ),
-  //   );
-  // }
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        children: _widgetOptions,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.home_outlined,
-                  color: _selectedIndex == 0
-                      ? AppColors.backgroundOrange
-                      : Colors.grey,
-                ),
-                Text(
-                  'Home',
-                  style: TextStyle(
-                    color: _selectedIndex == 0
-                        ? AppColors.backgroundOrange
-                        : Colors.grey,
-                    fontWeight: _selectedIndex == 0
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                ),
-              ],
-            ),
-            label: '',
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: AppColors.backgroundYellow,
+    body: Column(
+      children: [
+        Expanded(
+          child: PageView(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            children: _widgetOptions,
           ),
-          BottomNavigationBarItem(
-            icon: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.history,
-                  color: _selectedIndex == 1
-                      ? AppColors.backgroundOrange
-                      : Colors.grey,
+        ),
+        Container(
+          height: 120, // Điều chỉnh chiều cao tại đây
+          child: BottomNavigationBar(
+            backgroundColor: AppColors.backgroundYellow,
+            items: [
+              BottomNavigationBarItem(
+                icon: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.home_outlined,
+                      color: _selectedIndex == 0
+                          ? AppColors.backgroundOrange
+                          : Colors.grey,
+                    ),
+                    Text(
+                      'Home',
+                      style: TextStyle(
+                        color: _selectedIndex == 0
+                            ? AppColors.backgroundOrange
+                            : Colors.grey,
+                        fontWeight: _selectedIndex == 0
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  'History',
-                  style: TextStyle(
-                    color: _selectedIndex == 1
-                        ? AppColors.backgroundOrange
-                        : Colors.grey,
-                    fontWeight: _selectedIndex == 1
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
-                ),
-              ],
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              decoration: BoxDecoration(
-                color: AppColors.backgroundOrange,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 5,
-                    blurRadius: 7,
-                    offset: Offset(0, 3),
-                  ),
-                ],
+                label: '',
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Icon(
-                  Icons.qr_code_scanner,
-                  color: Colors.white,
-                  size: 28,
+              BottomNavigationBarItem(
+                icon: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.history,
+                      color: _selectedIndex == 1
+                          ? AppColors.backgroundOrange
+                          : Colors.grey,
+                    ),
+                    Text(
+                      'History',
+                      style: TextStyle(
+                        color: _selectedIndex == 1
+                            ? AppColors.backgroundOrange
+                            : Colors.grey,
+                        fontWeight: _selectedIndex == 1
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
+                label: '',
               ),
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.notifications,
-                  color: _selectedIndex == 2
-                      ? AppColors.backgroundOrange
-                      : Colors.grey,
-                ),
-                Text(
-                  'Notices',
-                  style: TextStyle(
-                    color: _selectedIndex == 2
-                        ? AppColors.backgroundOrange
-                        : Colors.grey,
-                    fontWeight: _selectedIndex == 2
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+              BottomNavigationBarItem(
+                icon: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundOrange,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Icon(
+                      Icons.qr_code_scanner,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
                 ),
-              ],
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.account_circle_outlined,
-                  color: _selectedIndex == 3
-                      ? AppColors.backgroundOrange
-                      : Colors.grey,
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.notifications,
+                      color: _selectedIndex == 2
+                          ? AppColors.backgroundOrange
+                          : Colors.grey,
+                    ),
+                    Text(
+                      'Notices',
+                      style: TextStyle(
+                        color: _selectedIndex == 2
+                            ? AppColors.backgroundOrange
+                            : Colors.grey,
+                        fontWeight: _selectedIndex == 2
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  'Profile',
-                  style: TextStyle(
-                    color: _selectedIndex == 3
-                        ? AppColors.backgroundOrange
-                        : Colors.grey,
-                    fontWeight: _selectedIndex == 3
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                  ),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.account_circle_outlined,
+                      color: _selectedIndex == 3
+                          ? AppColors.backgroundOrange
+                          : Colors.grey,
+                    ),
+                    Text(
+                      'Profile',
+                      style: TextStyle(
+                        color: _selectedIndex == 3
+                            ? AppColors.backgroundOrange
+                            : Colors.grey,
+                        fontWeight: _selectedIndex == 3
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            label: '',
+                label: '',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: AppColors.backgroundOrange,
+            unselectedItemColor: Colors.grey,
+            type: BottomNavigationBarType.fixed,
+            onTap: _onItemTapped,
+            elevation: 0,
           ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: AppColors.backgroundOrange,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        onTap: _onItemTapped,
-        elevation: 0,
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
+
 
   Widget ntfPage() {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundYellow,
       appBar: AppBar(
         title: Text("Notifications",
             style: AppTypography.textMd.copyWith(
@@ -1655,7 +1603,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     );
   }
 
-// Danh sách thông báo giả từ khách hàng
   final List<Map<String, String>> fakeNotifications = [
     {
       "title": "Đơn hàng từ Khách hàng Khoa",
@@ -1674,7 +1621,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     },
   ];
 
-  // Hiển thị card thông báo
   Widget ntfcard(
     String title,
     String description,
@@ -1820,56 +1766,55 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
             child: SingleChildScrollView(
               // Cho phép cuộn nếu cần thiết
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      labelText: "Title",
-                      labelStyle:
-                          TextStyle(color: Colors.black54), // Màu chữ label
-                      border: OutlineInputBorder(), // Viền ô nhập
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Colors.amber,
-                            width: 2.0), // Màu viền khi có tiêu điểm
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: _descriptionController,
-                    decoration: InputDecoration(
-                      labelText: "Description",
-                      labelStyle:
-                          TextStyle(color: Colors.black54), // Màu chữ label
-                      border: OutlineInputBorder(), // Viền ô nhập
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Colors.amber,
-                            width: 2.0), // Màu viền khi có tiêu điểm
-                      ),
-                    ),
-                    maxLines: 4, // Cho phép nhiều dòng
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      createNotification(
-                          _titleController.text, _descriptionController.text);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 207, 236, 125),
-                      padding:
-                          EdgeInsets.symmetric(vertical: 15), // Padding cho nút
-                    ),
-                    child: Text("Create",
-                        style:
-                            TextStyle(fontSize: 16)), // Kích thước chữ lớn hơn
-                  ),
-                ],
-              ),
+  mainAxisAlignment: MainAxisAlignment.center,
+  crossAxisAlignment: CrossAxisAlignment.stretch,
+  children: [
+    TextField(
+      controller: _titleController,
+      decoration: InputDecoration(
+        labelText: "Title",
+        labelStyle: TextStyle(color: Colors.grey[700]), // Màu chữ nhãn
+        border: OutlineInputBorder(), // Viền ô nhập
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+              color: Colors.teal, // Màu viền khi có tiêu điểm
+              width: 2.0),
+        ),
+      ),
+    ),
+    SizedBox(height: 10),
+    TextField(
+      controller: _descriptionController,
+      decoration: InputDecoration(
+        labelText: "Description",
+        labelStyle: TextStyle(color: Colors.grey[700]), // Màu chữ nhãn
+        border: OutlineInputBorder(), // Viền ô nhập
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+              color: Colors.teal, // Màu viền khi có tiêu điểm
+              width: 2.0),
+        ),
+      ),
+      maxLines: 4, // Cho phép nhiều dòng
+    ),
+    SizedBox(height: 20),
+    ElevatedButton(
+      onPressed: () {
+        createNotification(_titleController.text, _descriptionController.text);
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF80CBC4), // Màu nền nút
+        padding: EdgeInsets.symmetric(vertical: 15), // Padding cho nút
+      ),
+      child: Text(
+        "Create",
+        style: TextStyle(
+            fontSize: 16, color: Colors.white), // Kích thước và màu chữ
+      ),
+    ),
+  ],
+)
+
             ),
           ),
         ),
@@ -1885,7 +1830,6 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     await notifications.add({
       'title': title,
       'description': description,
-      // 'date': DateFormat('dd/MM/yyyy').format(DateTime.now()), // Lưu ngày tạo
       'date': DateFormat('HH:mm dd/MM/yyyy').format(DateTime.now()),
       'shop_id': widget.shop.shopID, // Gán shop ID cho thông báo
       'isNew': true,

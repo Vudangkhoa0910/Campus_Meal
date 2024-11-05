@@ -1885,7 +1885,8 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     await notifications.add({
       'title': title,
       'description': description,
-      'date': DateFormat('dd/MM/yyyy').format(DateTime.now()), // Lưu ngày tạo
+      // 'date': DateFormat('dd/MM/yyyy').format(DateTime.now()), // Lưu ngày tạo
+      'date': DateFormat('HH:mm dd/MM/yyyy').format(DateTime.now()),
       'shop_id': widget.shop.shopID, // Gán shop ID cho thông báo
       'isNew': true,
     });

@@ -20,6 +20,7 @@ class _SearchInputState extends State<SearchInput> {
 
   @override
   void dispose() {
+    // Clean up the controller when the widget is disposed.
     searchController.dispose();
     super.dispose();
   }
@@ -30,6 +31,7 @@ class _SearchInputState extends State<SearchInput> {
         .doc(searchTerm)
         .get();
 
+    // Kiểm tra tài liệu có tồn tại không
     if (searchResult.exists) {
       return searchResult['list'] ?? [];
     } else {
@@ -66,6 +68,7 @@ class _SearchInputState extends State<SearchInput> {
       ),
     );
   } else {
+    // Hiển thị thông báo nếu không tìm thấy kết quả nào
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Không tìm thấy kết quả nào.')),
     );
@@ -205,7 +208,15 @@ class ShopCard extends StatelessWidget {
                     )
                   ],
                 ),
-                Image.asset("assets/temp.png"),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0), // Đặt bán kính bo cạnh
+                  child: Image.asset(
+                    "assets/iconshop.jpg",
+                    width: 50.0, 
+                    height: 50.0,
+                    fit: BoxFit.cover,
+                  ),
+                )
               ],
             ),
           ),
@@ -258,10 +269,15 @@ class ShopHeader extends StatelessWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  String currentLocation = '';
   @override
   Widget build(BuildContext context) {
     List openShopsAndFoods = widget.shopResults;
     List closedShops = [];
+
+     if (openShopsAndFoods.isNotEmpty) {
+      currentLocation = openShopsAndFoods[0]["location"] ?? 'Unknown Location';
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -329,22 +345,96 @@ class _SearchScreenState extends State<SearchScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: AppColors.backgroundOrange,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+     bottomNavigationBar: BottomAppBar(
+        color: AppColors.backgroundYellow,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0), 
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+            children: [
+              // Nút Home
+              Expanded(
+                child: Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context); 
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.home, color: Colors.black), 
+                        SizedBox(width: 8),
+                        Text(
+                          'Home',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 20), // Khoảng cách giữa Home và Shop
+              // Nút Shop với biểu tượng Location
+              GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Container(
+                      width: 250, 
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start, 
+                        children: [
+                          Icon(Icons.info, color: Colors.white), // Biểu tượng thông báo
+                          SizedBox(width: 8),
+                          Expanded( 
+                            child: Text(
+                              'Please choose in $currentLocation.',
+                              overflow: TextOverflow.ellipsis, 
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 3),
+                  ),
+                );
+                },
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundOrange,
+                    borderRadius: BorderRadius.circular(30.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.orange.withOpacity(0.5),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.location_on, color: Colors.white), // Biểu tượng Location
+                        SizedBox(width: 8),
+                        Text(
+                          'Shop in $currentLocation',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history_rounded),
-            label: 'Orders',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Cart',
-          ),
-        ],
+        ),
       ),
     );
   }

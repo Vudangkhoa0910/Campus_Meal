@@ -34,7 +34,7 @@ class FoodChatScreen extends StatefulWidget {
 class _FoodChatScreenState extends State<FoodChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   List<String> _messages = [];
-  final String geminiApiKey = 'AIzaSyAlm5c_M4ULC3qwKWz5VABu9WIAiitL4qg'; // Set API key directly
+  final String geminiApiKey = '';
 
   @override
   void initState() {

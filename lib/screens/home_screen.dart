@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_catalogue/constants/colors.dart';
 import 'package:campus_catalogue/constants/typography.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/cupertino.dart';
 
 class ShopHeader extends StatelessWidget {
@@ -852,67 +853,73 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           Positioned(
-            bottom: 6,
-            right: 3,
+            bottom: -10,
+            right: 0,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                AnimatedContainer(
+                AnimatedOpacity(
+                  opacity: _isExpanded ? 1.0 : 0.0, 
                   duration: const Duration(milliseconds: 300),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  padding:
-                      _isExpanded ? const EdgeInsets.all(5.0) : EdgeInsets.zero,
-                  height: _isExpanded ? 120 : 0,
-                  width: _isExpanded ? 60 : 0,
-                  child: _isExpanded
-                      ? SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              FloatingActionButton(
-                                onPressed: _openMap,
-                                backgroundColor:
-                                    const Color.fromARGB(255, 255, 139, 44),
-                                child:
-                                    const Icon(Icons.map, color: Colors.white),
-                                mini: true,
-                              ),
-                              const SizedBox(height: 10),
-                              FloatingActionButton(
-                                onPressed: _openChatWindow,
-                                backgroundColor:
-                                    const Color.fromARGB(255, 255, 139, 44),
-                                child:
-                                    const Icon(Icons.chat, color: Colors.white),
-                                mini: true,
-                              ),
-                            ],
+                  child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      width: 60, 
+                      height: _isExpanded ? 120 : 0, 
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                            offset: const Offset(4, 4),
                           ),
-                        )
-                      : const SizedBox.shrink(),
+                        ],
+                      ),
+                      child: Column(  
+                        children: [
+                          // Nút mở bản đồ
+                          Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: FloatingActionButton(
+                              onPressed: _openMap,
+                              backgroundColor: const Color.fromARGB(255, 255, 139, 44),
+                              child: const Icon(Icons.map, color: Colors.white),
+                              mini: true,
+                            ),
+                          ),
+                        // Nút mở chat
+                        Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: FloatingActionButton(
+                            onPressed: _openChatWindow,
+                            backgroundColor: const Color.fromARGB(255, 255, 139, 44),
+                            child: const Icon(Icons.chat, color: Colors.white),
+                            mini: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 10),
-                FloatingActionButton(
-                  onPressed: () {
-                    setState(() {
-                      _isExpanded = !_isExpanded;
-                    });
-                  },
-                  backgroundColor:
-                      const Color.fromRGBO(255, 125, 19, 1).withOpacity(0.9),
-                  child: Icon(
-                    _isExpanded ? Icons.close : Icons.add,
-                    color: Colors.white,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(30), 
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      setState(() {
+                        _isExpanded = !_isExpanded; 
+                      });
+                    },
+                    backgroundColor: Colors.transparent, 
+                    elevation: 0, 
+                    child:Icon(
+                      _isExpanded
+                          ? FontAwesomeIcons.angleDoubleDown 
+                          : FontAwesomeIcons.angleDoubleUp,
+                      color: Colors.orange, 
+                      size: 30, 
+                    ),
                   ),
                 ),
               ],

@@ -2,7 +2,8 @@ import 'dart:developer';
 import 'dart:async';
 import 'package:campus_catalogue/models/buyer_model.dart';
 import 'package:campus_catalogue/models/order_model.dart';
-import 'package:campus_catalogue/screens/api_chart.dart';
+import 'package:campus_catalogue/screens/Scanner/scanner.dart';
+import 'package:campus_catalogue/screens/api_chat.dart';
 import 'package:campus_catalogue/screens/cart.dart';
 import 'package:campus_catalogue/screens/history_user_page.dart';
 import 'package:campus_catalogue/screens/map_screen.dart';
@@ -697,7 +698,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
 
   final List<String> _titles = [
-    "Explore IITG",
+    "Explore Home",
     "Cart",
     "History",
     "Notifications",
@@ -748,29 +749,48 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const UserType()),
-            );
-          },
-          icon: const Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: AppColors.backgroundOrange,
-          ),
-        ),
         backgroundColor: AppColors.backgroundYellow,
         elevation: 0,
         centerTitle: true,
         title: Text(
           _titles[_selectedIndex],
           style: AppTypography.textMd.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.backgroundOrange),
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: AppColors.backgroundOrange,
+          ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0), 
+            child: IconButton(
+              onPressed: () {
+               Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Scanner()),
+                );
+              },
+              icon: const Icon(
+                Icons.qr_code,
+                color: AppColors.backgroundOrange,
+                size: 27.0,
+              ),
+            ),
+          ),
+        ],
       ),
+      // leading: IconButton(
+        //   onPressed: () {
+        //     Navigator.pushReplacement(
+        //       context,
+        //       MaterialPageRoute(builder: (context) => const UserType()),
+        //     );
+        //   },
+        //   icon: const Icon(
+        //     Icons.arrow_back_ios_new_rounded,
+        //     color: AppColors.backgroundOrange,
+        //   ),
+        // ),
       backgroundColor: AppColors.backgroundYellow,
       body: Stack(
         children: [

@@ -514,6 +514,20 @@ class CartState extends State<Cart> with RouteAware {
     });
   }
 
+  // void removeItem(int index) async {
+  //   print(index);
+  //   final itemName = items[index]['name'];
+
+  //   // Xóa item khỏi Firebase
+  //   await DatabaseService().deleteOrder(widget.buyer.userName, itemName);
+
+  //   // Cập nhật lại danh sách items và quantities
+  //   setState(() {
+  //     items.removeAt(index);
+  //     quantities.removeAt(index);
+  //   });
+  // }
+
   void removeItem(String itemName) async {
     // Xóa item khỏi Firebase
     await DatabaseService().deleteOrder(widget.buyer.userName, itemName);
@@ -573,30 +587,31 @@ class CartState extends State<Cart> with RouteAware {
                         child: Text('Có lỗi xảy ra: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 90),
-                        Text(
-                          'CAMPUS MEAL',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 90),
+                          Text(
+                            'CAMPUS MEAL',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8), 
-                        Text(
-                          'No items in the cart. Please add in the shop',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
+                          const SizedBox(height: 8),
+                          Text(
+                            'No items in the cart. Please add in the shop',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
+                        ],
+                      ),
+                    );
                   }
+
                   final data = snapshot.data!;
 
                   // Cập nhật danh sách items và quantities từ dữ liệu mới nhất
@@ -755,7 +770,7 @@ class ItemCard extends StatefulWidget {
   final String imgUrl;
   final num count;
   final Function(int) onQuantityChanged;
-  final Function() onRemove; // Thêm hàm xóa
+  final Function() onRemove;
 
   const ItemCard({
     super.key,
@@ -764,7 +779,7 @@ class ItemCard extends StatefulWidget {
     required this.imgUrl,
     required this.count,
     required this.onQuantityChanged,
-    required this.onRemove, // Thêm hàm xóa
+    required this.onRemove,
   });
 
   @override
@@ -782,7 +797,6 @@ class _ItemCardState extends State<ItemCard> {
     _controller.text = _count.toString();
   }
 
-  // Increment the quantity
   void _increment() {
     setState(() {
       _count++;
@@ -791,7 +805,6 @@ class _ItemCardState extends State<ItemCard> {
     });
   }
 
-  // Decrement the quantity
   void _decrement() {
     setState(() {
       if (_count > 1) {
@@ -804,77 +817,131 @@ class _ItemCardState extends State<ItemCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(10),
+    return Dismissible(
+      key: Key(widget.name),
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction) {
+        widget.onRemove();
+      },
+      background: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.red, Colors.redAccent.shade700],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Icon(
+              Icons.delete_forever,
+              color: Colors.white,
+              size: 30,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'Delete',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
-      padding: const EdgeInsets.all(5),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              border: Border.all(
-                  color: const Color.fromARGB(255, 255, 146, 3), width: 2),
-              borderRadius: BorderRadius.circular(10),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 5,
+              offset: const Offset(0, 3),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                widget.imgUrl,
-                fit: BoxFit.cover,
+          ],
+        ),
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFFF9203), width: 2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  widget.imgUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 20),
-          // Display product details
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.name,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    "\$${widget.price}",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                "\$${widget.price}",
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-            ],
-          ),
-          const Spacer(),
-          // Quantity controls
-          IconButton(
-            icon: const Icon(Icons.remove),
-            onPressed: _decrement,
-          ),
-          SizedBox(
-            width: 15,
-            child: TextField(
-              controller: _controller,
-              keyboardType: TextInputType.number,
-              textAlign: TextAlign.center,
-              onChanged: (value) {
-                setState(() {
-                  _count = int.tryParse(value) ?? 1;
-                });
-                widget.onQuantityChanged(_count);
-              },
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _increment,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: () {
-              widget.onRemove(); // Gọi hàm xóa khi nhấn nút
-            },
-          ),
-        ],
+            IconButton(
+              icon: const Icon(Icons.remove),
+              onPressed: _decrement,
+            ),
+            SizedBox(
+              width: 40,
+              child: TextField(
+                controller: _controller,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                onChanged: (value) {
+                  setState(() {
+                    _count = int.tryParse(value) ?? 1;
+                  });
+                  widget.onQuantityChanged(_count);
+                },
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: _increment,
+            ),
+          ],
+        ),
       ),
     );
   }

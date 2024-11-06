@@ -148,7 +148,6 @@ class _PaymentInfoState extends State<PaymentInfo> {
           .collection('buy')
           .where('buyer_name', isEqualTo: widget.buyer.userName)
           .get();
-// Xoá từng tài liệu trong kết quả truy vấn
       for (var doc in querySnapshot.docs) {
         await doc.reference.delete();
       }
@@ -161,35 +160,30 @@ class _PaymentInfoState extends State<PaymentInfo> {
 
   // Phương thức tính tổng
   void calculateTotal() {
-    // if (count.length != fee.length) {
-    //   throw Exception('Hai danh sách count và fee phải có độ dài bằng nhau.');
-    // }
+  total = 0.0;
+  double discountedPrice = 0.0;
+  for (int i = 0; i < items.length; i++) {
+    double itemPrice = items[i]['count'].toDouble() * items[i]['price'].toDouble();
 
-    total = 0.0; // Đặt lại giá trị của total trước khi tính lại
-    double discountedPrice = 0;
-    for (int i = 0; i < items.length; i++) {
-      double itemPrice = items[i]['count'] * items[i]['price'];
-
-      if (discount == 1) {
-        discountedPrice = itemPrice;
-      } else {
-        // Áp dụng discount
-        discountedPrice = itemPrice - (itemPrice * discount / 100);
-      }
-
-      total += discountedPrice; // Cộng giá trị đã tính vào total
+    if (discount == 1) {
+      discountedPrice = itemPrice;
+    } else {
+      discountedPrice = itemPrice - (itemPrice * discount / 100.0); 
     }
+
+    total += discountedPrice;
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
     calculateTotal();
 
-    // Khởi tạo ScreenUtil
     ScreenUtil.init(
       context,
       // designSize: const Size(360, 490), // Android
-      designSize: const Size(250, 900), // Kích thước thiết kế mặc định
+      designSize: const Size(250, 900),
       minTextAdapt: true,
       splitScreenMode: true,
     );

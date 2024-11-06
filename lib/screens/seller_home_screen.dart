@@ -1372,6 +1372,64 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 10),
+                Center(
+                  child: Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Text('🔔', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '🔔';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('📢', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '📢';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('💡', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '💡';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('⭐', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '⭐';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('⚠️', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '⚠️';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('💸', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '💸';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('🎉', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '🎉';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('🔥', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '🔥';
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
                 CupertinoTextField(
                   controller: _titleController,
                   placeholder: "Title",

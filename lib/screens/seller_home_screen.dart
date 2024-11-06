@@ -12,6 +12,7 @@ import 'package:campus_catalogue/screens/update_menu.dart';
 import 'package:campus_catalogue/screens/userType_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:campus_catalogue/services/database_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
@@ -1327,6 +1328,122 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     }
   }
 
+  void showEditDialog(BuildContext context, String notificationId, String initialTitle, String initialDescription) {
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  // Thiết lập giá trị ban đầu
+  _titleController.text = initialTitle;
+  _descriptionController.text = initialDescription;
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(20.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  "Edit Notification",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: const Color.fromARGB(255, 254, 181, 122),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                CupertinoTextField(
+                  controller: _titleController,
+                  placeholder: "Title",
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.white,
+                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
+                  style: TextStyle(color: CupertinoColors.black),
+                ),
+                SizedBox(height: 10),
+                CupertinoTextField(
+                  controller: _descriptionController,
+                  placeholder: "Description",
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.white,
+                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
+                  style: TextStyle(color: CupertinoColors.black),
+                  maxLines: 4,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    updateNotification(
+                      notificationId,
+                      _titleController.text,
+                      _descriptionController.text,
+                    );
+                    Navigator.of(context).pop(); // Đóng hộp thoại
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF80CBC4),
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    "Update",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void updateNotification(String id, String title, String description) async {
+  await FirebaseFirestore.instance
+      .collection('notifications')
+      .doc(id)
+      .update({
+    'title': title,
+    'description': description,
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Notification updated successfully!')),
+  );
+}
+
+
   @override
  @override
 Widget build(BuildContext context) {
@@ -1517,12 +1634,15 @@ Widget build(BuildContext context) {
               Icons.add,
               color: AppColors.backgroundOrange,
             ),
+            // onPressed: () {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //         builder: (context) => createNotificationForm()),
+            //   );
+            // },
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => createNotificationForm()),
-              );
+              showCreateNotificationDialog(context); // Gọi hàm mở hộp thoại
             },
           ),
         ],
@@ -1553,17 +1673,13 @@ Widget build(BuildContext context) {
                       data['title'] ?? 'No Title',
                       data['description'] ?? 'No Description',
                       data['date'] ?? 'Unknown Date',
-                      isNew: data['isNew'] ?? false, // Lấy giá trị isNew
+                      isNew: data['isNew'] ?? false, 
                       onEdit: () {
-                        Navigator.push(
+                        showEditDialog(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => EditNotificationForm(
-                              notificationId: notifications[index].id,
-                              initialTitle: data['title'],
-                              initialDescription: data['description'],
-                            ),
-                          ),
+                          notifications[index].id, 
+                          data['title'],
+                          data['description'], 
                         );
                       },
                       onDelete: () {
@@ -1748,99 +1864,177 @@ Widget build(BuildContext context) {
     );
   }
 
-  // Form tạo thông báo mới
-  Widget createNotificationForm() {
-    final _titleController = TextEditingController();
-    final _descriptionController = TextEditingController();
+  void showCreateNotificationDialog(BuildContext context) {
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Create Notification"),
-        backgroundColor: const Color.fromARGB(255, 254, 181, 122),
-      ),
-      body: Container(
-        color: Colors.white, // Màu nền chính
-        child: Padding(
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Container(
           padding: const EdgeInsets.all(20.0),
-          child: Center(
-            child: SingleChildScrollView(
-              // Cho phép cuộn nếu cần thiết
-              child: Column(
-  mainAxisAlignment: MainAxisAlignment.center,
-  crossAxisAlignment: CrossAxisAlignment.stretch,
-  children: [
-    TextField(
-      controller: _titleController,
-      decoration: InputDecoration(
-        labelText: "Title",
-        labelStyle: TextStyle(color: Colors.grey[700]), // Màu chữ nhãn
-        border: OutlineInputBorder(), // Viền ô nhập
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-              color: Colors.teal, // Màu viền khi có tiêu điểm
-              width: 2.0),
-        ),
-      ),
-    ),
-    SizedBox(height: 10),
-    TextField(
-      controller: _descriptionController,
-      decoration: InputDecoration(
-        labelText: "Description",
-        labelStyle: TextStyle(color: Colors.grey[700]), // Màu chữ nhãn
-        border: OutlineInputBorder(), // Viền ô nhập
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-              color: Colors.teal, // Màu viền khi có tiêu điểm
-              width: 2.0),
-        ),
-      ),
-      maxLines: 4, // Cho phép nhiều dòng
-    ),
-    SizedBox(height: 20),
-    ElevatedButton(
-      onPressed: () {
-        createNotification(_titleController.text, _descriptionController.text);
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF80CBC4), // Màu nền nút
-        padding: EdgeInsets.symmetric(vertical: 15), // Padding cho nút
-      ),
-      child: Text(
-        "Create",
-        style: TextStyle(
-            fontSize: 16, color: Colors.white), // Kích thước và màu chữ
-      ),
-    ),
-  ],
-)
-
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  "Create Notification",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: const Color.fromARGB(255, 254, 181, 122),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                Center (
+                  child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  alignment: WrapAlignment.center, 
+                  children: [
+                    IconButton(
+                      icon: Text('🔔', style: TextStyle(fontSize: 24)),
+                      onPressed: () {
+                        _titleController.text += '🔔';
+                      },
+                    ),
+                    IconButton(
+                      icon: Text('📢', style: TextStyle(fontSize: 24)),
+                      onPressed: () {
+                        _titleController.text += '📢';
+                      },
+                    ),
+                    IconButton(
+                      icon: Text('💡', style: TextStyle(fontSize: 24)),
+                      onPressed: () {
+                        _titleController.text += '💡';
+                      },
+                    ),
+                    IconButton(
+                      icon: Text('⭐', style: TextStyle(fontSize: 24)),
+                      onPressed: () {
+                        _titleController.text += '⭐';
+                      },
+                    ),
+                    IconButton(
+                      icon: Text('⚠️', style: TextStyle(fontSize: 24)),
+                      onPressed: () {
+                        _titleController.text += '⚠️';
+                      },
+                    ),
+                    IconButton(
+                      icon: Text('💸', style: TextStyle(fontSize: 24)),
+                      onPressed: () {
+                        _titleController.text += '💸';
+                      },
+                    ),
+                    IconButton(
+                      icon: Text('🎉', style: TextStyle(fontSize: 24)),
+                      onPressed: () {
+                        _titleController.text += '🎉';
+                      },
+                    ),
+                    IconButton(
+                      icon: Text('🔥', style: TextStyle(fontSize: 24)),
+                      onPressed: () {
+                        _titleController.text += '🔥';
+                      },
+                    ),
+                  ],
+                ),
+                ),
+                SizedBox(height: 20),
+                CupertinoTextField(
+                  controller: _titleController,
+                  placeholder: "Title",
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.white,
+                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
+                  style: TextStyle(color: CupertinoColors.black),
+                ),
+                SizedBox(height: 10),
+                CupertinoTextField(
+                  controller: _descriptionController,
+                  placeholder: "Description",
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.white,
+                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
+                  style: TextStyle(color: CupertinoColors.black),
+                  maxLines: 4,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    createNotification(
+                      _titleController.text,
+                      _descriptionController.text,
+                    );
+                    Navigator.of(context).pop(); // Đóng hộp thoại
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF80CBC4),
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    "Create",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
-// Hàm tạo thông báo và lưu vào Firestore
-  void createNotification(String title, String description) async {
-    CollectionReference notifications =
-        FirebaseFirestore.instance.collection('notifications');
 
-    await notifications.add({
-      'title': title,
-      'description': description,
-      'date': DateFormat('HH:mm dd/MM/yyyy').format(DateTime.now()),
-      'shop_id': widget.shop.shopID, // Gán shop ID cho thông báo
-      'isNew': true,
-    });
+void createNotification(String title, String description) async {
+  CollectionReference notifications =
+      FirebaseFirestore.instance.collection('notifications');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Notification created successfully!')),
-    );
+  await notifications.add({
+    'title': title,
+    'description': description,
+    'date': DateFormat('HH:mm dd/MM/yyyy').format(DateTime.now()),
+    'shop_id': widget.shop.shopID, 
+    'isNew': true,
+  });
 
-    Navigator.pop(context); // Quay lại sau khi tạo
-  }
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Notification created successfully!')),
+  );
+}
 }
 
 class OrderTile extends StatelessWidget {
@@ -1941,6 +2135,7 @@ class OrderTile extends StatelessWidget {
   }
 }
 
+
 class EditNotificationForm extends StatefulWidget {
   final String notificationId;
   final String initialTitle;
@@ -1955,6 +2150,20 @@ class EditNotificationForm extends StatefulWidget {
 
   @override
   _EditNotificationFormState createState() => _EditNotificationFormState();
+
+  // Hàm tĩnh để gọi EditNotificationForm từ bất kỳ đâu
+  static void open(BuildContext context, String notificationId, String initialTitle, String initialDescription) {
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => EditNotificationForm(
+          notificationId: notificationId,
+          initialTitle: initialTitle,
+          initialDescription: initialDescription,
+        ),
+      ),
+    );
+  }
 }
 
 class _EditNotificationFormState extends State<EditNotificationForm> {
@@ -1970,90 +2179,202 @@ class _EditNotificationFormState extends State<EditNotificationForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Edit Notification"),
-        backgroundColor: const Color.fromARGB(255, 254, 181, 122),
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: Text("Edit Notification"),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            // showEditDialog(context);
+          },
+          child: Icon(CupertinoIcons.pen),
+        ),
       ),
-      body: Container(
-        color: Colors.white, // Màu nền chính
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Center(
-            child: SingleChildScrollView(
-              // Cho phép cuộn nếu cần thiết
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      labelText: "Title",
-                      labelStyle:
-                          TextStyle(color: Colors.black54), // Màu chữ label
-                      border: OutlineInputBorder(), // Viền ô nhập
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Colors.amber,
-                            width: 2.0), // Màu viền khi có tiêu điểm
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: _descriptionController,
-                    decoration: InputDecoration(
-                      labelText: "Description",
-                      labelStyle:
-                          TextStyle(color: Colors.black54), // Màu chữ label
-                      border: OutlineInputBorder(), // Viền ô nhập
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Colors.amber,
-                            width: 2.0), // Màu viền khi có tiêu điểm
-                      ),
-                    ),
-                    maxLines: 4, // Cho phép nhiều dòng
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      updateNotification(widget.notificationId,
-                          _titleController.text, _descriptionController.text);
-                      Navigator.pop(context); // Quay lại trang trước
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(
-                          255, 207, 236, 125), // Màu nền của nút
-                      padding:
-                          EdgeInsets.symmetric(vertical: 15), // Padding cho nút
-                    ),
-                    child: Text("Update",
-                        style:
-                            TextStyle(fontSize: 16)), // Kích thước chữ lớn hơn
-                  ),
-                ],
-              ),
-            ),
+      child: SafeArea(
+        child: Center(
+          child: CupertinoButton.filled(
+            onPressed: () {
+              // showEditDialog(context); // Hiển thị dialog
+            },
+            child: Text('Edit Notification'),
           ),
         ),
       ),
     );
   }
 
-  // Hàm cập nhật thông báo trong Firestore
-  void updateNotification(String id, String title, String description) async {
-    await FirebaseFirestore.instance
-        .collection('notifications')
-        .doc(id)
-        .update({
-      'title': title,
-      'description': description,
-    });
+  // Hiển thị dialog để chỉnh sửa thông báo
+ void showEditDialog(BuildContext context, String notificationId, String initialTitle, String initialDescription) {
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Notification updated successfully!')),
-    );
-  }
+  // Thiết lập giá trị ban đầu
+  _titleController.text = initialTitle;
+  _descriptionController.text = initialDescription;
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(20.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  "Edit Notification",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: const Color.fromARGB(255, 254, 181, 122),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                Center(
+                  child: Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Text('🔔', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '🔔';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('📢', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '📢';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('💡', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '💡';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('⭐', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '⭐';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('⚠️', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '⚠️';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('💸', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '💸';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('🎉', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '🎉';
+                        },
+                      ),
+                      IconButton(
+                        icon: Text('🔥', style: TextStyle(fontSize: 24)),
+                        onPressed: () {
+                          _titleController.text += '🔥';
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
+                CupertinoTextField(
+                  controller: _titleController,
+                  placeholder: "Title",
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.white,
+                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
+                  style: TextStyle(color: CupertinoColors.black),
+                ),
+                SizedBox(height: 10),
+                CupertinoTextField(
+                  controller: _descriptionController,
+                  placeholder: "Description",
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.white,
+                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
+                  style: TextStyle(color: CupertinoColors.black),
+                  maxLines: 4,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    updateNotification(
+                      notificationId,
+                      _titleController.text,
+                      _descriptionController.text,
+                    );
+                    Navigator.of(context).pop(); // Đóng hộp thoại
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF80CBC4),
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text(
+                    "Update",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void updateNotification(String id, String title, String description) async {
+  await FirebaseFirestore.instance
+      .collection('notifications')
+      .doc(id)
+      .update({
+    'title': title,
+    'description': description,
+  });
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Notification updated successfully!')),
+  );
+}
+
 }

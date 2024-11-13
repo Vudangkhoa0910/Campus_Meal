@@ -4,6 +4,7 @@ import 'package:campus_catalogue/Phone%20Auth/phone_login.dart';
 import 'package:campus_catalogue/Widget/button.dart';
 import 'package:campus_catalogue/screens/home_screen2.dart';
 import 'package:campus_catalogue/screens/userType_screen.dart';
+import 'package:campus_catalogue/constants/colors.dart';
 import 'package:flutter/material.dart';
 
 
@@ -64,7 +65,7 @@ class _SignupScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.backgroundYellow,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -74,14 +75,16 @@ class _SignupScreenState extends State<LoginScreen> {
               const Text(
                   "CAMPUS MEALS",
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 35,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+              const SizedBox(height: 20),
               SizedBox(
                 height: height / 3.5,
-                child: Image.asset('assets/onboarding_image.png'),
+                child: Image.asset('assets/splash_screen.png'),
               ),
+              const SizedBox(height: 20),
               TextFieldInput(
                 icon: Icons.person,
                 textEditingController: emailController,

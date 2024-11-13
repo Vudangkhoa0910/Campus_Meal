@@ -6,6 +6,7 @@ class TextFieldInput extends StatelessWidget {
   final String hintText;
   final IconData? icon;
   final TextInputType textInputType;
+
   const TextFieldInput({
     super.key,
     required this.textEditingController,
@@ -27,16 +28,16 @@ class TextFieldInput extends StatelessWidget {
           hintText: hintText,
           hintStyle: const TextStyle(color: Colors.black45, fontSize: 18),
           enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(color: Colors.orange, width: 2.5),
             borderRadius: BorderRadius.circular(30),
           ),
           border: InputBorder.none,
           focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.blue, width: 2),
+            borderSide: const BorderSide(color: Colors.orange, width: 2.5), 
             borderRadius: BorderRadius.circular(30),
           ),
           filled: true,
-          fillColor: const Color(0xFFedf0f8),
+          fillColor: Colors.white, // Nền là màu trắng
           contentPadding: const EdgeInsets.symmetric(
             vertical: 15,
             horizontal: 20,

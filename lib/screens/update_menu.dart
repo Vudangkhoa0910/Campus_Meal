@@ -209,12 +209,13 @@ class _UpdateMenuItemPageState extends State<UpdateMenuItemPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundYellow,
       appBar: AppBar(
         title: const Text(
           "Update Item",
-          style: TextStyle(color: AppColors.backgroundOrange),
+          style: TextStyle(color: AppColors.backgroundOrange, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.amber[100],
+        backgroundColor: AppColors.backgroundYellow,
       ),
       body: ListView.builder(
         itemCount: _menu.length,
@@ -236,16 +237,38 @@ class _UpdateMenuItemPageState extends State<UpdateMenuItemPage> {
           //     ),
           //   );
           // }
-
           return Card(
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.orangeAccent, width: 3),
+            ),
+            color: const Color.fromARGB(255, 251, 243, 190),
             child: ListTile(
-              title: Text(itemName),
-              subtitle: Text('Price: ${itemPrice} - ${itemDescription}'),
+              contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              title: Text(
+                itemName,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: const Color.fromARGB(255, 255, 157, 0),
+                ),
+              ),
+              subtitle: Text(
+                'Price: \$${itemPrice.toStringAsFixed(2)} - ${itemDescription}',
+                style: TextStyle(
+                  color: const Color.fromARGB(255, 0, 0, 0),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600
+                ),
+              ),
               trailing: IconButton(
-                icon: const Icon(Icons.edit),
+                icon: const Icon(
+                  Icons.edit,
+                  color: Colors.orangeAccent,
+                ),
                 onPressed: () {
-                  // Mở màn hình chỉnh sửa
                   showDialog(
                     context: context,
                     builder: (context) {
@@ -266,38 +289,58 @@ class _UpdateMenuItemPageState extends State<UpdateMenuItemPage> {
                           return AlertDialog(
                             title: const Text(
                               "Update Item",
-                              style:
-                                  TextStyle(color: AppColors.backgroundOrange),
+                              style: TextStyle(
+                                color: Colors.orangeAccent,
+                                fontSize: 20,
+                              ),
                             ),
                             content: SingleChildScrollView(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   TextField(
-                                    decoration: const InputDecoration(
-                                        labelText: 'Name'),
+                                    decoration: InputDecoration(
+                                      labelText: 'Name',
+                                      labelStyle: TextStyle(color: Colors.orangeAccent),
+                                      focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.orangeAccent),
+                                      ),
+                                    ),
                                     onChanged: (value) {
                                       newName = value;
                                     },
                                     controller: nameController,
                                   ),
+                                  SizedBox(height: 12),
                                   TextField(
-                                    decoration: const InputDecoration(
-                                        labelText: 'Description'),
+                                    decoration: InputDecoration(
+                                      labelText: 'Description',
+                                      labelStyle: TextStyle(color: Colors.orangeAccent),
+                                      focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.orangeAccent),
+                                      ),
+                                    ),
                                     onChanged: (value) {
                                       newDescription = value;
                                     },
                                     controller: descriptionController,
                                   ),
+                                  SizedBox(height: 12),
                                   TextField(
-                                    decoration: const InputDecoration(
-                                        labelText: 'Price'),
+                                    decoration: InputDecoration(
+                                      labelText: 'Price',
+                                      labelStyle: TextStyle(color: Colors.orangeAccent),
+                                      focusedBorder: UnderlineInputBorder(
+                                        borderSide: BorderSide(color: Colors.orangeAccent),
+                                      ),
+                                    ),
                                     onChanged: (value) {
                                       newPrice = double.tryParse(value) ?? 0.0;
                                     },
                                     controller: priceController,
                                     keyboardType: TextInputType.number,
                                   ),
+                                  SizedBox(height: 12),
                                   Row(
                                     children: [
                                       Checkbox(
@@ -308,7 +351,13 @@ class _UpdateMenuItemPageState extends State<UpdateMenuItemPage> {
                                           });
                                         },
                                       ),
-                                      const Text("Vegetarian"),
+                                      const Text(
+                                        "Vegetarian",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -317,85 +366,86 @@ class _UpdateMenuItemPageState extends State<UpdateMenuItemPage> {
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  // Kiểm tra dữ liệu hợp lệ trước khi cập nhật
                                   if (newName.trim().isEmpty ||
                                       newDescription.trim().isEmpty ||
                                       newPrice <= 0) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                          content: Text(
-                                              "Vui lòng nhập đầy đủ thông tin")),
+                                          content:
+                                              Text("Please provide all required data")),
                                     );
                                     return;
                                   }
 
-                                  // Kiểm tra itemId không null hoặc rỗng trước khi gọi phương thức
                                   if (itemId == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                          content: Text("Món ăn không hợp lệ")),
+                                          content: Text("Invalid item data")),
                                     );
                                     Navigator.of(context).pop();
                                     return;
                                   }
 
-                                  updateMenuItem(itemId, newName,
-                                      newDescription, newPrice, newVegetarian);
+                                  updateMenuItem(
+                                    itemId,
+                                    newName,
+                                    newDescription,
+                                    newPrice,
+                                    newVegetarian,
+                                  );
                                   Navigator.of(context).pop();
                                 },
                                 child: const Text(
                                   "Update",
                                   style: TextStyle(
-                                      color: AppColors.backgroundOrange),
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.orangeAccent,
                                 ),
                               ),
                               TextButton(
                                 onPressed: () {
-                                  // Hiển thị hộp thoại xác nhận trước khi xóa
                                   showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: const Text("Xác nhận xóa"),
+                                        title: const Text("Confirm Deletion"),
                                         content: const Text(
-                                            "Bạn có chắc chắn muốn xóa món ăn này không?"),
+                                            "Are you sure you want to delete this item?"),
                                         actions: [
                                           TextButton(
                                             onPressed: () {
-                                              // Kiểm tra itemId không null hoặc rỗng trước khi xóa
                                               if (itemId == null) {
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(
                                                   const SnackBar(
-                                                      content: Text(
-                                                          "Món ăn không hợp lệ")),
+                                                      content:
+                                                          Text("Invalid item data")),
                                                 );
-                                                Navigator.of(context)
-                                                    .pop(); // Đóng hộp thoại xác nhận
+                                                Navigator.of(context).pop();
                                                 return;
                                               }
 
                                               deleteMenuItem(itemId);
-                                              Navigator.of(context)
-                                                  .pop(); // Đóng hộp thoại xác nhận
+                                              Navigator.of(context).pop();
                                             },
                                             child: const Text(
                                               "Delete",
-                                              style: TextStyle(
-                                                  color: AppColors
-                                                      .backgroundOrange),
+                                              style: TextStyle(color: Colors.red),
                                             ),
                                           ),
                                           TextButton(
                                             onPressed: () {
-                                              Navigator.of(context)
-                                                  .pop(); // Đóng hộp thoại xác nhận
+                                              Navigator.of(context).pop();
                                             },
                                             child: const Text(
                                               "Cancel",
                                               style: TextStyle(
-                                                  color: AppColors
-                                                      .backgroundOrange),
+                                                color: Colors.orangeAccent,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -405,8 +455,7 @@ class _UpdateMenuItemPageState extends State<UpdateMenuItemPage> {
                                 },
                                 child: const Text(
                                   "Delete",
-                                  style: TextStyle(
-                                      color: AppColors.backgroundOrange),
+                                  style: TextStyle(color: Colors.red),
                                 ),
                               ),
                               TextButton(
@@ -415,8 +464,7 @@ class _UpdateMenuItemPageState extends State<UpdateMenuItemPage> {
                                 },
                                 child: const Text(
                                   "Cancel",
-                                  style: TextStyle(
-                                      color: AppColors.backgroundOrange),
+                                  style: TextStyle(color: Colors.orangeAccent),
                                 ),
                               ),
                             ],

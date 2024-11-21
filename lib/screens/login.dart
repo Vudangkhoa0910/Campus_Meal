@@ -75,16 +75,16 @@ class _SignupScreenState extends State<LoginScreen> {
               const Text(
                   "CAMPUS MEALS",
                   style: TextStyle(
-                    fontSize: 35,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               SizedBox(
                 height: height / 3.5,
                 child: Image.asset('assets/splash_screen.png'),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               TextFieldInput(
                 icon: Icons.person,
                 textEditingController: emailController,

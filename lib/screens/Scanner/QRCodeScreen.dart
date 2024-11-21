@@ -1,6 +1,5 @@
 import 'package:campus_catalogue/constants/colors.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class QRCodeScreen extends StatelessWidget {
@@ -11,6 +10,7 @@ class QRCodeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundYellow,
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
@@ -26,11 +26,11 @@ class QRCodeScreen extends StatelessWidget {
         centerTitle: true,
         title: Text(
           'QR Codes',
-          style: TextStyle(color: AppColors.backgroundOrange),
+          style: TextStyle(color: AppColors.backgroundOrange, fontWeight: FontWeight.bold),
         ),
       ),
       body: FutureBuilder<List<Map<String, String>>>(
-        future: _getQRCodeIds(), // Fetch list of QR codes with IDs and URLs
+        future: _getQRCodeIds(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -59,7 +59,9 @@ class QRCodeScreen extends StatelessWidget {
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.orangeAccent, width: 3),
                   ),
+                  color: const Color.fromARGB(255, 251, 243, 190),
                   child: ListTile(
                     contentPadding: EdgeInsets.all(16),
                     leading:
@@ -87,14 +89,12 @@ class QRCodeScreen extends StatelessWidget {
         .get();
 
     if (snapshot.exists) {
-      // Truy xuất mảng qr_codes từ Firestore
       List<dynamic> qrCodeData = snapshot.data()?['qr_codes'] ?? [];
 
-      // Trả về danh sách các map chứa 'id' và 'url'
       return qrCodeData.map((item) {
         return {
           'id': item['id'] as String,
-          'url': item['url'] as String, // Thêm trường url
+          'url': item['url'] as String,
         };
       }).toList();
     } else {
@@ -107,6 +107,7 @@ class QRCodeScreen extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
+          backgroundColor: AppColors.backgroundYellow,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Padding(
@@ -119,14 +120,30 @@ class QRCodeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 16),
-                CachedNetworkImage(
-                  imageUrl: qrUrl,
-                  placeholder: (context, url) => CircularProgressIndicator(),
-                  errorWidget: (context, url, error) =>
-                      Icon(Icons.error, color: Colors.red),
-                  height: 300.0,
-                  width: 300.0,
+                Image.network(
+                  qrUrl,
+                  height: 230.0,
+                  width: 230.0,
                   fit: BoxFit.cover,
+                  loadingBuilder: (BuildContext context, Widget child,
+                      ImageChunkEvent? loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    } else {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    }
+                  },
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.error,
+                    color: Colors.red,
+                  ),
                 ),
                 SizedBox(height: 16),
                 TextButton(

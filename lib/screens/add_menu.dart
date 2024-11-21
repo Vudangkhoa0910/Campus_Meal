@@ -209,50 +209,51 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundYellow,
       appBar: AppBar(
-        leading: Builder(builder: (BuildContext context) {
-          return IconButton(
-            onPressed: () async {
-              try {
-                // Truy vấn Firestore dựa trên shop_id
-                QuerySnapshot shopSnapshot = await FirebaseFirestore.instance
-                    .collection('shop')
-                    .where('shop_id', isEqualTo: widget.shop.shopID)
-                    .get();
+        // leading: Builder(builder: (BuildContext context) {
+        //   return IconButton(
+        //     onPressed: () async {
+        //       try {
+        //         // Truy vấn Firestore dựa trên shop_id
+        //         QuerySnapshot shopSnapshot = await FirebaseFirestore.instance
+        //             .collection('shop')
+        //             .where('shop_id', isEqualTo: widget.shop.shopID)
+        //             .get();
 
-                if (shopSnapshot.docs.isNotEmpty) {
-                  // Lấy document đầu tiên (giả sử mỗi shop_id là duy nhất)
-                  DocumentSnapshot shopDoc = shopSnapshot.docs.first;
-                  Map<String, dynamic> shopData =
-                      shopDoc.data() as Map<String, dynamic>;
+        //         if (shopSnapshot.docs.isNotEmpty) {
+        //           // Lấy document đầu tiên (giả sử mỗi shop_id là duy nhất)
+        //           DocumentSnapshot shopDoc = shopSnapshot.docs.first;
+        //           Map<String, dynamic> shopData =
+        //               shopDoc.data() as Map<String, dynamic>;
 
-                  // Điều hướng đến màn hình SellerHomeScreen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SellerHomeScreen(shop: widget.shop),
-                    ),
-                  );
-                } else {
-                  // Nếu không tìm thấy shop
-                  print("Shop không tồn tại");
-                }
-              } catch (e) {
-                // Xử lý lỗi khi truy vấn Firestore
-                print("Lỗi khi truy vấn Firestore: $e");
-              }
-            },
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: Color(0xffF57C51),
-            ),
-          );
-        }),
+        //           // Điều hướng đến màn hình SellerHomeScreen
+        //           Navigator.push(
+        //             context,
+        //             MaterialPageRoute(
+        //               builder: (context) => SellerHomeScreen(shop: widget.shop),
+        //             ),
+        //           );
+        //         } else {
+        //           // Nếu không tìm thấy shop
+        //           print("Shop không tồn tại");
+        //         }
+        //       } catch (e) {
+        //         // Xử lý lỗi khi truy vấn Firestore
+        //         print("Lỗi khi truy vấn Firestore: $e");
+        //       }
+        //     },
+        //     icon: const Icon(
+        //       Icons.arrow_back_ios_new,
+        //       color: Color(0xffF57C51),
+        //     ),
+        //   );
+        // }),
         title: const Text(
           "Add New Menu",
-          style: TextStyle(color: AppColors.backgroundOrange),
+          style: TextStyle(color: AppColors.backgroundOrange, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.amber[100],
+        backgroundColor: AppColors.backgroundYellow,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -275,13 +276,13 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
                         onTap: getImage,
                         child: Center(
                           child: Container(
-                            height: 150,
-                            width: 250,
+                            height: 130,
+                            width: 290,
                             decoration: BoxDecoration(
                               border:
                                   Border.all(color: Colors.orange, width: 1.5),
                               borderRadius: BorderRadius.circular(20),
-                              color: Colors.grey[200],
+                              color: const Color.fromARGB(255, 255, 255, 255),
                             ),
                             child: const Icon(
                               Icons.add,
@@ -296,8 +297,8 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
                           elevation: 4.0,
                           borderRadius: BorderRadius.circular(20),
                           child: Container(
-                            height: 150,
-                            width: 250,
+                            height: 130,
+                            width: 290,
                             decoration: BoxDecoration(
                               border:
                                   Border.all(color: Colors.orange, width: 1.5),
@@ -319,7 +320,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
                           ),
                         ),
                       ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
 
             // Tên Menu
             const Text(
@@ -329,7 +330,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
             Container(
               decoration: BoxDecoration(
                 border:
@@ -359,7 +360,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
 
             // Giá
             const Text(
@@ -405,9 +406,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-
-            // Checkbox Vegetarian
+            const SizedBox(height: 10),
             Row(
               children: [
                 Checkbox(
@@ -426,7 +425,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
 
             // Mô Tả
             const Text(
@@ -501,7 +500,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
             //     );
             //   }).toList(),
             // ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
             // Nút Thêm Menu
             SizedBox(
@@ -509,7 +508,7 @@ class _AddMenuItemPageState extends State<AddMenuItemPage> {
               child: ElevatedButton(
                 onPressed: isLoading ? null : addMenu,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.backgroundOrange,
+                  backgroundColor: const Color.fromARGB(255, 255, 155, 73),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),

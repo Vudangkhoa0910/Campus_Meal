@@ -863,14 +863,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   duration: const Duration(milliseconds: 300),
                   child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      width: 60, 
+                      width: 63, 
                       height: _isExpanded ? 120 : 0, 
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: const Color.fromARGB(255, 53, 47, 47).withOpacity(0.2),
                             blurRadius: 10,
                             offset: const Offset(4, 4),
                           ),
@@ -928,28 +928,28 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: CupertinoTabBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.backgroundYellow,
         activeColor: AppColors.backgroundOrange,
         inactiveColor: Colors.grey,
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: _buildIcon(Icons.home, 0),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
+            icon: _buildIcon(Icons.shopping_cart, 1),
             label: 'Cart',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.history),
+            icon: _buildIcon(Icons.history, 2),
             label: 'History',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
+            icon: _buildIcon(Icons.notifications, 3),
             label: 'Notifications',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle_outlined),
+            icon: _buildIcon(Icons.account_circle_outlined, 4),
             label: 'Profile',
           ),
         ],
@@ -965,6 +965,14 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
+    );
+  }
+
+   Widget _buildIcon(IconData icon, int index) {
+    double iconSize = _selectedIndex == index ? 33.0 : 25.0; 
+    return Icon(
+      icon,
+      size: iconSize,
     );
   }
 }

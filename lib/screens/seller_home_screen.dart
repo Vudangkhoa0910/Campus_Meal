@@ -282,9 +282,9 @@ class HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      padding: EdgeInsets.all(8),
+                      padding: EdgeInsets.all(1),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.backgroundYellow,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Center(

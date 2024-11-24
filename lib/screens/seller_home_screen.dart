@@ -166,13 +166,19 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
+        leading: Icon(
+          Icons.circle, // You can choose any icon, but this is just an example.
+          color: AppColors.backgroundYellow, // Same color as the background
+        ),
         backgroundColor: AppColors.backgroundYellow,
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12.0), 
+            padding: const EdgeInsets.only(right: 12.0),
             child: IconButton(
               onPressed: () {
-               Navigator.push(
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Scanner()),
                 );
@@ -193,8 +199,8 @@ class HomePageState extends State<HomePage> {
         //   onPressed: () => Navigator.push(context,
         //       MaterialPageRoute(builder: (context) => const UserType())),
         // ),
-        elevation: 0,
-        centerTitle: true,
+        // elevation: 0,
+        // centerTitle: true,
         title: GestureDetector(
           onTap: () {
             setState(() {
@@ -264,114 +270,116 @@ class HomePageState extends State<HomePage> {
               const SizedBox(height: 7),
               for (var item in menu)
                 Container(
-                margin: EdgeInsets.symmetric(vertical: 4, horizontal: 3),
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.yellow[50],
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(1),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundYellow,
-                        borderRadius: BorderRadius.circular(8),
+                  margin: EdgeInsets.symmetric(vertical: 4, horizontal: 3),
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.yellow[50],
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
                       ),
-                      child: Center(
-                        child: Icon(Icons.storefront, size: 48, color: Colors.orange),
-                      ),
-                    ),
-                    SizedBox(width: 11),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 6, bottom: 3),
-                            child: Text(
-                              "Name: ${item['name']}",
-                              style: AppTypography.textMd.copyWith(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.backgroundOrange,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 3),
-                            child: Text(
-                              "Price: Rs. ${item['price']}",
-                              style: AppTypography.textMd.copyWith(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.green[800],
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: Text(
-                              "Description: ${item['description']}",
-                              style: AppTypography.textSm.copyWith(
-                                fontSize: 13,
-                                fontWeight: FontWeight.normal,
-                                fontStyle: FontStyle.italic,
-                                color: Colors.black87,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
-                          ),
-                          Divider(
-                            color: AppColors.backgroundOrange.withOpacity(0.5),
-                            thickness: 1.5,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Center(
-                      child: Container(
-                        height: 100,
-                        width: 100,
-                        padding: EdgeInsets.all(2), 
+                    ],
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(1),
                         decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                            width: 1.0,
-                          ),
-                          borderRadius: BorderRadius.circular(20),
+                          color: AppColors.backgroundYellow,
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: Image.network(
-                            item['img'],
-                            fit: BoxFit.cover, 
-                            errorBuilder: (context, error, stackTrace) {
-                              return Image.asset(
-                                'assets/iconshop.jpg',
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                              );
-                            },
+                        child: Center(
+                          child: Icon(Icons.storefront,
+                              size: 48, color: Colors.orange),
+                        ),
+                      ),
+                      SizedBox(width: 11),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6, bottom: 3),
+                              child: Text(
+                                "Name: ${item['name']}",
+                                style: AppTypography.textMd.copyWith(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.backgroundOrange,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 3),
+                              child: Text(
+                                "Price: Rs. ${item['price']}",
+                                style: AppTypography.textMd.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.green[800],
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 6),
+                              child: Text(
+                                "Description: ${item['description']}",
+                                style: AppTypography.textSm.copyWith(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.normal,
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.black87,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                              ),
+                            ),
+                            Divider(
+                              color:
+                                  AppColors.backgroundOrange.withOpacity(0.5),
+                              thickness: 1.5,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Center(
+                        child: Container(
+                          height: 100,
+                          width: 100,
+                          padding: EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: const Color.fromARGB(255, 0, 0, 0),
+                              width: 1.0,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.network(
+                              item['img'],
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'assets/iconshop.jpg',
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -522,6 +530,8 @@ class _HistoryPageState extends State<HistoryPage> {
   List card = [];
   bool isLoading = true;
   String errorMessage = '';
+  String selectedButton = "All";
+  // bool isPay = false;
 
   @override
   void initState() {
@@ -531,13 +541,15 @@ class _HistoryPageState extends State<HistoryPage> {
 
   Future<void> fetchOrders() async {
     try {
+      // Lấy toàn bộ dữ liệu từ Firestore
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('orders')
           .where('shop_name', isEqualTo: widget.shop.shopName)
           .get();
 
       setState(() {
-        card = snapshot.docs.map((doc) {
+        // Lấy danh sách tất cả các đơn hàng
+        List<List<dynamic>> allOrders = snapshot.docs.map((doc) {
           var data = doc.data() as Map<String, dynamic>;
           return [
             data['buyer_name'] ?? 'Unknown',
@@ -547,8 +559,24 @@ class _HistoryPageState extends State<HistoryPage> {
             data['img'] ?? 'Unknown',
             data['rating'] ?? 0.0,
             data['review'] ?? '',
+            data['pay'],
           ];
         }).toList();
+
+        // Lọc đơn hàng theo ngày hiện tại nếu chọn "Day"
+        if (selectedButton == "Day") {
+          DateTime now = DateTime.now();
+          String today = DateFormat('dd/MM/yyyy').format(now);
+
+          card = allOrders.where((order) {
+            String orderDate = order[3]; // Trường 'date'
+            return orderDate == today; // So sánh với ngày hiện tại
+          }).toList();
+        } else {
+          // Hiển thị toàn bộ nếu là "All"
+          card = allOrders;
+        }
+
         isLoading = false;
       });
     } catch (e) {
@@ -592,6 +620,12 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
+        leading: Icon(
+          Icons.circle, // You can choose any icon, but this is just an example.
+          color: AppColors.backgroundYellow, // Same color as the background
+        ),
         title: Text("Order History",
             style: AppTypography.textMd.copyWith(
                 fontSize: 20,
@@ -600,10 +634,10 @@ class _HistoryPageState extends State<HistoryPage> {
         backgroundColor: AppColors.backgroundYellow,
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12.0), 
+            padding: const EdgeInsets.only(right: 12.0),
             child: IconButton(
               onPressed: () {
-               Navigator.push(
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Scanner()),
                 );
@@ -624,8 +658,8 @@ class _HistoryPageState extends State<HistoryPage> {
         //   onPressed: () => Navigator.push(context,
         //       MaterialPageRoute(builder: (context) => const UserType())),
         // ),
-        elevation: 0,
-        centerTitle: true,
+        // elevation: 0,
+        // centerTitle: true,
       ),
       backgroundColor: AppColors.backgroundYellow,
       body: isLoading
@@ -722,10 +756,22 @@ class _HistoryPageState extends State<HistoryPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(20),
-                        child: Text(
-                          "All Orders",
-                          style: AppTypography.textMd.copyWith(
-                              fontSize: 20, fontWeight: FontWeight.w700),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "All Orders",
+                              style: AppTypography.textMd.copyWith(
+                                  fontSize: 20, fontWeight: FontWeight.w700),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _buildButtonHst("All"),
+                                _buildButtonHst("Day"),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                       card.isEmpty
@@ -751,8 +797,13 @@ class _HistoryPageState extends State<HistoryPage> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                         color: const Color(0xFFFFF2E0),
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: order[7]
+                                              ? Colors.green
+                                              : Colors.red,
+                                          width: 5,
+                                        )),
                                     child: Padding(
                                       padding: const EdgeInsets.all(10),
                                       child: Row(
@@ -880,6 +931,35 @@ class _HistoryPageState extends State<HistoryPage> {
                   ),
                 ),
       // Nếu bạn muốn cuộn lên đầu khi có nhiều nội dung, hãy xem xét sử dụng ListView thay vì SingleChildScrollView với Column
+    );
+  }
+
+  Widget _buildButtonHst(String label) {
+    final isSelected = selectedButton == label;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedButton = label;
+          fetchOrders();
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: isSelected
+                ? BorderSide(color: AppColors.backgroundOrange, width: 2)
+                : BorderSide.none,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? AppColors.backgroundOrange : Colors.grey,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1032,124 +1112,137 @@ class _InfoPageState extends State<InfoPage> {
     }
   }
 
-void logOut() {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0), // Bo góc cho hộp thoại
-        ),
-        backgroundColor: AppColors.backgroundYellow,
-        title: Row(
-          children: [
-            Icon(Icons.exit_to_app, color: Colors.orange, size: 30), // Biểu tượng
-            const SizedBox(width: 10),
-            const Text(
-              "LogOut | ChangeRole ",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  void logOut() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0), // Bo góc cho hộp thoại
+          ),
+          backgroundColor: AppColors.backgroundYellow,
+          title: Row(
+            children: [
+              Icon(Icons.exit_to_app,
+                  color: Colors.orange, size: 30), // Biểu tượng
+              const SizedBox(width: 10),
+              const Text(
+                "LogOut | ChangeRole ",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "What do you want to do next ?",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
+          actions: [
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const UserType()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              icon: const Icon(Icons.swap_horiz),
+              label: const Text("ChangeRole"),
             ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "What do you want to do next ?",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, color: Colors.black87),
-            ),
-          ],
-        ),
-        actionsAlignment: MainAxisAlignment.spaceEvenly, 
-        actions: [
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop(); 
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const UserType()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.orange),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              icon: const Icon(Icons.logout, color: Colors.orange),
+              label: const Text(
+                "LogOut",
+                style: TextStyle(color: Colors.orange),
               ),
             ),
-            icon: const Icon(Icons.swap_horiz),
-            label: const Text("ChangeRole"),
-          ),
-          OutlinedButton.icon(
-            onPressed: () {
-              Navigator.of(context).pop(); 
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
-            },
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.orange),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            icon: const Icon(Icons.logout, color: Colors.orange),
-            label: const Text(
-              "LogOut",
-              style: TextStyle(color: Colors.orange),
-            ),
-          ),
-        ],
-      );
-    },
-  );
-}
+          ],
+        );
+      },
+    );
+  }
 
-  Widget inputText(TextEditingController controller, String hintText, {double width = 250, double height = 50}) {
-  return Padding(
-    padding: const EdgeInsets.all(5),
-    child: SizedBox(
-      width: width,  // Chiều rộng của trường nhập liệu
-      child: TextFormField(
-        decoration: InputDecoration(
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          hintText: hintText,
-          suffixIcon: IconButton(
-            icon: Icon(
-              Icons.edit,
-              color: _isEditable
-                  ? Colors.grey[400]
-                  : const Color.fromRGBO(238, 118, 0, 1),
+  Widget inputText(TextEditingController controller, String hintText,
+      {double width = 250, double height = 50}) {
+    return Padding(
+      padding: const EdgeInsets.all(5),
+      child: SizedBox(
+        width: width, // Chiều rộng của trường nhập liệu
+        child: TextFormField(
+          decoration: InputDecoration(
+            enabledBorder: const OutlineInputBorder(
+              borderSide:
+                  BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
-            onPressed: () {
-              setState(() {
-                _isEditable = !_isEditable;
-              });
-            },
+            focusedBorder: const OutlineInputBorder(
+              borderSide:
+                  BorderSide(width: 2, color: Color.fromRGBO(238, 118, 0, 1)),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            hintText: hintText,
+            suffixIcon: IconButton(
+              icon: Icon(
+                Icons.edit,
+                color: _isEditable
+                    ? Colors.grey[400]
+                    : const Color.fromRGBO(238, 118, 0, 1),
+              ),
+              onPressed: () {
+                setState(() {
+                  _isEditable = !_isEditable;
+                });
+              },
+            ),
           ),
+          readOnly: !_isEditable, // Nếu không editable thì sẽ chỉ hiển thị
+          controller: controller,
+          style: TextStyle(
+              height: height / 24), // Điều chỉnh chiều cao của TextFormField
         ),
-        readOnly: !_isEditable,  // Nếu không editable thì sẽ chỉ hiển thị
-        controller: controller,
-        style: TextStyle(height: height / 24),  // Điều chỉnh chiều cao của TextFormField
       ),
-    ),
-  );
-}
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
+        leading: Icon(
+          Icons.circle, // You can choose any icon, but this is just an example.
+          color: AppColors.backgroundYellow, // Same color as the background
+        ),
         title: Text("Profile",
             style: AppTypography.textMd.copyWith(
                 fontSize: 20,
@@ -1158,10 +1251,10 @@ void logOut() {
         backgroundColor: AppColors.backgroundYellow,
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 12.0), 
+            padding: const EdgeInsets.only(right: 12.0),
             child: IconButton(
               onPressed: () {
-               Navigator.push(
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Scanner()),
                 );
@@ -1182,8 +1275,8 @@ void logOut() {
         //   onPressed: () => Navigator.push(context,
         //       MaterialPageRoute(builder: (context) => const UserType())),
         // ),
-        elevation: 0,
-        centerTitle: true,
+        // elevation: 0,
+        // centerTitle: true,
       ),
       backgroundColor: AppColors.backgroundYellow,
       body: SingleChildScrollView(
@@ -1211,7 +1304,7 @@ void logOut() {
                 ),
               ],
             ),
-              Align(
+            Align(
               alignment: Alignment.topCenter,
               child: Container(
                 margin: const EdgeInsets.only(top: 5),
@@ -1238,11 +1331,15 @@ void logOut() {
                           Text(
                             'Hà Nội: ${weatherData!['main']['temp']}°C, ',
                             style: const TextStyle(
-                                fontSize: 16.5, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 0, 0, 0)),
+                                fontSize: 16.5,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 0, 0, 0)),
                           ),
                           Text(
                             weatherData!['weather'][0]['description'],
-                            style: const TextStyle(fontSize: 16.5, color: Color.fromARGB(255, 0, 0, 0)),
+                            style: const TextStyle(
+                                fontSize: 16.5,
+                                color: Color.fromARGB(255, 0, 0, 0)),
                           ),
                         ],
                       )
@@ -1266,37 +1363,43 @@ void logOut() {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: Image.asset(
-                    "assets/Ảnh.jpg",
+                    "assets/iconprofile.png",
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
             Positioned(
-            bottom: 95,
-            left: (MediaQuery.of(context).size.width - 250) / 2, // Căn giữa form
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Điều chỉnh chiều rộng và khoảng cách giữa các trường
-                inputText(ownerNameController, "Owner Name", width: 250, height: 20),
-                inputText(phoneNumberController, "Phone Number", width: 250, height: 20),
-                inputText(shopNameController, "Shop Name", width: 250, height: 20),
-                inputText(openingTimeController, "Opening Time", width: 250, height: 20),
-                inputText(closingTimeController, "Closing Time", width: 250, height: 20),
-                inputText(upiIdController, "UPI ID", width: 250, height: 20),
-              ],
+              bottom: 95,
+              left: (MediaQuery.of(context).size.width - 250) /
+                  2, // Căn giữa form
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Điều chỉnh chiều rộng và khoảng cách giữa các trường
+                  inputText(ownerNameController, "Owner Name",
+                      width: 250, height: 20),
+                  inputText(phoneNumberController, "Phone Number",
+                      width: 250, height: 20),
+                  inputText(shopNameController, "Shop Name",
+                      width: 250, height: 20),
+                  inputText(openingTimeController, "Opening Time",
+                      width: 250, height: 20),
+                  inputText(closingTimeController, "Closing Time",
+                      width: 250, height: 20),
+                  inputText(upiIdController, "UPI ID", width: 250, height: 20),
+                ],
+              ),
             ),
-          ),
             Positioned(
               bottom: 12,
-              left: (MediaQuery.of(context).size.width - 300) / 2 + 25, 
+              left: (MediaQuery.of(context).size.width - 300) / 2 + 25,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.end, 
+                mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center, 
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       GestureDetector(
                         onTap: _isUpdating
@@ -1316,17 +1419,18 @@ void logOut() {
                           child: Center(
                             child: _isUpdating
                                 ? const CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white),
                                   )
                                 : Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: const [
                                       Icon(
-                                        Icons.update, 
+                                        Icons.update,
                                         color: Colors.white,
                                         size: 20,
                                       ),
-                                      SizedBox(width: 8), 
+                                      SizedBox(width: 8),
                                       Text(
                                         "UPDATE",
                                         style: TextStyle(
@@ -1339,13 +1443,14 @@ void logOut() {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 10), 
+                      const SizedBox(width: 10),
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => BuyerSelectionScreen(shop: widget.shop),
+                              builder: (context) =>
+                                  BuyerSelectionScreen(shop: widget.shop),
                             ),
                           );
                         },
@@ -1361,11 +1466,11 @@ void logOut() {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
-                                  Icons.chat,  
+                                  Icons.chat,
                                   color: Colors.white,
                                   size: 20,
                                 ),
-                                SizedBox(width: 8), 
+                                SizedBox(width: 8),
                                 Text(
                                   "Chat",
                                   style: TextStyle(
@@ -1380,12 +1485,12 @@ void logOut() {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10), 
+                  const SizedBox(height: 10),
                   // Hàng 2: Nút Log Out | Change Role
                   GestureDetector(
                     onTap: logOut,
                     child: Container(
-                      width: MediaQuery.of(context).size.width * 2 / 3, 
+                      width: MediaQuery.of(context).size.width * 2 / 3,
                       height: 35,
                       decoration: BoxDecoration(
                         color: Colors.red,
@@ -1396,9 +1501,9 @@ void logOut() {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              Icons.exit_to_app,  
+                              Icons.exit_to_app,
                               color: Colors.white,
-                              size: 20,
+                              size: 18,
                             ),
                             SizedBox(width: 8),
                             Text(
@@ -1485,285 +1590,296 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     }
   }
 
-  void showEditDialog(BuildContext context, String notificationId, String initialTitle, String initialDescription) {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  void showEditDialog(BuildContext context, String notificationId,
+      String initialTitle, String initialDescription) {
+    final TextEditingController _titleController = TextEditingController();
+    final TextEditingController _descriptionController =
+        TextEditingController();
 
-  _titleController.text = initialTitle;
-  _descriptionController.text = initialDescription;
+    _titleController.text = initialTitle;
+    _descriptionController.text = initialDescription;
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(20.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: Offset(0, 3),
-              ),
-            ],
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  "Edit Notification",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 254, 181, 122),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 10),
-                Center(
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Text('🔔', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '🔔';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('📢', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '📢';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('💡', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '💡';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('⭐', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '⭐';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('⚠️', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '⚠️';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('💸', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '💸';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('🎉', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '🎉';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('🔥', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '🔥';
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-                CupertinoTextField(
-                  controller: _titleController,
-                  placeholder: "Title",
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.white,
-                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
-                  style: TextStyle(color: CupertinoColors.black),
-                ),
-                SizedBox(height: 10),
-                CupertinoTextField(
-                  controller: _descriptionController,
-                  placeholder: "Description",
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.white,
-                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
-                  style: TextStyle(color: CupertinoColors.black),
-                  maxLines: 4,
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    updateNotification(
-                      notificationId,
-                      _titleController.text,
-                      _descriptionController.text,
-                    );
-                    Navigator.of(context).pop(); // Đóng hộp thoại
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF80CBC4),
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(
-                    "Update",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+          child: Container(
+            padding: const EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
                 ),
               ],
             ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    "Edit Notification",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: const Color.fromARGB(255, 254, 181, 122),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 10),
+                  Center(
+                    child: Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: Text('🔔', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '🔔';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('📢', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '📢';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('💡', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '💡';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('⭐', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '⭐';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('⚠️', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '⚠️';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('💸', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '💸';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('🎉', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '🎉';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('🔥', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '🔥';
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  CupertinoTextField(
+                    controller: _titleController,
+                    placeholder: "Title",
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white,
+                      border: Border.all(
+                          color: CupertinoColors.systemGrey4, width: 1.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    placeholderStyle: TextStyle(
+                        color: CupertinoColors.systemGrey, fontSize: 16),
+                    style: TextStyle(color: CupertinoColors.black),
+                  ),
+                  SizedBox(height: 10),
+                  CupertinoTextField(
+                    controller: _descriptionController,
+                    placeholder: "Description",
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white,
+                      border: Border.all(
+                          color: CupertinoColors.systemGrey4, width: 1.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    placeholderStyle: TextStyle(
+                        color: CupertinoColors.systemGrey, fontSize: 16),
+                    style: TextStyle(color: CupertinoColors.black),
+                    maxLines: 4,
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      updateNotification(
+                        notificationId,
+                        _titleController.text,
+                        _descriptionController.text,
+                      );
+                      Navigator.of(context).pop(); // Đóng hộp thoại
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF80CBC4),
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      "Update",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
-void updateNotification(String id, String title, String description) async {
-  await FirebaseFirestore.instance
-      .collection('notifications')
-      .doc(id)
-      .update({
-    'title': title,
-    'description': description,
-  });
+  void updateNotification(String id, String title, String description) async {
+    await FirebaseFirestore.instance
+        .collection('notifications')
+        .doc(id)
+        .update({
+      'title': title,
+      'description': description,
+    });
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Notification updated successfully!')),
-  );
-}
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Notification updated successfully!')),
+    );
+  }
 
-
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: AppColors.backgroundYellow,
-    body: Column(
-      children: [
-        Expanded(
-          child: PageView(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _selectedIndex = index < 2 ? index : index + 1; 
-              });
-            },
-            children: _widgetOptions,
-          ),
-        ),
-      ],
-    ),
-    bottomNavigationBar: BottomAppBar(
-      color: AppColors.backgroundYellow,
-      child: Container(
-        height: 100, 
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
-          children: [
-            _buildBottomNavigationItem(Icons.home_outlined, 'Home', 0),
-            SizedBox(width: 10),
-            _buildBottomNavigationItem(Icons.history, 'History', 1),
-            SizedBox(width: 10), 
-            _buildCenteredIcon(Icons.qr_code_scanner, 2), 
-            SizedBox(width: 10), 
-            _buildBottomNavigationItem(Icons.notifications, 'Notices', 3),
-            SizedBox(width: 10), 
-            _buildBottomNavigationItem(Icons.account_circle_outlined, 'Profile', 4),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-Widget _buildBottomNavigationItem(IconData icon, String label, int index) {
-  return GestureDetector(
-    onTap: () {
-      _onItemTapped(index); 
-    },
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: _selectedIndex == index
-              ? AppColors.backgroundOrange 
-              : Colors.grey, 
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            color: _selectedIndex == index
-                ? AppColors.backgroundOrange 
-                : Colors.grey, 
-            fontWeight: _selectedIndex == index
-                ? FontWeight.bold 
-                : FontWeight.normal, 
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-Widget _buildCenteredIcon(IconData icon, int index) {
-  return GestureDetector(
-    onTap: () {
-      _onItemTapped(index); 
-    },
-    child: Container(
-      decoration: BoxDecoration(
-        color: AppColors.backgroundOrange, 
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 5,
-            blurRadius: 7,
-            offset: Offset(0, 3),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.backgroundYellow,
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _selectedIndex = index < 2 ? index : index + 1;
+                });
+              },
+              children: _widgetOptions,
+            ),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: 28,
+      bottomNavigationBar: BottomAppBar(
+        color: AppColors.backgroundYellow,
+        child: Container(
+          height: 100,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildBottomNavigationItem(Icons.home_outlined, 'Home', 0),
+              SizedBox(width: 10),
+              _buildBottomNavigationItem(Icons.history, 'History', 1),
+              SizedBox(width: 10),
+              _buildCenteredIcon(Icons.qr_code_scanner, 2),
+              SizedBox(width: 10),
+              _buildBottomNavigationItem(Icons.notifications, 'Notices', 3),
+              SizedBox(width: 10),
+              _buildBottomNavigationItem(
+                  Icons.account_circle_outlined, 'Profile', 4),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
+
+  Widget _buildBottomNavigationItem(IconData icon, String label, int index) {
+    return GestureDetector(
+      onTap: () {
+        _onItemTapped(index);
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: _selectedIndex == index
+                ? AppColors.backgroundOrange
+                : Colors.grey,
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              color: _selectedIndex == index
+                  ? AppColors.backgroundOrange
+                  : Colors.grey,
+              fontWeight:
+                  _selectedIndex == index ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCenteredIcon(IconData icon, int index) {
+    return GestureDetector(
+      onTap: () {
+        _onItemTapped(index);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.backgroundOrange,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Icon(
+            icon,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget ntfPage() {
     return Scaffold(
       backgroundColor: AppColors.backgroundYellow,
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
+        leading: Icon(
+          Icons.circle, // You can choose any icon, but this is just an example.
+          color: AppColors.backgroundYellow, // Same color as the background
+        ),
         title: Text("Notifications",
             style: AppTypography.textMd.copyWith(
                 fontSize: 20,
@@ -1778,8 +1894,8 @@ Widget _buildCenteredIcon(IconData icon, int index) {
         //   onPressed: () => Navigator.push(context,
         //       MaterialPageRoute(builder: (context) => const UserType())),
         // ),
-        elevation: 0,
-        centerTitle: true,
+        // elevation: 0,
+        // centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(
@@ -1794,14 +1910,14 @@ Widget _buildCenteredIcon(IconData icon, int index) {
             //   );
             // },
             onPressed: () {
-              showCreateNotificationDialog(context); 
+              showCreateNotificationDialog(context);
             },
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 12.0), 
+            padding: const EdgeInsets.only(right: 12.0),
             child: IconButton(
               onPressed: () {
-               Navigator.push(
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Scanner()),
                 );
@@ -1841,13 +1957,13 @@ Widget _buildCenteredIcon(IconData icon, int index) {
                       data['title'] ?? 'No Title',
                       data['description'] ?? 'No Description',
                       data['date'] ?? 'Unknown Date',
-                      isNew: data['isNew'] ?? false, 
+                      isNew: data['isNew'] ?? false,
                       onEdit: () {
                         showEditDialog(
                           context,
-                          notifications[index].id, 
+                          notifications[index].id,
                           data['title'],
-                          data['description'], 
+                          data['description'],
                         );
                       },
                       onDelete: () {
@@ -2033,176 +2149,179 @@ Widget _buildCenteredIcon(IconData icon, int index) {
   }
 
   void showCreateNotificationDialog(BuildContext context) {
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
+    final _titleController = TextEditingController();
+    final _descriptionController = TextEditingController();
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(20.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: Offset(0, 3),
-              ),
-            ],
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  "Create Notification",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 254, 181, 122),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 10),
-                Center (
-                  child: Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  alignment: WrapAlignment.center, 
-                  children: [
-                    IconButton(
-                      icon: Text('🔔', style: TextStyle(fontSize: 24)),
-                      onPressed: () {
-                        _titleController.text += '🔔';
-                      },
-                    ),
-                    IconButton(
-                      icon: Text('📢', style: TextStyle(fontSize: 24)),
-                      onPressed: () {
-                        _titleController.text += '📢';
-                      },
-                    ),
-                    IconButton(
-                      icon: Text('💡', style: TextStyle(fontSize: 24)),
-                      onPressed: () {
-                        _titleController.text += '💡';
-                      },
-                    ),
-                    IconButton(
-                      icon: Text('⭐', style: TextStyle(fontSize: 24)),
-                      onPressed: () {
-                        _titleController.text += '⭐';
-                      },
-                    ),
-                    IconButton(
-                      icon: Text('⚠️', style: TextStyle(fontSize: 24)),
-                      onPressed: () {
-                        _titleController.text += '⚠️';
-                      },
-                    ),
-                    IconButton(
-                      icon: Text('💸', style: TextStyle(fontSize: 24)),
-                      onPressed: () {
-                        _titleController.text += '💸';
-                      },
-                    ),
-                    IconButton(
-                      icon: Text('🎉', style: TextStyle(fontSize: 24)),
-                      onPressed: () {
-                        _titleController.text += '🎉';
-                      },
-                    ),
-                    IconButton(
-                      icon: Text('🔥', style: TextStyle(fontSize: 24)),
-                      onPressed: () {
-                        _titleController.text += '🔥';
-                      },
-                    ),
-                  ],
-                ),
-                ),
-                SizedBox(height: 20),
-                CupertinoTextField(
-                  controller: _titleController,
-                  placeholder: "Title",
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.white,
-                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
-                  style: TextStyle(color: CupertinoColors.black),
-                ),
-                SizedBox(height: 10),
-                CupertinoTextField(
-                  controller: _descriptionController,
-                  placeholder: "Description",
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.white,
-                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
-                  style: TextStyle(color: CupertinoColors.black),
-                  maxLines: 4,
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    createNotification(
-                      _titleController.text,
-                      _descriptionController.text,
-                    );
-                    Navigator.of(context).pop(); // Đóng hộp thoại
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF80CBC4),
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(
-                    "Create",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+          child: Container(
+            padding: const EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
                 ),
               ],
             ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    "Create Notification",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: const Color.fromARGB(255, 254, 181, 122),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 10),
+                  Center(
+                    child: Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: Text('🔔', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '🔔';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('📢', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '📢';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('💡', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '💡';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('⭐', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '⭐';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('⚠️', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '⚠️';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('💸', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '💸';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('🎉', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '🎉';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('🔥', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '🔥';
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  CupertinoTextField(
+                    controller: _titleController,
+                    placeholder: "Title",
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white,
+                      border: Border.all(
+                          color: CupertinoColors.systemGrey4, width: 1.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    placeholderStyle: TextStyle(
+                        color: CupertinoColors.systemGrey, fontSize: 16),
+                    style: TextStyle(color: CupertinoColors.black),
+                  ),
+                  SizedBox(height: 10),
+                  CupertinoTextField(
+                    controller: _descriptionController,
+                    placeholder: "Description",
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white,
+                      border: Border.all(
+                          color: CupertinoColors.systemGrey4, width: 1.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    placeholderStyle: TextStyle(
+                        color: CupertinoColors.systemGrey, fontSize: 16),
+                    style: TextStyle(color: CupertinoColors.black),
+                    maxLines: 4,
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      createNotification(
+                        _titleController.text,
+                        _descriptionController.text,
+                      );
+                      Navigator.of(context).pop(); // Đóng hộp thoại
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF80CBC4),
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      "Create",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
+  void createNotification(String title, String description) async {
+    CollectionReference notifications =
+        FirebaseFirestore.instance.collection('notifications');
 
-void createNotification(String title, String description) async {
-  CollectionReference notifications =
-      FirebaseFirestore.instance.collection('notifications');
+    await notifications.add({
+      'title': title,
+      'description': description,
+      'date': DateFormat('HH:mm dd/MM/yyyy').format(DateTime.now()),
+      'shop_id': widget.shop.shopID,
+      'isNew': true,
+    });
 
-  await notifications.add({
-    'title': title,
-    'description': description,
-    'date': DateFormat('HH:mm dd/MM/yyyy').format(DateTime.now()),
-    'shop_id': widget.shop.shopID, 
-    'isNew': true,
-  });
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Notification created successfully!')),
-  );
-}
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Notification created successfully!')),
+    );
+  }
 }
 
 class OrderTile extends StatelessWidget {
@@ -2303,7 +2422,6 @@ class OrderTile extends StatelessWidget {
   }
 }
 
-
 class EditNotificationForm extends StatefulWidget {
   final String notificationId;
   final String initialTitle;
@@ -2320,7 +2438,8 @@ class EditNotificationForm extends StatefulWidget {
   _EditNotificationFormState createState() => _EditNotificationFormState();
 
   // Hàm tĩnh để gọi EditNotificationForm từ bất kỳ đâu
-  static void open(BuildContext context, String notificationId, String initialTitle, String initialDescription) {
+  static void open(BuildContext context, String notificationId,
+      String initialTitle, String initialDescription) {
     Navigator.push(
       context,
       CupertinoPageRoute(
@@ -2372,177 +2491,182 @@ class _EditNotificationFormState extends State<EditNotificationForm> {
   }
 
   // Hiển thị dialog để chỉnh sửa thông báo
- void showEditDialog(BuildContext context, String notificationId, String initialTitle, String initialDescription) {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  void showEditDialog(BuildContext context, String notificationId,
+      String initialTitle, String initialDescription) {
+    final TextEditingController _titleController = TextEditingController();
+    final TextEditingController _descriptionController =
+        TextEditingController();
 
-  // Thiết lập giá trị ban đầu
-  _titleController.text = initialTitle;
-  _descriptionController.text = initialDescription;
+    // Thiết lập giá trị ban đầu
+    _titleController.text = initialTitle;
+    _descriptionController.text = initialDescription;
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        child: Container(
-          padding: const EdgeInsets.all(20.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: Offset(0, 3),
-              ),
-            ],
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  "Edit Notification",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 254, 181, 122),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 10),
-                Center(
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Text('🔔', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '🔔';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('📢', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '📢';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('💡', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '💡';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('⭐', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '⭐';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('⚠️', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '⚠️';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('💸', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '💸';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('🎉', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '🎉';
-                        },
-                      ),
-                      IconButton(
-                        icon: Text('🔥', style: TextStyle(fontSize: 24)),
-                        onPressed: () {
-                          _titleController.text += '🔥';
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-                CupertinoTextField(
-                  controller: _titleController,
-                  placeholder: "Title",
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.white,
-                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
-                  style: TextStyle(color: CupertinoColors.black),
-                ),
-                SizedBox(height: 10),
-                CupertinoTextField(
-                  controller: _descriptionController,
-                  placeholder: "Description",
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.white,
-                    border: Border.all(color: CupertinoColors.systemGrey4, width: 1.0),
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  placeholderStyle: TextStyle(color: CupertinoColors.systemGrey, fontSize: 16),
-                  style: TextStyle(color: CupertinoColors.black),
-                  maxLines: 4,
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    updateNotification(
-                      notificationId,
-                      _titleController.text,
-                      _descriptionController.text,
-                    );
-                    Navigator.of(context).pop(); // Đóng hộp thoại
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF80CBC4),
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(
-                    "Update",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
+          child: Container(
+            padding: const EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
                 ),
               ],
             ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    "Edit Notification",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: const Color.fromARGB(255, 254, 181, 122),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 10),
+                  Center(
+                    child: Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: Text('🔔', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '🔔';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('📢', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '📢';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('💡', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '💡';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('⭐', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '⭐';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('⚠️', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '⚠️';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('💸', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '💸';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('🎉', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '🎉';
+                          },
+                        ),
+                        IconButton(
+                          icon: Text('🔥', style: TextStyle(fontSize: 24)),
+                          onPressed: () {
+                            _titleController.text += '🔥';
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  CupertinoTextField(
+                    controller: _titleController,
+                    placeholder: "Title",
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white,
+                      border: Border.all(
+                          color: CupertinoColors.systemGrey4, width: 1.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    placeholderStyle: TextStyle(
+                        color: CupertinoColors.systemGrey, fontSize: 16),
+                    style: TextStyle(color: CupertinoColors.black),
+                  ),
+                  SizedBox(height: 10),
+                  CupertinoTextField(
+                    controller: _descriptionController,
+                    placeholder: "Description",
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white,
+                      border: Border.all(
+                          color: CupertinoColors.systemGrey4, width: 1.0),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    placeholderStyle: TextStyle(
+                        color: CupertinoColors.systemGrey, fontSize: 16),
+                    style: TextStyle(color: CupertinoColors.black),
+                    maxLines: 4,
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      updateNotification(
+                        notificationId,
+                        _titleController.text,
+                        _descriptionController.text,
+                      );
+                      Navigator.of(context).pop(); // Đóng hộp thoại
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF80CBC4),
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      "Update",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
-void updateNotification(String id, String title, String description) async {
-  await FirebaseFirestore.instance
-      .collection('notifications')
-      .doc(id)
-      .update({
-    'title': title,
-    'description': description,
-  });
+  void updateNotification(String id, String title, String description) async {
+    await FirebaseFirestore.instance
+        .collection('notifications')
+        .doc(id)
+        .update({
+      'title': title,
+      'description': description,
+    });
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Notification updated successfully!')),
-  );
-}
-
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Notification updated successfully!')),
+    );
+  }
 }

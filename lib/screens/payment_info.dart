@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:campus_catalogue/models/buyer_model.dart';
@@ -168,16 +169,20 @@ class _PaymentInfoState extends State<PaymentInfo> {
 
         for (var order in ordersList) {
           // Lưu thông tin vào collection 'orders'
+          // final String randomId = Uuid().v4(); // Tạo ID ngẫu nhiên
+
           await FirebaseFirestore.instance.collection('orders').add({
+            'id': buyDoc['id'], // Thêm ID ngẫu nhiên
             'buyer_name': order['buyer_name'],
             'buyer_phone': order['buyer_phone'],
-            'date': order['date'],
+            'date': DateFormat('dd/MM/yyyy').format(DateTime.now()),
             'img': order['img'],
             'order_name': order['order_name'],
             'price': order['price'],
             'shop_name': order['shop_name'],
             'count': order['count'],
             'rating': 0.0,
+            'pay': false,
           });
 
           // // Sau khi lưu đơn hàng, tạo mã QR cho từng đơn hàng
@@ -243,113 +248,6 @@ class _PaymentInfoState extends State<PaymentInfo> {
     }
   }
 
-// Hàm tạo mã QR và tải lên Firebase Storage
-  // Future<void> generateAndUploadQRCode() async {
-  //   try {
-  //     List<Map<String, dynamic>> orderList =
-  //         []; // Khởi tạo orderList ngoài vòng lặp
-
-  //     List<Map<String, String>> qrCodes =
-  //         []; // Mảng chứa các id và đường dẫn ảnh
-
-  //     var uuid = Uuid();
-  //     String qrCodeId = uuid.v4();
-
-  //     // Lấy dữ liệu từ Firestore theo điều kiện
-  //     QuerySnapshot snapshot = await FirebaseFirestore.instance
-  //         .collection('buy')
-  //         .where('buyer_name', isEqualTo: widget.buyer.userName)
-  //         .get();
-
-  //     if (snapshot.docs.isNotEmpty) {
-  //       // Duyệt qua tất cả các tài liệu trong collection 'buy'
-  //       for (var buyDoc in snapshot.docs) {
-  //         List<dynamic> ordersList =
-  //             buyDoc['orders']; // Lấy danh sách các đơn hàng
-
-  //         // Tạo danh sách đơn hàng với các trường cần thiết
-  //         for (var order in ordersList) {
-  //           orderList.add({
-  //             'order_name': order['order_name'], // Tên đơn hàng
-  //             'count': order['count'], // Số lượng mặt hàng
-  //             'img': order['img'], // Đường dẫn hình ảnh (nếu có)
-  //           });
-  //         }
-  //       }
-
-  //       // Dữ liệu JSON chứa danh sách các đơn hàng
-  //       String qrData = jsonEncode({
-  //         'orders': orderList, // Danh sách đơn hàng đầy đủ
-  //         'buyer_id': widget.buyer.user_id, // ID của người mua
-  //         'qr_code_id': qrCodeId,
-  //       });
-
-  //       // Tạo mã QR từ chuỗi JSON
-  //       final qrPainter = QrPainter(
-  //         data: qrData,
-  //         version: QrVersions
-  //             .auto, // Tự động điều chỉnh phiên bản để có kích thước QR tối ưu
-  //         gapless: true,
-  //       );
-
-  //       // Kích thước mã QR (đảm bảo mã QR đủ lớn để chứa tất cả dữ liệu)
-  //       final qrSize = 400.0; // Tăng kích thước mã QR để dễ dàng quét
-
-  //       // Vẽ mã QR dưới dạng hình ảnh PNG
-  //       final pictureRecorder = ui.PictureRecorder();
-  //       final canvas = Canvas(pictureRecorder);
-  //       final paint = Paint()..color = Colors.white;
-  //       canvas.drawRect(Rect.fromLTWH(0, 0, qrSize, qrSize), paint);
-  //       qrPainter.paint(canvas, Size(qrSize, qrSize));
-  //       final img = await pictureRecorder
-  //           .endRecording()
-  //           .toImage(qrSize.toInt(), qrSize.toInt());
-  //       final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-  //       final pngBytes = byteData!.buffer.asUint8List();
-
-  //       // Lưu mã QR vào tệp tạm thời
-  //       final tempDir = await getTemporaryDirectory();
-  //       final file = File('${tempDir.path}/$qrCodeId.png');
-  //       await file.writeAsBytes(pngBytes);
-
-  //       // Tải lên mã QR lên Firebase Storage
-  //       final storageRef = FirebaseStorage.instance
-  //           .ref()
-  //           .child('qr_code/${widget.buyer.user_id}/$qrCodeId.png');
-
-  //       final uploadTask = storageRef.putFile(
-  //         file,
-  //         SettableMetadata(contentType: 'image/png'),
-  //       );
-
-  //       await uploadTask.whenComplete(() async {
-  //         String qrCodeUrl = await storageRef.getDownloadURL();
-  //         // Thêm vào mảng qrCodes
-  //         // qrCodes.add({
-  //         //   'id': qrCodeId, // ID QR
-  //         //   'url': qrCodeUrl, // Đường dẫn đến ảnh QR
-  //         // });
-
-  //         // Lưu thông tin QR code vào Firestore
-  //         await FirebaseFirestore.instance
-  //             .collection('qr_codes')
-  //             .doc(widget.buyer.user_id)
-  //             .set({
-  //           'buyer_id': widget.buyer.user_id,
-  //           'qr_codes': qrCodes, // Mảng QR codes
-  //         });
-
-  //         print(
-  //             "QR code uploaded successfully to qr_code/${widget.buyer.user_id}");
-  //       });
-  //     } else {
-  //       print("No orders found for this buyer.");
-  //     }
-  //   } catch (e) {
-  //     print("Error generating or uploading QR code: $e");
-  //   }
-  // }
-
   Future<void> generateAndUploadQRCode() async {
     try {
       List<Map<String, dynamic>> orderList =
@@ -376,6 +274,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
               'order_name': order['order_name'], // Tên đơn hàng
               'count': order['count'], // Số lượng mặt hàng
               'img': order['img'], // Đường dẫn hình ảnh (nếu có)
+              'id': buyDoc['id'],
             });
           }
         }

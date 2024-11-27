@@ -1,72 +1,41 @@
-import 'dart:ffi';
-
+import 'package:campus_catalogue/models/order_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class OrderModel {
-  final String buyerPhone;
+class Buy {
   final String buyerName;
-  final String shopName;
-  final num count;
-  final num price;
-  final String date;
-  final String orderName;
-  final String img;
-  final double rating;
-  final String review;
-  final bool pay;
+  List<OrderModel> orders;
+  num discount;
+  String id;
 
-  OrderModel({
-    required this.buyerPhone,
-    required this.buyerName,
-    required this.shopName,
-    required this.count,
-    required this.price,
-    required this.date,
-    required this.orderName,
-    required this.img,
-    this.rating = 0.0,
-    this.review = '',
-    this.pay = false,
-  });
+  Buy(
+      {required this.buyerName,
+      required this.orders,
+      this.discount = 1,
+      required this.id});
 
   Map<String, dynamic> toMap() {
+    // Chuyển đổi danh sách orders thành danh sách map
     return {
-      'buyer_phone': buyerPhone,
       'buyer_name': buyerName,
-      'shop_name': shopName,
-      'count': count,
-      'price': price,
-      'date': date,
-      'order_name': orderName,
-      'img': img,
-      'rating': rating,
-      'review': review,
+      'orders': orders
+          .map((order) => order.toMap())
+          .toList(), // Đảm bảo gọi toMap cho từng order
+      'id': id,
     };
   }
 
-  OrderModel.fromMap(Map<String, dynamic> map)
-      : buyerPhone = map["buyer_phone"] ?? '',
-        buyerName = map["buyer_name"] ?? '',
-        shopName = map["shop_name"] ?? '',
-        count = map["count"] ?? 0,
-        price = map["price"] ?? 0,
-        date = map["date"] ?? '',
-        orderName = map["order_name"] ?? '',
-        img = map["img"] ?? '',
-        rating = (map["rating"] ?? 0).toDouble(),
-        review = map["review"] ?? '',
-        pay = map["pay"];
+  Buy.fromMap(Map<String, dynamic> buyMap)
+      : buyerName = buyMap["buyer_name"],
+        orders = List<OrderModel>.from(
+            buyMap["orders"].map((orderMap) => OrderModel.fromMap(orderMap))),
+        discount = buyMap['discount'],
+        id = buyMap['id']; // Sử dụng fromMap cho OrderModel
 
-  OrderModel.fromDocumentSnapshot(DocumentSnapshot<Map<String, dynamic>> doc)
-      : buyerPhone = doc.data()?["buyer_phone"] ?? '',
-        buyerName = doc.data()?["buyer_name"] ?? '',
-        shopName = doc.data()?["shop_name"] ?? '',
-        count = doc.data()?["count"] ?? 0,
-        price = doc.data()?["price"] ?? 0,
-        date = doc.data()?["date"] ?? '',
-        orderName = doc.data()?["order_name"] ?? '',
-        img = doc.data()?["img"] ?? '',
-        rating = (doc.data()?["rating"] ?? 0).toDouble(),
-        review = doc.data()?["review"] ?? '',
-        pay = doc.data()?["pay"];
+  Buy.fromDocumentSnapshot(DocumentSnapshot<Map<String, dynamic>> doc)
+      : buyerName = doc.data()!["buyer_name"],
+        orders = List<OrderModel>.from(doc
+            .data()!["orders"]
+            .map((orderMap) => OrderModel.fromMap(orderMap))),
+        discount = doc.data()!['discount'],
+        id = doc.data()!['id']; // Cũng tương tự ở đây
 }

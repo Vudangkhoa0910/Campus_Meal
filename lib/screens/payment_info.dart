@@ -271,6 +271,7 @@ class _PaymentInfoState extends State<PaymentInfo> {
           // Tạo danh sách đơn hàng với các trường cần thiết
           for (var order in ordersList) {
             orderList.add({
+              'shop_name': order['shop_name'],
               'order_name': order['order_name'], // Tên đơn hàng
               'count': order['count'], // Số lượng mặt hàng
               'img': order['img'], // Đường dẫn hình ảnh (nếu có)

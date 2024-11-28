@@ -5,7 +5,7 @@ import 'package:campus_catalogue/models/order_model.dart';
 import 'package:campus_catalogue/models/shopModel.dart';
 import 'package:campus_catalogue/screens/login.dart';
 import 'package:campus_catalogue/screens/add_menu.dart';
-import 'package:campus_catalogue/screens/Scanner/qr_code_scanner.dart';
+// import 'package:campus_catalogue/screens/Scanner/qr_code_scanner.dart';
 import 'package:campus_catalogue/screens/Scanner/scanner.dart';
 import 'package:campus_catalogue/screens/sele_buyer.dart';
 import 'package:campus_catalogue/screens/update_menu.dart';
@@ -180,7 +180,10 @@ class HomePageState extends State<HomePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Scanner()),
+                  MaterialPageRoute(
+                      builder: (context) => Scanner(
+                            shop: widget.shop,
+                          )),
                 );
               },
               icon: const Icon(
@@ -638,9 +641,10 @@ class _HistoryPageState extends State<HistoryPage> {
             child: IconButton(
               onPressed: () {
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Scanner()),
-                );
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Scanner(shop: widget.shop),
+                    ));
               },
               icon: const Icon(
                 Icons.qr_code,
@@ -1256,7 +1260,10 @@ class _InfoPageState extends State<InfoPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Scanner()),
+                  MaterialPageRoute(
+                      builder: (context) => Scanner(
+                            shop: widget.shop,
+                          )),
                 );
               },
               icon: const Icon(
@@ -1579,7 +1586,10 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
       // Khi nhấn nút QR, mở màn hình QRScanner
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => Scanner()),
+        MaterialPageRoute(
+            builder: (context) => Scanner(
+                  shop: widget.shop,
+                )),
       );
     } else {
       // Cập nhật trang hiện tại cho các mục khác
@@ -1919,7 +1929,10 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Scanner()),
+                  MaterialPageRoute(
+                      builder: (context) => Scanner(
+                            shop: widget.shop,
+                          )),
                 );
               },
               icon: const Icon(

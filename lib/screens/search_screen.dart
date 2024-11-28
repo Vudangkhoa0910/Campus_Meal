@@ -8,7 +8,7 @@ import 'package:campus_catalogue/constants/typography.dart';
 class SearchInput extends StatefulWidget {
   final Buyer buyer;
   const SearchInput({super.key, required this.buyer});
-  
+
   @override
   State<SearchInput> createState() => _SearchInputState();
 }
@@ -40,41 +40,40 @@ class _SearchInputState extends State<SearchInput> {
   }
 
   void searchSubmit(BuildContext context) async {
-  searchTerms = searchController.text.split(' ');
-  Set<dynamic> shops = {};
+    searchTerms = searchController.text.split(' ');
+    Set<dynamic> shops = {};
 
-  for (String term in searchTerms) {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection("shop")
-        .where("shop_name", isGreaterThanOrEqualTo: term)
-        .where("shop_name", isLessThanOrEqualTo: term + '\uf8ff') 
-        .get();
+    for (String term in searchTerms) {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("shop")
+          .where("shop_name", isGreaterThanOrEqualTo: term)
+          .where("shop_name", isLessThanOrEqualTo: term + '\uf8ff')
+          .get();
 
-    for (var shopDoc in querySnapshot.docs) {
-      shops.add(shopDoc.data()); 
+      for (var shopDoc in querySnapshot.docs) {
+        shops.add(shopDoc.data());
+      }
+    }
+
+    if (shops.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SearchScreen(
+            shopResults: shops.toList(),
+            isSearch: true,
+            title: "Explore IITG",
+            buyer: widget.buyer,
+          ),
+        ),
+      );
+    } else {
+      // Hiển thị thông báo nếu không tìm thấy kết quả nào
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Không tìm thấy kết quả nào.')),
+      );
     }
   }
-
-  if (shops.isNotEmpty) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SearchScreen(
-          shopResults: shops.toList(),
-          isSearch: true,
-          title: "Explore IITG",
-          buyer: widget.buyer,
-        ),
-      ),
-    );
-  } else {
-    // Hiển thị thông báo nếu không tìm thấy kết quả nào
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Không tìm thấy kết quả nào.')),
-    );
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -97,14 +96,17 @@ class _SearchInputState extends State<SearchInput> {
                     filled: true,
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(width: 1, color: AppColors.backgroundOrange),
+                      borderSide: const BorderSide(
+                          width: 1, color: AppColors.backgroundOrange),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(width: 1, color: AppColors.backgroundOrange),
+                      borderSide: const BorderSide(
+                          width: 1, color: AppColors.backgroundOrange),
                     ),
                     hintText: 'Search',
-                    hintStyle: const TextStyle(color: Colors.grey, fontSize: 18),
+                    hintStyle:
+                        const TextStyle(color: Colors.grey, fontSize: 18),
                     suffixIcon: const Icon(
                       Icons.search,
                       color: AppColors.secondary,
@@ -121,7 +123,7 @@ class _SearchInputState extends State<SearchInput> {
   }
 }
 
-class ShopCard extends StatelessWidget {
+class ShopCard extends StatefulWidget {
   final String name;
   final String rating;
   final String location;
@@ -142,6 +144,31 @@ class ShopCard extends StatelessWidget {
   });
 
   @override
+  State<ShopCard> createState() => _ShopCardState();
+}
+
+class _ShopCardState extends State<ShopCard> {
+  Future<double> getRating(String shopName) async {
+    double totalRating = 0;
+    int index = 0;
+    QuerySnapshot snap = await FirebaseFirestore.instance
+        .collection('orders')
+        .where('shop_name', isEqualTo: shopName)
+        .get();
+    if (snap.docs.isNotEmpty) {
+      for (var doc in snap.docs) {
+        var ratingData = doc['rating'];
+        double rating = (ratingData is num) ? ratingData.toDouble() : 0;
+        if (rating > 0) {
+          totalRating += rating;
+          index++;
+        }
+      }
+    }
+    return index > 0 ? totalRating / index : 0;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
@@ -149,13 +176,13 @@ class ShopCard extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => ShopPage(
-              name: name,
+              name: widget.name,
               rating: "0",
-              location: location,
-              menu: menu,
-              ownerName: ownerName,
-              upiID: upiID,
-              buyer: buyer,
+              location: widget.location,
+              menu: widget.menu,
+              ownerName: widget.ownerName,
+              upiID: widget.upiID,
+              buyer: widget.buyer,
             ),
           ),
         );
@@ -176,43 +203,90 @@ class ShopCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      widget.name,
                       style: AppTypography.textMd
                           .copyWith(fontSize: 20, fontWeight: FontWeight.w700),
                     ),
                     Row(
                       children: [
                         const Icon(Icons.pin_drop, size: 18),
-                        Text(location,
+                        Text(widget.location,
                             style: AppTypography.textSm.copyWith(
                                 fontSize: 12, fontWeight: FontWeight.w400)),
                       ],
                     ),
-                    Container(
-                      width: 40,
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: const Color(0xFFFFFEF6),
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            rating,
+                    FutureBuilder<double>(
+                      future: getRating(widget.name),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Text(
+                            "Loading...",
                             style: AppTypography.textSm.copyWith(
-                                fontSize: 15, fontWeight: FontWeight.w700),
-                          ),
-                          const Icon(Icons.star, size: 15)
-                        ],
-                      ),
-                    )
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Text(
+                            "Error",
+                            style: AppTypography.textSm.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          );
+                        } else {
+                          double rating = snapshot.data ?? 0;
+                          int fullStars = rating.floor();
+                          bool hasHalfStar = (rating - fullStars) >= 0.5;
+
+                          return Row(
+                            children: [
+                              // Display full stars
+                              for (int i = 0; i < fullStars; i++)
+                                const Icon(
+                                  Icons.star,
+                                  size: 12,
+                                  color: Colors.yellow,
+                                ),
+                              // Display half star if needed
+                              if (hasHalfStar)
+                                const Icon(
+                                  Icons.star_half,
+                                  size: 12,
+                                  color: Colors.yellow,
+                                ),
+                              // Display empty stars
+                              for (int i = 0;
+                                  i < (5 - fullStars - (hasHalfStar ? 1 : 0));
+                                  i++)
+                                const Icon(
+                                  Icons.star_border,
+                                  size: 12,
+                                  color: Colors.grey,
+                                ),
+                              const SizedBox(width: 4),
+                              Text(
+                                rating.toStringAsFixed(1),
+                                style: AppTypography.textSm.copyWith(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFFFA500),
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    ),
                   ],
                 ),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0), // Đặt bán kính bo cạnh
+                  borderRadius:
+                      BorderRadius.circular(8.0), // Đặt bán kính bo cạnh
                   child: Image.asset(
                     "assets/iconshop.jpg",
-                    width: 50.0, 
+                    width: 50.0,
                     height: 50.0,
                     fit: BoxFit.cover,
                   ),
@@ -275,7 +349,7 @@ class _SearchScreenState extends State<SearchScreen> {
     List openShopsAndFoods = widget.shopResults;
     List closedShops = [];
 
-     if (openShopsAndFoods.isNotEmpty) {
+    if (openShopsAndFoods.isNotEmpty) {
       currentLocation = openShopsAndFoods[0]["location"] ?? 'Unknown Location';
     }
 
@@ -345,24 +419,24 @@ class _SearchScreenState extends State<SearchScreen> {
           ],
         ),
       ),
-     bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: BottomAppBar(
         color: AppColors.backgroundYellow,
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0), 
+          padding: EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Nút Home
               Expanded(
                 child: Center(
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pop(context); 
+                      Navigator.pop(context);
                     },
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.home, color: Colors.black), 
+                        Icon(Icons.home, color: Colors.black),
                         SizedBox(width: 8),
                         Text(
                           'Home',
@@ -382,27 +456,28 @@ class _SearchScreenState extends State<SearchScreen> {
               GestureDetector(
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Container(
-                      width: 250, 
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start, 
-                        children: [
-                          Icon(Icons.info, color: Colors.white), // Biểu tượng thông báo
-                          SizedBox(width: 8),
-                          Expanded( 
-                            child: Text(
-                              'Please choose in $currentLocation.',
-                              overflow: TextOverflow.ellipsis, 
+                    SnackBar(
+                      content: Container(
+                        width: 250,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Icon(Icons.info,
+                                color: Colors.white), // Biểu tượng thông báo
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Please choose in $currentLocation.',
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 3),
                     ),
-                    backgroundColor: Colors.green,
-                    duration: Duration(seconds: 3),
-                  ),
-                );
+                  );
                 },
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -417,11 +492,13 @@ class _SearchScreenState extends State<SearchScreen> {
                     ],
                   ),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.location_on, color: Colors.white), // Biểu tượng Location
+                        Icon(Icons.location_on,
+                            color: Colors.white), // Biểu tượng Location
                         SizedBox(width: 8),
                         Text(
                           'Shop in $currentLocation',

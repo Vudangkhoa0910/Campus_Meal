@@ -1,11 +1,13 @@
 import 'package:campus_catalogue/constants/colors.dart';
+import 'package:campus_catalogue/models/shopModel.dart';
 import 'package:campus_catalogue/screens/Scanner/QRScannerOverlay.dart';
 import 'package:campus_catalogue/screens/Scanner/foundScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Scanner extends StatefulWidget {
-  const Scanner({Key? key}) : super(key: key);
+  final ShopModel shop;
+  const Scanner({Key? key, required this.shop}) : super(key: key);
 
   @override
   State<Scanner> createState() => _ScannerState();
@@ -71,6 +73,7 @@ class _ScannerState extends State<Scanner> {
           builder: (context) => FoundScreen(
             value: code,
             screenClose: _screenWasClosed,
+            shop: widget.shop,
           ),
         ),
       ).then((_) {

@@ -14,7 +14,7 @@ class HistoryPageUser extends StatefulWidget {
 }
 
 class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
-  List card = []; // Khởi tạo danh sách card rỗng
+  List card = []; 
 
   void reloadData() {
     fetchOrders();
@@ -23,36 +23,40 @@ class HistoryPageUserState extends State<HistoryPageUser> with RouteAware {
   @override
   void initState() {
     super.initState();
-    fetchOrders(); // Gọi hàm lấy đơn hàng khi khởi tạo
+    fetchOrders(); 
   }
 
   Future<void> fetchOrders() async {
-    try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('orders') // Tên collection của bạn
-          .where('buyer_name',
-              isEqualTo: widget.buyer.userName) // Lọc theo tên buyer
-          .get();
+  try {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('orders')
+        .where('buyer_name', isEqualTo: widget.buyer.userName)
+        .get();
 
-      setState(() {
-        card = snapshot.docs.map((doc) {
-          var data = doc.data() as Map<String, dynamic>;
-          return [
-            data['shop_name'] ?? 'Unknown',
-            data['order_name'] ?? 'Unknown',
-            data['price']?.toString() ?? '0',
-            data['date'] ?? 'Unknown',
-            data['img'] ?? 'Unknown',
-            doc.id,
-            data['rating'] ?? 0.0,
-            data['review'] ?? '',
-          ];
-        }).toList();
-      });
-    } catch (e) {
-      print('Error fetching orders: $e');
-    }
+    setState(() {
+      card = [];
+      for (var doc in snapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        List<dynamic> items = data['items'] ?? [];
+        
+        for (var item in items) {
+          card.add([
+            item['shop_name'] ?? 'Unknown',
+            item['order_name'] ?? 'Unknown',
+            item['price']?.toString() ?? '0',
+            data['date'] ?? 'Unknown', 
+            item['imgUrl'] ?? 'Unknown',
+            doc.id, 
+            data['rating'] ?? 0.0, 
+            data['review'] ?? '', 
+          ]);
+        }
+      }
+    });
+  } catch (e) {
+    print('Error fetching orders: $e');
   }
+}
 
   void _showRatingDialog(BuildContext context, String orderId) {
     TextEditingController reviewController = TextEditingController();

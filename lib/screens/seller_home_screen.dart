@@ -543,53 +543,59 @@ class _HistoryPageState extends State<HistoryPage> {
   }
 
   Future<void> fetchOrders() async {
-    try {
-      // Lấy toàn bộ dữ liệu từ Firestore
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('orders')
-          .where('shop_name', isEqualTo: widget.shop.shopName)
-          .get();
+  try {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('orders')
+        .get(); 
 
-      setState(() {
-        // Lấy danh sách tất cả các đơn hàng
-        List<List<dynamic>> allOrders = snapshot.docs.map((doc) {
-          var data = doc.data() as Map<String, dynamic>;
+    setState(() {
+      List<List<dynamic>> allOrders = snapshot.docs.expand((doc) {
+        var data = doc.data() as Map<String, dynamic>;
+        
+        var items = data['items'] as List<dynamic>? ?? [];
+
+        return items.where((item) {
+          return item['shop_name'] == widget.shop.shopName; 
+        }).map((item) {
+          bool payStatus = (item['pay'] is bool) ? item['pay'] : (item['pay'] == 'true');
+
           return [
-            data['buyer_name'] ?? 'Unknown',
-            data['order_name'] ?? 'Unknown',
-            data['price']?.toString() ?? '0',
-            data['date'] ?? 'Unknown',
-            data['img'] ?? 'Unknown',
-            data['rating'] ?? 0.0,
-            data['review'] ?? '',
-            data['pay'],
+            data['buyer_name'] ?? 'Unknown', 
+            data['order_name'] ?? 'Unknown', 
+            item['price']?.toString() ?? '0',
+            data['date'] ?? 'Unknown', 
+            item['imgUrl'] ?? 'Unknown', 
+            item['count'] ?? 1, 
+            item['status'] ?? 'Unknown', 
+            payStatus, 
+            item['total_price']?.toString() ?? '0', 
           ];
+        });
+      }).toList();
+
+      if (selectedButton == "Day") {
+        DateTime now = DateTime.now();
+        String today = DateFormat('dd/MM/yyyy').format(now);
+
+        card = allOrders.where((order) {
+          String orderDate = order[3]; 
+          return orderDate == today; 
         }).toList();
+      } else {
+        card = allOrders;
+      }
 
-        // Lọc đơn hàng theo ngày hiện tại nếu chọn "Day"
-        if (selectedButton == "Day") {
-          DateTime now = DateTime.now();
-          String today = DateFormat('dd/MM/yyyy').format(now);
-
-          card = allOrders.where((order) {
-            String orderDate = order[3]; // Trường 'date'
-            return orderDate == today; // So sánh với ngày hiện tại
-          }).toList();
-        } else {
-          // Hiển thị toàn bộ nếu là "All"
-          card = allOrders;
-        }
-
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Error fetching orders: $e';
-        isLoading = false;
-      });
-      print('Error fetching orders: $e');
-    }
+      isLoading = false;
+    });
+  } catch (e) {
+    setState(() {
+      errorMessage = 'Error fetching orders: $e';
+      isLoading = false;
+    });
+    print('Error fetching orders: $e');
   }
+}
+
 
   void _showReviewDialog(BuildContext context, String review) {
     showDialog(
@@ -1370,7 +1376,7 @@ class _InfoPageState extends State<InfoPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(100),
                   child: Image.asset(
-                    "assets/iconprofile.png",
+                    "assets/Ảnh.jpg",
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -1880,141 +1886,171 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
     );
   }
 
-  Widget ntfPage() {
-    return Scaffold(
+ Widget ntfPage() {
+  return Scaffold(
+    backgroundColor: AppColors.backgroundYellow,
+    appBar: AppBar(
+      elevation: 0,
+      centerTitle: true,
+      leading: Icon(
+        Icons.circle, // You can choose any icon, but this is just an example.
+        color: AppColors.backgroundYellow, // Same color as the background
+      ),
+      title: Text("Notifications",
+          style: AppTypography.textMd.copyWith(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.backgroundOrange)),
       backgroundColor: AppColors.backgroundYellow,
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        leading: Icon(
-          Icons.circle, // You can choose any icon, but this is just an example.
-          color: AppColors.backgroundYellow, // Same color as the background
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.add,
+            color: AppColors.backgroundOrange,
+          ),
+          onPressed: () {
+            showCreateNotificationDialog(context);
+          },
         ),
-        title: Text("Notifications",
-            style: AppTypography.textMd.copyWith(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: AppColors.backgroundOrange)),
-        backgroundColor: AppColors.backgroundYellow,
-        // leading: IconButton(
-        //   icon: const Icon(
-        //     Icons.arrow_back_ios_new_rounded,
-        //     color: AppColors.backgroundOrange,
-        //   ),
-        //   onPressed: () => Navigator.push(context,
-        //       MaterialPageRoute(builder: (context) => const UserType())),
-        // ),
-        // elevation: 0,
-        // centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.add,
-              color: AppColors.backgroundOrange,
-            ),
-            // onPressed: () {
-            //   Navigator.push(
-            //     context,
-            //     MaterialPageRoute(
-            //         builder: (context) => createNotificationForm()),
-            //   );
-            // },
+        Padding(
+          padding: const EdgeInsets.only(right: 12.0),
+          child: IconButton(
             onPressed: () {
-              showCreateNotificationDialog(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Scanner(
+                          shop: widget.shop,
+                        )),
+              );
+            },
+            icon: const Icon(
+              Icons.qr_code,
+              color: AppColors.backgroundOrange,
+              size: 27.0,
+            ),
+          ),
+        ),
+      ],
+    ),
+    body: Column(
+      children: [
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('notifications')
+                .where('shop_id', isEqualTo: widget.shop.shopID)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(child: Text('No notifications available'));
+              }
+              final notifications = snapshot.data!.docs;
+
+              return ListView.builder(
+                itemCount: notifications.length,
+                itemBuilder: (context, index) {
+                  final data =
+                      notifications[index].data() as Map<String, dynamic>;
+                  return ntfcard(
+                    data['title'] ?? 'No Title',
+                    data['description'] ?? 'No Description',
+                    data['date'] ?? 'Unknown Date',
+                    isNew: data['isNew'] ?? false,
+                    onEdit: () {
+                      showEditDialog(
+                        context,
+                        notifications[index].id,
+                        data['title'],
+                        data['description'],
+                      );
+                    },
+                    onDelete: () {
+                      FirebaseFirestore.instance
+                          .collection('notifications')
+                          .doc(notifications[index].id)
+                          .delete();
+                    },
+                  );
+                },
+              );
             },
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 12.0),
-            child: IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Scanner(
-                            shop: widget.shop,
-                          )),
-                );
-              },
-              icon: const Icon(
-                Icons.qr_code,
-                color: AppColors.backgroundOrange,
-                size: 27.0,
-              ),
-            ),
+        ),
+        // Added the section for "Received Notifications"
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Received Notifications',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('notifications')
-                  .where('shop_id', isEqualTo: widget.shop.shopID)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text('No notifications available'));
-                }
-                final notifications = snapshot.data!.docs;
+        ),
+        Expanded(
+  child: StreamBuilder<QuerySnapshot>(
+    stream: FirebaseFirestore.instance
+        .collection('shop_notifications') // Đảm bảo collection đúng
+        .where('shop_name', isEqualTo: widget.shop.shopName) // Kiểm tra lọc theo shop_name
+        .snapshots(),
+    builder: (context, snapshot) {
+      print("Shop name: ${widget.shop.shopName}");
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator());
+      }
 
-                return ListView.builder(
-                  itemCount: notifications.length,
-                  itemBuilder: (context, index) {
-                    final data =
-                        notifications[index].data() as Map<String, dynamic>;
-                    return ntfcard(
-                      data['title'] ?? 'No Title',
-                      data['description'] ?? 'No Description',
-                      data['date'] ?? 'Unknown Date',
-                      isNew: data['isNew'] ?? false,
-                      onEdit: () {
-                        showEditDialog(
-                          context,
-                          notifications[index].id,
-                          data['title'],
-                          data['description'],
-                        );
-                      },
-                      onDelete: () {
-                        FirebaseFirestore.instance
-                            .collection('notifications')
-                            .doc(notifications[index].id)
-                            .delete();
-                      },
-                    );
-                  },
-                );
-              },
+      if (snapshot.hasError) {
+        return Center(child: Text('Error: ${snapshot.error}')); // Thêm thông báo lỗi
+      }
+
+      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        return Center(child: Text('No received notifications'));
+      }
+
+      final receivedNotifications = snapshot.data!.docs;
+
+      // Debug: In ra danh sách dữ liệu nhận được
+      print("Received notifications: $receivedNotifications");
+
+      return ListView.builder(
+        itemCount: receivedNotifications.length,
+        itemBuilder: (context, index) {
+          final data = receivedNotifications[index].data() as Map<String, dynamic>;
+
+          // Debug: In ra dữ liệu từng thông báo
+          print("Notification data at index $index: $data");
+
+          return ListTile(
+            title: Text(data['message'] ?? 'No message'),
+            subtitle: Text('Date: ${data['date']}'),
+            trailing: Icon(
+              Icons.notifications,
+              color: AppColors.backgroundOrange,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Received Notifications',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: fakeNotifications.length,
-              itemBuilder: (context, index) {
-                final fakeData = fakeNotifications[index];
-                return ntfcard(
-                  fakeData['title'] ?? 'No Title',
-                  fakeData['description'] ?? 'No Description',
-                  fakeData['date'] ?? 'Unknown Date',
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+            onTap: () {
+              // Khi người dùng nhấn vào thông báo, chuyển sang màn hình chi tiết sản phẩm
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailsScreen(
+                    orderId: data['order_id'], // Truyền order_id hoặc các dữ liệu cần thiết
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+    },
+  ),
+),
+
+      ],
+    ),
+  );
+}
+
 
   final List<Map<String, String>> fakeNotifications = [
     {
@@ -2333,6 +2369,159 @@ class _SellerHomeScreenState extends State<SellerHomeScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Notification created successfully!')),
+    );
+  }
+}
+
+class ProductDetailsScreen extends StatelessWidget {
+  final String orderId;
+
+  ProductDetailsScreen({required this.orderId});
+
+  @override
+  Widget build(BuildContext context) {
+    print("Order ID passed: $orderId");
+    return Scaffold(
+      backgroundColor: AppColors.backgroundYellow,
+      appBar: AppBar(
+        title: Text('Product Details'),
+      ),
+      body: FutureBuilder<QuerySnapshot>(
+  future: FirebaseFirestore.instance
+      .collection('orders')
+      .where('order_id', isEqualTo: orderId)
+      .get(),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (snapshot.hasError) {
+      return Center(child: Text('Error: ${snapshot.error}'));
+    }
+
+    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      return Center(child: Text('No order found with ID: $orderId'));
+    }
+
+    final orderData = snapshot.data!.docs.first.data() as Map<String, dynamic>;
+
+    return Padding(
+  padding: const EdgeInsets.all(16.0),  
+  child: Container(
+    decoration: BoxDecoration(
+      color: Colors.yellow[100],  
+      borderRadius: BorderRadius.circular(25),  
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black26,  
+          offset: Offset(0, 4),
+          blurRadius: 6,
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),  
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 10),
+          
+          // Text: Buyer Name
+          Text(
+            'Buyer: ${orderData['buyer_name']}',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black, 
+            ),
+          ),
+          
+          // Text: Phone Number
+          Text(
+            'Phone: ${orderData['buyer_phone']}',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[800],  
+            ),
+          ),
+          
+          // Text: Date
+          Text(
+            'Date: ${orderData['date']}',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[800],  
+            ),
+          ),
+          
+          SizedBox(height: 20),
+
+          Text(
+            'Items:',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,  
+            ),
+          ),
+          
+          // List of Items
+          Expanded(
+            child: ListView.builder(
+              itemCount: (orderData['items'] as List).length,
+              itemBuilder: (context, index) {
+                final item = (orderData['items'] as List)[index];
+                return Card(
+                  margin: EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),  
+                  ),
+                  elevation: 4,
+                  child: Container(
+                   decoration: BoxDecoration(
+                      color: AppColors.backgroundYellow, // Màu nền
+                      borderRadius: BorderRadius.circular(12), // Bo góc
+                    ),
+                    child: ListTile(
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          item['imgUrl'] ?? '',
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      title: Text(
+                        item['order_name'],
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black, 
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Price: \$${item['price']} | Quantity: ${item['count']}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],  
+                        ),
+                      ),
+                    ),
+                  )
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+);
+
+  },
+),
     );
   }
 }

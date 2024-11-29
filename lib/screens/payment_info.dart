@@ -161,6 +161,15 @@ void calculateTotal() {
       'pay': true,           // Đánh dấu là đã thanh toán
     });
 
+    // Lưu thông báo cho shop (seller)
+    await FirebaseFirestore.instance.collection('shop_notifications').add({
+      'shop_name': selectedOrders[0]['shop_name'],  // Tên cửa hàng
+      'order_id': orderId,                         // ID đơn hàng
+      'message': 'Có một đơn hàng mới từ ${widget.buyer.userName}', // Thông báo
+      'date': DateFormat('dd/MM/yyyy').format(DateTime.now()), // Ngày đặt hàng
+      'status': 'new',                             // Trạng thái thông báo
+    });
+
     // Hiển thị thông báo lưu thành công
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -179,8 +188,6 @@ void calculateTotal() {
     }
   }
 }
-
-
 
 //   Future<void> deleteBuy() async {
 //     try {
@@ -514,8 +521,8 @@ Future<void> deleteBuy() async {
                 saveInvoice();
                 generateAndUploadQRCode();
                 updatePayStatus();
-                deleteBuy();
               });
+              deleteBuy();
               // Hiển thị thông báo thanh toán thành công
               showDialog(
                 context: context,
